@@ -88,7 +88,8 @@ if [ ! -d "$CHROOTNAME/$BLDNAME" ]; then
 fi
 
 echo "## Beginning ISO creation. ##"
-chroot $CHROOTOPTS "sh /$BLDNAME/build" > $LOGDIR/build.log 2>&1
+set -x
+chroot $CHROOTOPTS "sh -x /$BLDNAME/build" |tee $LOGDIR/build.log 2>&1
 
 mv $CHROOTNAME/$BLDNAME/*/*.iso* $LOGDIR/
 ls -l $LOGDIR/*.iso*

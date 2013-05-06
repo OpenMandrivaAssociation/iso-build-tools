@@ -1,11 +1,13 @@
 #!/bin/sh -x
+set -x
+modprobe loop
 losetup -a
 losetup -d /dev/loop*
 
 #ARCHS="i586 x86_64"
 ARCHS="x86_64"
 REPOURL="http://abf.rosalinux.ru/downloads/cooker/repository/#ARCH#"
-TZ="UTC"
+TZ="Universal"
 SVCEN="acpid,alsa,atd,avahi-daemon,prefdm,irqbalance,mandi,dbus,netfs,network,network-up,partmon,resolvconf,rpcbind,rsyslog,sound,udev-post,mandrake_everytime,crond"
 SVCDIS="sshd,pptp,pppoe,ntpd,iptables,ip6tables,shorewall,nfs-server,mysqld,abrtd,mysql,postfix,cups"
 PKGLISTFILE=iso-pkg-lists/omdv-kde4.lst
@@ -18,7 +20,7 @@ d=`date +%Y.%m.%d-%H.%M`
 i=2013.0
 echo "$i.$d" > ${build_root}/version.txt
 
-product_id="OpenMandriva_$i.alpha.`date +%Y.%m.%d.%H.%M`"
+product_id="OpenMandriva_$i.alpha.`date +%Y%m%d`"
 product_name_file="${build_root}/.name.txt" ; touch ${product_name_file}
 
 counter="${build_root}/.counter"
@@ -40,7 +42,9 @@ for arch in $ARCHS; do
 	sed -i -e "s|#PKGLISTFILE#|${PKGLISTFILE}|g" ${ks}
 
 	mkdir -p $build_root/${product_id}/
-	livecd-creator --config=${ks} --fslabel=${product_id}.$arch
+	LABEL=${product_id}.$arch
+	[ `echo $LABEL |wc -m` -gt 32 ] && LABEL=OpenMandriva
+	livecd-creator --config=${ks} --fslabel=$LABEL
 
 	mv ${product_id}.$arch.iso $build_root/${product_id}/
 	cd $build_root/${product_id}/
