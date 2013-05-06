@@ -1,0 +1,96 @@
+#!/bin/bash
+
+OURDIR=$(realpath $(dirname $0))
+BLDNAME=$(basename $OURDIR)
+
+if pwd |grep -q "^$OURDIR"; then
+	echo "Don't run this script from within its directory."
+	echo "Try:"
+	echo "cd $(realpath $OURDIR/..) ; $BLDNAME/$(basename $0)"
+	exit 1
+fi
+
+if [ "`id -u`" != "0" ]; then
+	# We need to be root for umount and friends to work...
+	exec sudo $0 "$@"
+	echo Run me as root
+	exit 1
+fi
+
+EXTARCH=x86_64
+CHROOTNAME="buildchroot-$EXTARCH"
+
+REPOPATH="http://mirror.rosalinux.com/rosa/rosa2012.1/repository/$EXTARCH/"
+SRCPATH="https://abf.rosalinux.ru/mdawkins/$BLDNAME.git"
+PKGLIST="https://abf.rosalinux.ru/openmandriva/iso-pkg-lists.git"
+LOGDIR="."
+BRANCH="master"
+CHROOTOPTS="$CHROOTNAME /bin/su root -c"
+
+umount_all() {
+	umount -f $CHROOTNAME/sys || :
+	umount -f $CHROOTNAME/proc || :
+	umount -f $CHROOTNAME/dev/pts || :
+	umount -f $CHROOTNAME/dev || :
+}
+error() {
+	umount_all
+	exit 1
+}
+
+# Don't leave potentially dangerous stuff if we had to error out...
+trap error ERR
+
+pushd "$OURDIR"
+[ -d iso-pkg-lists ] || git clone -b $BRANCH $PKGLIST
+popd
+
+echo $CHROOTNAME
+echo $REPOPATH
+echo $EXTARCH
+if [ -d "$CHROOTNAME" ]; then
+	echo "## Chroot $CHROOTNAME exists. Using existing chroot. ##"
+	umount_all
+else
+	echo "## Chroot $CHROOTNAME is missing. Creating chroot. ##"
+	mkdir $CHROOTNAME
+	urpmi.addmedia --urpmi-root $CHROOTNAME --distrib --all-media $REPOPATH > $LOGDIR/addrepo.log 2>&1
+	urpmi --no-suggests --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi rpm locales-en rpm-build livecd-tools syslinux yum git --auto
+	mkdir -p $CHROOTNAME/dev
+	mkdir -p $CHROOTNAME/dev/pts
+	mkdir -p $CHROOTNAME/proc
+	mkdir -p $CHROOTNAME/sys
+fi
+
+### these need to be mounted for anything to work inside the chroot
+mount --bind /dev/	$CHROOTNAME/dev
+mount --bind /dev/pts	$CHROOTNAME/dev/pts
+mount --bind /proc	$CHROOTNAME/proc
+mount --bind /sys	$CHROOTNAME/sys
+cp /etc/resolv.conf	$CHROOTNAME/etc/
+
+echo "## Making sure we have the latest from $BLDNAME. ##"
+
+# For now, unconditionally overwrite the $BLDNAME instance inside the chroot
+# so any local changes are sure to get in
+# May want to remove the rm -rf line below once things have stabilized.
+rm -rf "$CHROOTNAME/$BLDNAME"
+
+if [ ! -d "$CHROOTNAME/$BLDNAME" ]; then
+	if [ -d "`dirname $0`"/.git ]; then
+		# If possible, copy the running instance to save some network traffic
+		cp -a `dirname $0` $CHROOTNAME/$BLDNAME
+		chroot $CHROOTOPTS "cd /$BLDNAME; git pull"
+	else
+		chroot $CHROOTOPTS "cd / && git clone -b $BRANCH $SRCPATH"
+		chroot $CHROOTOPTS "cd /$BLDNAME; git clone -b $BRANCH $PKGLIST"
+	fi
+fi
+
+echo "## Beginning ISO creation. ##"
+chroot $CHROOTOPTS "sh /$BLDNAME/build" > $LOGDIR/build.log 2>&1
+
+mv $CHROOTNAME/$BLDNAME/*/*.iso* $LOGDIR/
+ls -l $LOGDIR/*.iso*
+
+umount_all

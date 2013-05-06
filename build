@@ -1,0 +1,52 @@
+#!/bin/sh -x
+losetup -a
+losetup -d /dev/loop*
+
+#ARCHS="i586 x86_64"
+ARCHS="x86_64"
+REPOURL="http://abf.rosalinux.ru/downloads/cooker/repository/#ARCH#"
+TZ="UTC"
+SVCEN="acpid,alsa,atd,avahi-daemon,prefdm,irqbalance,mandi,dbus,netfs,network,network-up,partmon,resolvconf,rpcbind,rsyslog,sound,udev-post,mandrake_everytime,crond"
+SVCDIS="sshd,pptp,pppoe,ntpd,iptables,ip6tables,shorewall,nfs-server,mysqld,abrtd,mysql,postfix,cups"
+PKGLISTFILE=iso-pkg-lists/omdv-kde4.lst
+
+DIRNAME=$(dirname $0)
+cd $DIRNAME
+
+build_root="./"
+d=`date +%Y.%m.%d-%H.%M`
+i=2013.0
+echo "$i.$d" > ${build_root}/version.txt
+
+product_id="OpenMandriva_$i.alpha.`date +%Y.%m.%d.%H.%M`"
+product_name_file="${build_root}/.name.txt" ; touch ${product_name_file}
+
+counter="${build_root}/.counter"
+touch ${counter}
+i=`cat ${counter}`
+i=`expr $i + 1`
+echo $i > ${counter}
+
+ks="${build_root}/.ks"
+
+# build different architectures
+for arch in $ARCHS; do
+	cp -f ks.template ${ks}
+	sed -i -e "s|#REPOURL#|${REPOURL}|g" ${ks}
+	sed -i -e "s|#ARCH#|${arch}|g" ${ks}
+	sed -i -e "s|#TZ#|${TZ}|g" ${ks}
+	sed -i -e "s|#SVCEN#|${SVCEN}|g" ${ks}
+	sed -i -e "s|#SVCDIS#|${SVCDIS}|g" ${ks}
+	sed -i -e "s|#PKGLISTFILE#|${PKGLISTFILE}|g" ${ks}
+
+	mkdir -p $build_root/${product_id}/
+	livecd-creator --config=${ks} --fslabel=${product_id}.$arch
+
+	mv ${product_id}.$arch.iso $build_root/${product_id}/
+	cd $build_root/${product_id}/
+	md5sum  ${product_id}.$arch.iso > ${product_id}.$arch.iso.md5sum
+
+	echo ""
+	echo "          ALL DONE!        $build_root/${product_id}/${product_id}.$arch.iso"
+	echo ""
+done
