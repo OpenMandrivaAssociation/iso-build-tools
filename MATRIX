@@ -91,7 +91,7 @@ fi
 
 echo "## Beginning ISO creation. ##"
 set -x
-chroot $CHROOTOPTS "sh -x /$BLDNAME/build" |tee $LOGDIR/build.log 2>&1
+chroot $CHROOTOPTS "sh -x /$BLDNAME/build" 2>&1 |tee $LOGDIR/build.log
 
 mv $CHROOTNAME/$BLDNAME/*/*.iso* $LOGDIR/
 ls -l $LOGDIR/*.iso*
