@@ -46,6 +46,7 @@ for arch in $ARCHS; do
 	[ `echo $LABEL |wc -m` -gt 32 ] && LABEL=OpenMandriva
 	livecd-creator --config=${ks} --fslabel=$LABEL
 
+	[ "$LABEL" != "${product_id}.$arch" ] && mv $LABEL.iso ${product_id}.$arch.iso
 	mv ${product_id}.$arch.iso $build_root/${product_id}/
 	cd $build_root/${product_id}/
 	md5sum  ${product_id}.$arch.iso > ${product_id}.$arch.iso.md5sum
