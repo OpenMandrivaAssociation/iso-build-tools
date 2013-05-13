@@ -55,9 +55,9 @@ rm -rf /boot/initrd-*
 /bin/chown -R live:live /home/live
 # usermod -a -G cdrom live
 # enable live user autologin
-#if [ -f /usr/share/config/kdm/kdmrc ]; then
-#	/bin/sed -i -e 's/.*AutoLoginEnable.*/AutoLoginEnable=true/g' -e #'s/.*AutoLoginUser.*/AutoLoginUser=live/g' /usr/share/config/kdm/kdmrc
-#fi
+if [ -f /usr/share/config/kdm/kdmrc ]; then
+	/bin/sed -i -e 's/.*AutoLoginEnable.*/AutoLoginEnable=true/g' -e #'s/.*AutoLoginUser.*/AutoLoginUser=live/g' /usr/share/config/kdm/kdmrc
+fi
 
 # ldetect stuff
 /usr/sbin/update-ldetect-lst
@@ -76,6 +76,11 @@ popd
 
 systemctl enable NetworkManager.service
 systemctl enable getty@.service
+
+# mdkapplet tries to create these directories on startup - but crashes
+# because it's not root. Let's create the directories here until we have
+# a proper fix.
+mkdir -p /var/cache/urpmi/partial /var/cache/urpmi/rpms
 
 # default background
 pushd /usr/share/mdk/backgrounds/

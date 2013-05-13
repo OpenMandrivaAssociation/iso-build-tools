@@ -17,10 +17,9 @@ cd $DIRNAME
 
 build_root="./"
 d=`date +%Y.%m.%d-%H.%M`
-i=2013.0
 echo "$i.$d" > ${build_root}/version.txt
 
-product_id="OpenMandriva_$i.alpha.`date +%Y%m%d`"
+product_id="OpenMandriva.alpha.`date +%Y%m%d`"
 product_name_file="${build_root}/.name.txt" ; touch ${product_name_file}
 
 counter="${build_root}/.counter"
@@ -43,8 +42,8 @@ for arch in $ARCHS; do
 
 	mkdir -p $build_root/${product_id}/
 	LABEL=${product_id}.$arch
-	[ `echo $LABEL |wc -m` -gt 32 ] && LABEL=OpenMandriva
-	livecd-creator --config=${ks} --fslabel=$LABEL
+	[ `echo $LABEL |wc -m` -gt 32 ] && LABEL="OpenMandriva_2013.0"
+	livecd-creator -d -v --config=${ks} --fslabel=$LABEL
 
 	[ "$LABEL" != "${product_id}.$arch" ] && mv $LABEL.iso ${product_id}.$arch.iso
 	mv ${product_id}.$arch.iso $build_root/${product_id}/
