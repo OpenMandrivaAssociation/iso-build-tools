@@ -56,7 +56,7 @@ rm -rf /boot/initrd-*
 # usermod -a -G cdrom live
 # enable live user autologin
 if [ -f /usr/share/config/kdm/kdmrc ]; then
-	/bin/sed -i -e 's/.*AutoLoginEnable.*/AutoLoginEnable=true/g' -e #'s/.*AutoLoginUser.*/AutoLoginUser=live/g' /usr/share/config/kdm/kdmrc
+	/bin/sed -i -e 's/.*AutoLoginEnable.*/AutoLoginEnable=true/g' -e 's/.*AutoLoginUser.*/AutoLoginUser=live/g' /usr/share/config/kdm/kdmrc
 fi
 
 # ldetect stuff
