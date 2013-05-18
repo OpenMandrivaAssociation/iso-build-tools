@@ -20,7 +20,8 @@ fi
 EXTARCH=x86_64
 CHROOTNAME="buildchroot-$EXTARCH"
 
-REPOPATH="http://mirror.rosalinux.com/rosa/rosa2012.1/repository/$EXTARCH/"
+REPOPATH="http://abf-downloads.rosalinux.ru/cooker/repository/$EXTARCH/"
+#REPOPATH="http://mirror.rosalinux.com/rosa/rosa2012.1/repository/$EXTARCH/"
 SRCPATH="https://abf.rosalinux.ru/mdawkins/$BLDNAME.git"
 PKGLIST="https://abf.rosalinux.ru/openmandriva/iso-pkg-lists.git"
 LOGDIR="."
