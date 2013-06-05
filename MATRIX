@@ -17,7 +17,8 @@ if [ "`id -u`" != "0" ]; then
 	exit 1
 fi
 
-EXTARCH=x86_64
+[ -z "$EXTARCH" ] && EXTARCH="$1"
+[ -z "$EXTARCH" ] && EXTARCH="x86_64"
 CHROOTNAME="buildchroot-$EXTARCH"
 
 REPOPATH="http://abf-downloads.rosalinux.ru/cooker/repository/$EXTARCH/"
@@ -57,7 +58,7 @@ else
 	mkdir $CHROOTNAME
 	urpmi.addmedia --urpmi-root $CHROOTNAME --distrib --all-media $REPOPATH > $LOGDIR/addrepo.log 2>&1
 	urpmi.update --urpmi-root $CHROOTNAME main
-	urpmi --no-suggests --no-verify-rpm --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi rpm locales-en rpm-build livecd-tools syslinux yum git --auto
+	urpmi --no-suggests --no-verify-rpm --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi rpm locales-en rpm-build livecd-tools syslinux yum git --prefer /default-kde4-config/ --auto
 	mkdir -p $CHROOTNAME/dev
 	mkdir -p $CHROOTNAME/dev/pts
 	mkdir -p $CHROOTNAME/proc
@@ -91,7 +92,7 @@ fi
 
 echo "## Beginning ISO creation. ##"
 set -x
-chroot $CHROOTOPTS "sh -x /$BLDNAME/build" 2>&1 |tee $LOGDIR/build.log
+chroot $CHROOTOPTS "sh -x /$BLDNAME/build $EXTARCH" 2>&1 |tee $LOGDIR/build.log
 
 mv $CHROOTNAME/$BLDNAME/*/*.iso* $LOGDIR/
 ls -l $LOGDIR/*.iso*
