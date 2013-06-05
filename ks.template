@@ -87,7 +87,7 @@ systemctl enable getty@.service
 
 # default background
 pushd /usr/share/mdk/backgrounds/
-ln -s rosa-background.jpg default.jpg 
+[ -e default.jpg ] || ln -s OpenMandriva-1024x768.jpg default.jpg 
 popd
 
 #mtab
