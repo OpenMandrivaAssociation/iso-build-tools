@@ -60,7 +60,7 @@ if [ -f /usr/share/config/kdm/kdmrc ]; then
 fi
 
 # Allow urpmi to work
-/usr/sbin/urpmi.addmedia --distrib http://abf-downloads.rosalinux.ru/cooker/repository/x86_64
+/usr/sbin/urpmi.addmedia --distrib http://abf-downloads.rosalinux.ru/cooker/repository/#ARCH#
 
 # ldetect stuff
 /usr/sbin/update-ldetect-lst
@@ -183,6 +183,10 @@ done
 cp -rfT 	.///extraconfig/etc $INSTALL_ROOT/etc/
 cp -rfT 	.///extraconfig/usr $INSTALL_ROOT/usr/
 cp -rfT 	.///extraconfig/var $INSTALL_ROOT/var/
+# mdkapplet tries to create these directories on startup - but crashes
+# because it's not root. Let's create the directories here until we have
+# a proper fix.
+mkdir -p $INSTALL_ROOT/var/cache/urpmi/partial $INSTALL_ROOT/var/cache/urpmi/rpms
 cp -rfT 	.///extraconfig/var $INSTALL_ROOT/root/
 cp -rfT		.///extraconfig/etc/skel $INSTALL_ROOT/home/live/
 chown -R 500:500 $INSTALL_ROOT/home/live/
