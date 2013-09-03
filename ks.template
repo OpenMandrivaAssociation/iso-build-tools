@@ -60,7 +60,7 @@ if [ -f /usr/share/config/kdm/kdmrc ]; then
 fi
 
 # Allow urpmi to work
-/usr/sbin/urpmi.addmedia --distrib http://abf-downloads.rosalinux.ru/cooker/repository/#ARCH#
+/usr/sbin/urpmi.addmedia --distrib http://abf-downloads.rosalinux.ru/#TREE#/repository/#ARCH#
 
 # ldetect stuff
 /usr/sbin/update-ldetect-lst

@@ -9,7 +9,9 @@ losetup -d /dev/loop*
 #ARCHS=i586
 [ -z "$ARCHS" ] && ARCHS="$1"
 [ -z "$ARCHS" ] && ARCHS=x86_64
-REPOURL="http://abf-downloads.rosalinux.ru/cooker/repository/#ARCH#"
+[ -z "$TREE" ] && TREE="$2"
+[ -z "$TREE" ] && TREE=cooker
+REPOURL="http://abf-downloads.rosalinux.ru/$TREE/repository/#ARCH#"
 TZ="Universal"
 SVCEN="acpid,alsa,atd,avahi-daemon,prefdm,irqbalance,mandi,dbus,netfs,network,network-up,partmon,resolvconf,rpcbind,rsyslog,sound,udev-post,mandrake_everytime,crond"
 SVCDIS="sshd,pptp,pppoe,ntpd,iptables,ip6tables,shorewall,nfs-server,mysqld,abrtd,mysql,postfix,cups"
@@ -38,6 +40,7 @@ for arch in $ARCHS; do
 	cp -f ks.template ${ks}
 	sed -i -e "s|#REPOURL#|${REPOURL}|g" ${ks}
 	sed -i -e "s|#ARCH#|${arch}|g" ${ks}
+	sed -i -e "s|#TREE#|${TREE}|g" ${ks}
 	sed -i -e "s|#TZ#|${TZ}|g" ${ks}
 	sed -i -e "s|#SVCEN#|${SVCEN}|g" ${ks}
 	sed -i -e "s|#SVCDIS#|${SVCDIS}|g" ${ks}
