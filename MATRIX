@@ -1,7 +1,12 @@
 #!/bin/bash
 
 OURDIR=$(realpath $(dirname $0))
-BLDNAME=$(basename $OURDIR)
+if echo $OURDIR |grep -q /home/vagrant; then
+	# We're in ABF -- things are a little odd
+	BLDNAME=iso-build-tools
+else
+	BLDNAME=$(basename $OURDIR)
+fi
 
 if pwd |grep -q "^$OURDIR"; then
 	echo "Don't run this script from within its directory."
