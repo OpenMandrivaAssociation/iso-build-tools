@@ -100,4 +100,11 @@ chroot $CHROOTOPTS "sh -x /$BLDNAME/build $EXTARCH $TREE" 2>&1 |tee $LOGDIR/buil
 mv $CHROOTNAME/$BLDNAME/*/*.iso* $LOGDIR/
 ls -l $LOGDIR/*.iso*
 
+if echo $OURDIR |grep -q /home/vagrant; then
+	# We're running in ABF -- adjust to its directory structure
+	mkdir -p /home/vagrant/results /home/vagrant/archives
+	mv $LOGDIR/*.iso* /home/vagrant/results/
+	mv $LOGDIR/*.log /home/vagrant/archives/
+fi
+
 umount_all
