@@ -162,6 +162,14 @@ ln -s /boot/initramfs-$KERNEL.img /run/initramfs/live/isolinux/initrd0.img
 #cp -f /boot/initramfs-$KERNEL.img /run/initramfs/live/isolinux/initrd0.img
 ls -l /boot/
 
+# Set reasonable defaults
+if ! [ -e /etc/sysconfig/desktop ]; then
+	cat >/etc/sysconfig/desktop <<'EOF'
+DISPLAYMANAGER=#DISPLAYMANAGER#
+DESKTOP=#DESKTOP#
+EOF
+fi
+
 #hack for nscd loop error
 while (ps -e | grep nscd)
 do

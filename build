@@ -35,6 +35,9 @@ echo $i > ${counter}
 
 ks="${build_root}/.ks"
 
+[ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER=kdm
+[ -z "$DESKTOP" ] && DESKTOP=kde4
+
 # build different architectures
 for arch in $ARCHS; do
 	cp -f ks.template ${ks}
@@ -45,6 +48,8 @@ for arch in $ARCHS; do
 	sed -i -e "s|#SVCEN#|${SVCEN}|g" ${ks}
 	sed -i -e "s|#SVCDIS#|${SVCDIS}|g" ${ks}
 	sed -i -e "s|#PKGLISTFILE#|${PKGLISTFILE}|g" ${ks}
+	sed -i -e "s|#DISPLAYMANAGER#|${DISPLAYMANAGER}|g" ${ks}
+	sed -i -e "s|#DESKTOP#|${DESKTOP}|g" ${ks}
 
 	mkdir -p $build_root/${product_id}/
 	LABEL=${product_id}.$arch
