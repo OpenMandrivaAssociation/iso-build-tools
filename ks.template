@@ -1,5 +1,5 @@
 timezone #TZ#
-auth --useshadow --enablemd5
+auth --useshadow --passalgo=sha512
 selinux --disabled
 firewall --enabled
 firstboot --enabled
