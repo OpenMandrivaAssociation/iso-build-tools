@@ -86,9 +86,9 @@ systemctl enable NetworkManager.service
 systemctl enable getty@.service
 
 # default background
-pushd /usr/share/mdk/backgrounds/
-[ -e default.jpg ] || ln -s OpenMandriva-1024x768.jpg default.jpg 
-popd
+# pushd /usr/share/mdk/backgrounds/
+# [ -e default.jpg ] || ln -s OpenMandriva-1024x768.jpg default.jpg 
+# popd
 
 #mtab
 #pushd /etc/
@@ -147,7 +147,7 @@ popd
 # Sysfs must be mounted for dracut to work!
 #
 mount -t sysfs /sys /sys
-ln -s /usr/share/plymouth/themes/Mandriva-Rosa/rosa.png /usr/share/plymouth/themes/Mandriva-Rosa/welcome.png
+# ln -s /usr/share/plymouth/themes/Mandriva-Rosa/rosa.png /usr/share/plymouth/themes/Mandriva-Rosa/welcome.png
 pushd /lib/modules/
 KERNEL=$(echo *)
 popd
