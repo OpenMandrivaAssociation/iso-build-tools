@@ -39,6 +39,7 @@ ks="${build_root}/.ks"
 [ -z "$DESKTOP" ] && DESKTOP=kde4
 
 # build different architectures
+export DURING_INSTALL=true
 for arch in $ARCHS; do
 	cp -f ks.template ${ks}
 	sed -i -e "s|#REPOURL#|${REPOURL}|g" ${ks}
@@ -65,3 +66,4 @@ for arch in $ARCHS; do
 	echo "          ALL DONE!        $build_root/${product_id}/${product_id}.$arch.iso"
 	echo ""
 done
+unset DURING_INSTALL
