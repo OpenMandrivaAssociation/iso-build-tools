@@ -1,14 +1,17 @@
 #!/bin/bash
 DIST=omdv
 TYPE=kde4
+TREE=cooker
 ARCH=`uname -m`
 SUDO=sudo
 [ "`id -u`" = "0" ] && SUDO=""
-[ "$ARCH" = "i386" ] && ARCH=i586
 
-[ -n "$1" ] && TYPE="$1"
-[ -n "$2" ] && ARCH="$2"
-[ -n "$3" ] && DIST="$3"
+[ -n "$1" ] && TREE="$1"
+[ -n "$2" ] && TYPE="$2"
+[ -n "$3" ] && ARCH="$3"
+[ -n "$4" ] && DIST="$4"
+
+[ "$ARCH" = "i386" ] && ARCH=i586
 
 parsePkgList() {
 	LINE=0
@@ -35,7 +38,7 @@ $SUDO mkdir -p "$ROOT"/tmp
 
 [ -d iso-pkg-lists ] || git clone https://abf.rosalinux.ru/openmandriva/iso-pkg-lists.git
 cd iso-pkg-lists
-$SUDO urpmi.addmedia --urpmi-root "$ROOT" --distrib http://abf-downloads.rosalinux.ru/cooker/repository/$ARCH
+$SUDO urpmi.addmedia --urpmi-root "$ROOT" --distrib http://abf-downloads.rosalinux.ru/$TREE/repository/$ARCH
 $SUDO urpmi.update --urpmi-root "$ROOT" -a
 parsePkgList ${DIST}-${TYPE}.lst |xargs $SUDO urpmi --urpmi-root "$ROOT" --no-install --download-all "$ROOT"/tmp --auto --prefer /default-kde4-config/
 cd ..
