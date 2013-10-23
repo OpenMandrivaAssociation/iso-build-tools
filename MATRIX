@@ -29,6 +29,12 @@ CHROOTNAME="buildchroot-$EXTARCH"
 [ -z "$TREE" ] && TREE="$2"
 [ -z "$TREE" ] && TREE=cooker
 
+[ -z "$RELEASE_ID" ] && RELEASE_ID="$3"
+[ -z "$RELEASE_ID" ] && RELEASE_ID="alpha.`date +%Y%m%d`"
+
+[ -z "$VERSION" ] && VERSION="$4"
+[ -z "$VERSION" ] && VERSION="`date +%Y.0`"
+
 REPOPATH="http://abf-downloads.rosalinux.ru/$TREE/repository/$EXTARCH/"
 SRCPATH="https://abf.rosalinux.ru/openmandriva/$BLDNAME.git"
 PKGLIST="https://abf.rosalinux.ru/openmandriva/iso-pkg-lists.git"
@@ -66,7 +72,7 @@ else
 	mkdir $CHROOTNAME
 	urpmi.addmedia --urpmi-root $CHROOTNAME --distrib --all-media $REPOPATH > $LOGDIR/addrepo.log 2>&1
 	urpmi.update --urpmi-root $CHROOTNAME main
-	urpmi --no-suggests --no-verify-rpm --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi rpm locales-en rpm-build livecd-tools syslinux yum git --prefer /default-kde4-config/ --prefer /distro-theme-OpenMandriva/ --auto
+	urpmi --no-suggests --no-verify-rpm --debug --verbose --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi rpm locales-en rpm-build livecd-tools syslinux yum git --prefer /default-kde4-config/ --prefer /distro-theme-OpenMandriva/ --auto
 	mkdir -p $CHROOTNAME/dev
 	mkdir -p $CHROOTNAME/dev/pts
 	mkdir -p $CHROOTNAME/proc
@@ -100,7 +106,7 @@ fi
 
 echo "## Beginning ISO creation. ##"
 set -x
-chroot $CHROOTOPTS "sh -x /$BLDNAME/build $EXTARCH $TREE" 2>&1 |tee $LOGDIR/build.log
+chroot $CHROOTOPTS "sh -x /$BLDNAME/build $EXTARCH $TREE $VERSION $RELEASE_ID" 2>&1 |tee $LOGDIR/build.log
 
 mv $CHROOTNAME/$BLDNAME/*/*.iso* $LOGDIR/
 ls -l $LOGDIR/*.iso*

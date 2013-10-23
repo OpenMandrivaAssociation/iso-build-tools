@@ -11,6 +11,10 @@ losetup -d /dev/loop*
 [ -z "$ARCHS" ] && ARCHS=x86_64
 [ -z "$TREE" ] && TREE="$2"
 [ -z "$TREE" ] && TREE=cooker
+[ -z "$VERSION" ] && VERSION="$3"
+[ -z "$VERSION" ] && VERSION="2013.0"
+[ -z "$RELEASE_ID" ] && RELEASE_ID="$4"
+[ -z "$RELEASE_ID" ] && RELEASE_ID="alpha.`date +%Y%m%d`"
 REPOURL="http://abf-downloads.rosalinux.ru/$TREE/repository/#ARCH#"
 TZ="Universal"
 SVCEN="acpid,alsa,atd,avahi-daemon,prefdm,irqbalance,mandi,dbus,netfs,network,network-up,partmon,resolvconf,rpcbind,rsyslog,sound,udev-post,mandrake_everytime,crond"
@@ -24,7 +28,7 @@ build_root="./"
 d=`date +%Y.%m.%d-%H.%M`
 echo "$i.$d" > ${build_root}/version.txt
 
-product_id="OpenMandriva.alpha.`date +%Y%m%d`"
+product_id="OpenMandriva.$RELEASE_ID"
 product_name_file="${build_root}/.name.txt" ; touch ${product_name_file}
 
 counter="${build_root}/.counter"
@@ -54,13 +58,14 @@ for arch in $ARCHS; do
 
 	mkdir -p $build_root/${product_id}/
 	LABEL=${product_id}.$arch
-	[ `echo $LABEL |wc -m` -gt 32 ] && LABEL="OpenMandriva_2013.0"
+	[ `echo $LABEL |wc -m` -gt 32 ] && LABEL="OpenMandriva_${VERSION}"
 	livecd-creator -d -v --config=${ks} --fslabel=$LABEL
 
 	[ "$LABEL" != "${product_id}.$arch" ] && mv $LABEL.iso ${product_id}.$arch.iso
 	mv ${product_id}.$arch.iso $build_root/${product_id}/
 	cd $build_root/${product_id}/
 	md5sum  ${product_id}.$arch.iso > ${product_id}.$arch.iso.md5sum
+	sha1sum ${product_id}.$arch.iso > ${product_id}.$arch.iso.sha1sum
 
 	echo ""
 	echo "          ALL DONE!        $build_root/${product_id}/${product_id}.$arch.iso"
