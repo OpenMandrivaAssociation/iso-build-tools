@@ -83,7 +83,6 @@ popd
 mkdir -p /var/cache/urpmi/partial /var/cache/urpmi/rpms
 
 systemctl enable NetworkManager.service
-systemctl enable getty@.service
 
 # default background
 # pushd /usr/share/mdk/backgrounds/
