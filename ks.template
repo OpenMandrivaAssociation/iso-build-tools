@@ -82,7 +82,39 @@ popd
 # a proper fix.
 mkdir -p /var/cache/urpmi/partial /var/cache/urpmi/rpms
 
+
+# SYSTEMD STUFF
 systemctl enable NetworkManager.service
+
+# turn off atd
+systemctl --no-reload disable atd.service
+systemctl stop atd.service
+
+# turn of crond
+systemctl --no-reload disable crond.service
+systemctl stop crond.service
+
+# turn of lm_sensors
+systemctl --no-reload disable lm_sensors.service
+systemctl --no-reload disable sensord.service
+systemctl stop lm_sensors.service
+systemctl stop sensord.service
+
+# turn of microcode_ctl
+systemctl --no-reload disable microcode_ctl.service
+systemctl stop microcode_ctl.service
+
+# turn off mdmonitor by default
+systemctl --no-reload disable mdmonitor.service
+systemctl --no-reload disable mdmonitor-takeover.service
+systemctl stop mdmonitor.service
+systemctl stop mdmonitor-takeover.service
+
+# turn of saslauthd
+systemctl --no-reload disable saslauthd.service
+systemctl stop saslauthd.service
+
+# END SYSTEMD STUFF
 
 # default background
 # pushd /usr/share/mdk/backgrounds/
