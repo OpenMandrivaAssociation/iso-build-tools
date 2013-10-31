@@ -187,7 +187,7 @@ echo Generating kernel. System kernel is `uname -r`, installed kernels are:
 rpm -qa kernel-*
 echo Detected kernel version: $KERNEL
 
-/usr/sbin/dracut --add-drivers "isofs iso9660" -o " bash rescue quemu multipath mdraid dmraid " /boot/initramfs-$KERNEL.img $KERNEL -v --force
+/usr/sbin/dracut --mount "tmpfs /var/tmp tmpfs defaults" --add-drivers "isofs iso9660" -o " bash rescue quemu multipath mdraid dmraid " /boot/initramfs-$KERNEL.img $KERNEL -v --force
 mkdir -p /run/initramfs/live/isolinux/
 ln -s /boot/initramfs-$KERNEL.img /run/initramfs/live/isolinux/initrd0.img
 #cp -f /boot/initramfs-$KERNEL.img /run/initramfs/live/isolinux/initrd0.img
