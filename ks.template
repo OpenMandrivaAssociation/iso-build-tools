@@ -241,6 +241,7 @@ cp -rfT		.///welcome.jpg $INSTALL_ROOT/splash.jpg
 #rm -f $INSTALL_ROOT/usr/share/icons/gnome/icon-theme.cache
 #rm -f $INSTALL_ROOT/usr/share/icons/nuoveXT2/icon-theme.cache
 #rm -f $INSTALL_ROOT/home/live/.face.icon
+find /usr/share/icons/ -name "*.cache" -type f -delete
 
 #ssh key don't need
 rm -f $INSTALL_ROOT/etc/ssh/*key*
