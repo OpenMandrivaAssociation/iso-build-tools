@@ -188,9 +188,13 @@ rpm -qa kernel-*
 echo Detected kernel version: $KERNEL
 
 /usr/sbin/dracut --add-drivers "isofs iso9660" /boot/initramfs-$KERNEL.img $KERNEL -v --force
+
+/usr/sbin/dracut -f --mount "tmpfs /var/tmp tmpfs" -o " aufs-mount bash rescue qemu multipath mdraid dmraid " /boot/liveramfs-$KERNEL.img $KERNEL -v
+
+
 mkdir -p /run/initramfs/live/isolinux/
-ln -s /boot/initramfs-$KERNEL.img /run/initramfs/live/isolinux/initrd0.img
-#cp -f /boot/initramfs-$KERNEL.img /run/initramfs/live/isolinux/initrd0.img
+ln -s /boot/liveramfs-$KERNEL.img /run/initramfs/live/isolinux/initrd0.img
+#cp -f /boot/liveramfs-$KERNEL.img /run/initramfs/live/isolinux/initrd0.img
 ls -l /boot/
 
 # Set reasonable defaults
