@@ -245,6 +245,9 @@ cp -rfT		.///welcome.jpg $INSTALL_ROOT/splash.jpg
 #rm -f $INSTALL_ROOT/usr/share/icons/gnome/icon-theme.cache
 #rm -f $INSTALL_ROOT/usr/share/icons/nuoveXT2/icon-theme.cache
 #rm -f $INSTALL_ROOT/home/live/.face.icon
+mkdir -p $INSTALL_ROOT/home/live/.kde4/env
+echo "export KDEVARTMP=/tmp" > $INSTALL_ROOT/home/live/.kde4/env/00-live.sh
+echo "export KDETMP=/tmp" >> $INSTALL_ROOT/home/live/.kde4/env/00-live.sh
 find /usr/share/icons/ -name "*.cache" -type f -delete
 
 #ssh key don't need
