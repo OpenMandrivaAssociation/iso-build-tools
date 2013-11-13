@@ -72,7 +72,7 @@ else
 	mkdir $CHROOTNAME
 	urpmi.addmedia --urpmi-root $CHROOTNAME --distrib --all-media $REPOPATH > $LOGDIR/addrepo.log 2>&1
 	urpmi.update --urpmi-root $CHROOTNAME main
-	urpmi --no-suggests --no-verify-rpm --debug --verbose --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi rpm locales-en rpm-build livecd-tools syslinux yum git --prefer /default-kde4-config/ --prefer /distro-theme-OpenMandriva/ --auto
+	urpmi --no-suggests --no-verify-rpm --debug --verbose --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi rpm locales-en rpm-build livecd-tools syslinux yum lorax grub-efi grub-efi-efi git --prefer /default-kde4-config/ --prefer /distro-theme-OpenMandriva/ --auto
 	mkdir -p $CHROOTNAME/dev
 	mkdir -p $CHROOTNAME/dev/pts
 	mkdir -p $CHROOTNAME/proc
