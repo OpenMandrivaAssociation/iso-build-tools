@@ -250,6 +250,27 @@ echo "export KDEVARTMP=/tmp" > $INSTALL_ROOT/home/live/.kde4/env/00-live.sh
 echo "export KDETMP=/tmp" >> $INSTALL_ROOT/home/live/.kde4/env/00-live.sh
 find /usr/share/icons/ -name "*.cache" -type f -delete
 
+# Don't start akonadi
+if [ -e $INSTALL_ROOT/home/live/.kde4/.config/akonadi/akonadiserverrc ]; then
+	sed -i -e "s/StartServer=true/StartServer=false/" ~/.config/akonadi/akonadiserverrc
+else
+	mkdir -p $INSTALL_ROOT/home/live/.kde4/.config/akonadi
+	cat >$INSTALL_ROOT/home/live/.kde4/.config/akonadi/akonadiserverrc <<'EOF'
+[%General]
+Driver=QMYSQL
+
+[QMYSQL]
+Name=akonadi
+Host=
+Options="UNIX_SOCKET=/home/live/.local/share/akonadi/socket-localhost/mysql.socket"
+ServerPath=/usr/sbin/mysqld
+StartServer=false
+
+[Debug]
+Tracer=null
+EOF
+fi
+
 #ssh key don't need
 rm -f $INSTALL_ROOT/etc/ssh/*key*
 
