@@ -269,7 +269,11 @@ StartServer=false
 [Debug]
 Tracer=null
 EOF
+	chown -R 500:500 $INSTALL_ROOT/home/live/.kde4/.config/akonadi
 fi
+
+mkdir -p $INSTALL_ROOT/home/live/.cache
+chown 500:500 $INSTALL_ROOT/home/live/.cache
 
 #ssh key don't need
 rm -f $INSTALL_ROOT/etc/ssh/*key*
