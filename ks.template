@@ -85,7 +85,11 @@ mkdir -p /var/cache/urpmi/partial /var/cache/urpmi/rpms
 
 
 # SYSTEMD STUFF
-systemctl enable NetworkManager.service
+echo "CONFIGURE SYSTEMD SERVICES"
+systemctl enable NetworkManager.service\
+
+# Enable DM - use you DM service name!
+systemctl enable kdm.service
 
 # turn off atd
 systemctl --no-reload disable atd.service
@@ -135,6 +139,8 @@ systemctl stop saslauthd.service
 
 ###chkconfig###
 /sbin/chkconfig --add checkflashboot
+echo "RUN CHKSESSION"
+chksession -g
 #####
 
 # Change samba groupe to WORKGROUP
@@ -277,6 +283,7 @@ mkdir -p $INSTALL_ROOT/home/live/.cache
 chown 500:500 $INSTALL_ROOT/home/live/.cache
 
 # install repos
+echo "CONFIGURING REPOSITORIES"
 cp -rfT /etc/resolv.conf $INSTALL_ROOT/etc/resolv.conf
 /usr/sbin/urpmi.removemedia -a
 /usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib http://abf.rosalinux.ru/downloads/openmandriva2014.0/repository/#ARCH#/
