@@ -86,7 +86,7 @@ mkdir -p /var/cache/urpmi/partial /var/cache/urpmi/rpms
 
 # SYSTEMD STUFF
 echo "CONFIGURE SYSTEMD SERVICES"
-systemctl enable NetworkManager.service\
+systemctl enable NetworkManager.service
 
 # Enable DM - use you DM service name!
 systemctl enable kdm.service
@@ -194,9 +194,9 @@ echo Generating kernel. System kernel is `uname -r`, installed kernels are:
 rpm -qa kernel-*
 echo Detected kernel version: $KERNEL
 
-/usr/sbin/dracut --add-drivers "isofs iso9660" /boot/initramfs-$KERNEL.img $KERNEL -v --force
+/usr/sbin/dracut --add-drivers "isofs iso9660" /boot/initramfs-$KERNEL.img $KERNEL --force --quet
 
-/usr/sbin/dracut -f --mount "tmpfs /var/tmp tmpfs" -o " aufs-mount bash rescue qemu multipath mdraid dmraid " /boot/liveramfs-$KERNEL.img $KERNEL -v
+/usr/sbin/dracut -f --mount "tmpfs /var/tmp tmpfs" -o " aufs-mount bash rescue qemu multipath mdraid dmraid " /boot/liveramfs-$KERNEL.img $KERNEL --quiet
 
 
 mkdir -p /run/initramfs/live/isolinux/
