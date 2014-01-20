@@ -43,10 +43,10 @@ BRANCH="master"
 CHROOTOPTS="$CHROOTNAME /bin/su root -c"
 
 umount_all() {
-	umount -Rf $CHROOTNAME/sys || :
-	umount -Rf $CHROOTNAME/proc || :
-	umount -Rf $CHROOTNAME/dev/pts || :
-	umount -Rf $CHROOTNAME/dev || :
+	umount -f $CHROOTNAME/sys || :
+	umount -f $CHROOTNAME/proc || :
+	umount -f $CHROOTNAME/dev/pts || :
+	umount -f $CHROOTNAME/dev || :
 }
 error() {
 	umount_all
