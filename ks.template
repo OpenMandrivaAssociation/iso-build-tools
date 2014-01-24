@@ -283,15 +283,13 @@ mkdir -p $INSTALL_ROOT/home/live/.cache
 chown 500:500 $INSTALL_ROOT/home/live/.cache
 
 # install repos
-echo "CONFIGURING REPOSITORIES"
 cp -rfT /etc/resolv.conf $INSTALL_ROOT/etc/resolv.conf
 /usr/sbin/urpmi.removemedia -a
+/usr/sbin/urpmi.addmedia --urpmi-root=$INSTALL_ROOT --distrib http://abf.rosalinux.ru/downloads/openmandriva2014.0/repository/#ARCH#/
 /usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib http://abf.rosalinux.ru/downloads/openmandriva2014.0/repository/#ARCH#/
-/usr/sbin/chroot $INSTALL_ROOT urpmi.update -a
 
 echo > $INSTALL_ROOT/etc/resolv.conf
 #end of it
-
 
 #ssh key don't need
 rm -f $INSTALL_ROOT/etc/ssh/*key*
