@@ -64,7 +64,8 @@ fi
 
 # ldetect stuff
 /usr/sbin/update-ldetect-lst
-/usr/sbin/update-pciids
+/usr/sbin/update-pciids.sh
+/usr/sbin/update-usbids.sh
 
 # setting up network manager by default
 # don't forget to change it
