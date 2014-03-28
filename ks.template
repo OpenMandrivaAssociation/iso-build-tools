@@ -193,10 +193,10 @@ echo Generating kernel. System kernel is `uname -r`, installed kernels are:
 rpm -qa kernel-*
 echo Detected kernel version: $KERNEL
 
+# rebuild initrd
 /usr/sbin/dracut --add-drivers "isofs iso9660" /boot/initramfs-$KERNEL.img $KERNEL --force --quiet
-
-/usr/sbin/dracut -f --mount "tmpfs /var/tmp tmpfs defaults 0 0" -o " aufs-mount bash rescue qemu multipath mdraid dmraid " /boot/liveramfs-$KERNEL.img $KERNEL --quiet
-
+# rebuild liveramfs
+/usr/sbin/dracut -N -f --mount "tmpfs /var/tmp tmpfs defaults 0 0" -o " aufs-mount bash rescue qemu multipath mdraid dmraid " --no-early-microcode --nofscks --noprelink /boot/liveramfs-$KERNEL.img $KERNEL --quiet
 
 mkdir -p /run/initramfs/live/isolinux/
 ln -s /boot/liveramfs-$KERNEL.img /run/initramfs/live/isolinux/initrd0.img
@@ -243,7 +243,6 @@ chmod -R 0777 $INSTALL_ROOT/home/live/.local
 chmod -R 0777 $INSTALL_ROOT/home/live/.kde4
 cp -rfT		.///welcome.jpg $INSTALL_ROOT/splash.jpg
 cp -rfT		.///welcome.jpg $INSTALL_ROOT/welcome.jpg
-cp -rfT		.///welcome.jpg $INSTALL_ROOT/splash.jpg
 #mkdir -p $INSTALL_ROOT/var/run/serverinstall
 #cp .///extraconfig/squashfsx86_64.img $INSTALL_ROOT/var/run/serverinstall/squashfs.img
 
