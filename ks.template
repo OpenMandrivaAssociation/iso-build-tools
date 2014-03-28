@@ -196,7 +196,7 @@ echo Detected kernel version: $KERNEL
 # rebuild initrd
 /usr/sbin/dracut --add-drivers "isofs iso9660" /boot/initramfs-$KERNEL.img $KERNEL --force --quiet
 # rebuild liveramfs
-/usr/sbin/dracut -N -f --mount "tmpfs /var/tmp tmpfs defaults 0 0" -o " aufs-mount bash rescue resume network lvm nfs multipath mdraid dmraid " --no-early-microcode --nofscks --noprelink /boot/liveramfs-$KERNEL.img $KERNEL --quiet
+/usr/sbin/dracut -N -f --mount "tmpfs /var/tmp tmpfs defaults 0 0" -o " aufs-mount bash rescue resume network lvm nfs ifcfg cifs multipath mdraid dmraid " --no-early-microcode --nofscks --noprelink /boot/liveramfs-$KERNEL.img $KERNEL --quiet
 
 mkdir -p /run/initramfs/live/isolinux/
 ln -s /boot/liveramfs-$KERNEL.img /run/initramfs/live/isolinux/initrd0.img
