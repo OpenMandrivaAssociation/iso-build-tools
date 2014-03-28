@@ -107,6 +107,10 @@ fi
 
 echo "## Beginning ISO creation. ##"
 set -x
+
+#
+# ISO build starts here !
+#
 chroot $CHROOTOPTS "sh -x /$BLDNAME/build $EXTARCH $TREE $VERSION $RELEASE_ID" 2>&1 |tee $LOGDIR/build.log
 
 mv $CHROOTNAME/$BLDNAME/*/*.iso* $LOGDIR/
