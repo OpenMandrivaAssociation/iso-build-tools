@@ -27,7 +27,7 @@ repo	--name=Restricted	--baseurl=#REPOURL#/restricted/release
 #We user non-free version (like EE)
 sed -i 's/Free/EE/' /etc/product.id
 sed -i 's/One/EE/' /etc/product.id
-                                                      
+
 # adding messagebus user to workaround rpm ordering (eugeni)
 #/usr/share/rpm-helper/add-user dbus 1 messagebus / /sbin/nologin
 #/usr/share/rpm-helper/add-group dbus 1 messagebus
@@ -287,15 +287,16 @@ cp -rfT /etc/resolv.conf $INSTALL_ROOT/etc/resolv.conf
 /usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib --mirrorlist
 /usr/sbin/chroot $INSTALL_ROOT urpmi.update -a
 
-
-
 echo > $INSTALL_ROOT/etc/resolv.conf
 #end of it
 
 #ssh key don't need
 rm -f $INSTALL_ROOT/etc/ssh/*key*
 
-cp -rfT		.///.counter $INSTALL_ROOT/etc/isonumber 
+cp -rfT		.///.counter $INSTALL_ROOT/etc/isonumber
+mkdir -p $LIVE_ROOT/isolinux/
+cp #PATH#/extraconfig/memdisk $LIVE_ROOT/isolinux/
+cp #PATH#/extraconfig/sgb.iso $LIVE_ROOT/isolinux/
 
 cp -f		.///root/GPL $LIVE_ROOT/
 #mkdir -p 	$LIVE_ROOT/Addons
