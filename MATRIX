@@ -106,7 +106,7 @@ if [ ! -d "$CHROOTNAME/$BLDNAME" ]; then
 fi
 
 echo "## Beginning ISO creation. ##"
-set -x
+#set -x
 
 #
 # ISO build starts here !
