@@ -73,7 +73,7 @@ for arch in $ARCHS; do
 	LABEL=${product_id}.$arch
 	[ `echo $LABEL |wc -m` -gt 32 ] && LABEL="OpenMandriva_${VERSION}"
 
-	echo "## Starting livecd-creator tool with $LABEL as defaul label and ${ks} as default template file. ##"
+	echo "## Starting livecd-creator tool. ##"
 
 	livecd-creator -d -v --config=${ks} --fslabel=$LABEL
     
