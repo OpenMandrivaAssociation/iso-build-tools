@@ -1,6 +1,3 @@
-
-echo "## Starting template file ##"
-
 timezone #TZ#
 auth --useshadow --passalgo=sha512
 selinux --disabled
@@ -17,9 +14,8 @@ repo --name=Non-Free --baseurl=#REPOURL#/non-free/release
 repo --name=Restricted --baseurl=#REPOURL#/restricted/release
 
 %packages
-echo "## Including default package list ##"
 %include .///#PKGLISTFILE#
-echo "## End of package list ##"
+
 %end
 
 %post
