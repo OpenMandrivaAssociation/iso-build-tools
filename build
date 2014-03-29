@@ -27,7 +27,7 @@ SVCEN="acpid,alsa,atd,avahi-daemon,irqbalance,netfs,network,network-up,partmon,r
 SVCDIS="sshd,pptp,pppoe,ntpd,iptables,ip6tables,shorewall,nfs-server,mysqld,abrtd,mysql,postfix,cups"
 
 #PKGLISTFILE=iso-pkg-lists/omdv-kde4.lst
-PKGLISTFILE=iso-pkg-lists/omdv_iso.lst
+PKGLISTFILE=iso-pkg-lists/omdv_iso_minimal.lst
 
 DIRNAME=$(dirname $0)
 cd $DIRNAME
@@ -76,13 +76,15 @@ for arch in $ARCHS; do
 	echo "## Starting livecd-creator tool with $LABEL as defaul label and ${ks} as default template file. ##"
 
 	livecd-creator -d -v --config=${ks} --fslabel=$LABEL
-
+    
+	echo "## End of livecd-creator procedure##"
+    
 	[ "$LABEL" != "${product_id}.$arch" ] && mv $LABEL.iso ${product_id}.$arch.iso
 	mv ${product_id}.$arch.iso $build_root/${product_id}/
 	cd $build_root/${product_id}/
 	md5sum  ${product_id}.$arch.iso > ${product_id}.$arch.iso.md5sum
 	sha1sum ${product_id}.$arch.iso > ${product_id}.$arch.iso.sha1sum
 
-	echo "## ALL DONE!        $build_root/${product_id}/${product_id}.$arch.iso ##"
+	echo "## ALL DONE! $build_root/${product_id}/${product_id}.$arch.iso ##"
 done
 unset DURING_INSTALL
