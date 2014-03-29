@@ -1,3 +1,6 @@
+
+echo "## Starting template file ##"
+
 timezone #TZ#
 auth --useshadow --passalgo=sha512
 selinux --disabled
@@ -8,46 +11,26 @@ part / --size 8692
 services --enabled=#SVCEN#
 services --disabled=#SVCDIS#
 
-repo	--name=Main		--baseurl=#REPOURL#/main/release
-repo	--name=Contrib		--baseurl=#REPOURL#/contrib/release
-repo	--name=Non-Free		--baseurl=#REPOURL#/non-free/release
-repo	--name=Restricted	--baseurl=#REPOURL#/restricted/release
+repo --name=Main --baseurl=#REPOURL#/main/release
+repo --name=Contrib --baseurl=#REPOURL#/contrib/release
+repo --name=Non-Free --baseurl=#REPOURL#/non-free/release
+repo --name=Restricted --baseurl=#REPOURL#/restricted/release
 
 %packages
+echo "## Including default package list ##"
 %include .///#PKGLISTFILE#
-
+echo "## End of package list ##"
 %end
 
 %post
+echo "## Starting ISO build post procedure ##"
 
-#sed -i 's!MandrivaLinux!Unity Linux!g' /etc/lsb-release
-#sed -i 's!Mandriva!Unity Desktop!g' /etc/lsb-release
-#sed -i 's!2011.0!2012.1!g' /etc/lsb-release
-
-#We user non-free version (like EE)
-sed -i 's/Free/EE/' /etc/product.id
-sed -i 's/One/EE/' /etc/product.id
-
-# adding messagebus user to workaround rpm ordering (eugeni)
-#/usr/share/rpm-helper/add-user dbus 1 messagebus / /sbin/nologin
-#/usr/share/rpm-helper/add-group dbus 1 messagebus
-
-#/bin/chown root:messagebus /lib*/dbus-1/dbus-daemon-launch-helper
-#/bin/chmod u+s,g-s /lib*/dbus-1/dbus-daemon-launch-helper
-
-####### avahi workaround
-#/usr/share/rpm-helper/add-user avahi 1 avahi /var/avahi /bin/false
-#/usr/share/rpm-helper/add-user avahi 1 avahi-autoipd /var/avahi /bin/false
-#/usr/share/rpm-helper/add-service avahi 1 avahi-daemon
-#### end of it
-
-echo "###################################### Make initrd symlink >> "
-echo ""
-
+echo "## Make initrd symlink ##"
 /usr/sbin/update-alternatives --set mkinitrd /usr/sbin/mkinitrd-dracut
 rm -rf /boot/initrd-*
 
-# adding life user
+# adding live user
+echo "## Adding live user ##"
 /usr/sbin/adduser live
 /usr/bin/passwd -d live
 /bin/mkdir -p /home/live
@@ -83,8 +66,9 @@ popd
 mkdir -p /var/cache/urpmi/partial /var/cache/urpmi/rpms
 
 
+
 # SYSTEMD STUFF
-echo "CONFIGURE SYSTEMD SERVICES"
+echo "## Configure systemd services ##"
 systemctl enable NetworkManager.service
 
 # Enable DM - use you DM service name!
@@ -120,92 +104,41 @@ systemctl stop saslauthd.service
 
 # END SYSTEMD STUFF
 
-# default background
-# pushd /usr/share/mdk/backgrounds/
-# [ -e default.jpg ] || ln -s OpenMandriva-1024x768.jpg default.jpg 
-# popd
-
-#mtab
-#pushd /etc/
-#ln -sf /proc/mounts mtab
-#popd
-
-#####workaround for time###
-#rm -rf /etc/sysconfig/clock
-#rm -rf /etc/adjtime
-#rm -rf /etc/localtime
-##### 
-
 ###chkconfig###
 /sbin/chkconfig --add checkflashboot
 echo "RUN CHKSESSION"
 chksession -g
 #####
 
-# Change samba groupe to WORKGROUP
-#sed -i 's/MDVGROUP/WORKGROUP/' /etc/samba/smb.conf
+echo "## Mounting sysfs ##"
 
-#
-# DKMS
-#
-
-#echo
-#echo
-#echo Rebuilding DKMS drivers
-#echo
-#echo
-
-#export PATH=/bin:/sbin:/usr/bin:/usr/sbin
-
-#build arch import for vboxadditions dkms + flash workaround###
-
-#export BUILD_TARGET_ARCH=x86
-#XXX=`file /bin/rpm |grep -c x86-64`
-#if [ "$XXX" = "1" ];  then
-#	export BUILD_TARGET_ARCH=amd64
-#fi
-
-#echo " ###DKMS BUILD### "
-#kernel_ver=`ls /boot | /bin/grep vmlinuz | /bin/sed 's/vmlinuz-//'`
-#for module in broadcom-wl vboxadditions r8192se; do
-#	module_version=`rpm --qf '%{VERSION}\n' -q dkms-$module`
-#	module_release=`rpm --qf '%{RELEASE}\n' -q dkms-$module`
-#	/usr/sbin/dkms -k $kernel_ver -a x86_64 --rpm_safe_upgrade add -m $module -v $module_version-$module_release
-#	/usr/sbin/dkms -k $kernel_ver -a x86_64 --rpm_safe_upgrade build -m $module -v $module_version- $module_release
-#	/usr/sbin/dkms -k $kernel_ver -a x86_64 --rpm_safe_upgrade install -m $module -v $module_version-$module_release --force
-#done
-#echo "END OF IT"
-#/bin/bash
-#
-# kernel
-#
-
-#
 # Sysfs must be mounted for dracut to work!
-#
 mount -t sysfs /sys /sys
-# ln -s /usr/share/plymouth/themes/Mandriva-Rosa/rosa.png /usr/share/plymouth/themes/Mandriva-Rosa/welcome.png
+
 pushd /lib/modules/
 KERNEL=$(echo *)
 popd
 echo
-echo Generating kernel. System kernel is `uname -r`, installed kernels are:
+echo "## Generating kernel. System kernel is `uname -r`, installed kernels are: ##"
 rpm -qa kernel-*
-echo Detected kernel version: $KERNEL
+echo "## Detected kernel version: $KERNEL ##"
 
 # rebuild initrd
+echo "## Rebuilding initramfs ##"
 /usr/sbin/dracut --add-drivers "isofs iso9660" /boot/initramfs-$KERNEL.img $KERNEL --force --quiet
+
 # rebuild liveramfs
+echo "## Rebuilding liveramfs ##"
 /usr/sbin/dracut -N -f --mount "tmpfs /var/tmp tmpfs defaults 0 0" -o " aufs-mount bash rescue resume network lvm nfs ifcfg cifs multipath mdraid dmraid " --no-early-microcode --nofscks --noprelink /boot/liveramfs-$KERNEL.img $KERNEL --quiet
 
+echo "## Installing initrd0 inside isolinux ##"
 mkdir -p /run/initramfs/live/isolinux/
 ln -s /boot/liveramfs-$KERNEL.img /run/initramfs/live/isolinux/initrd0.img
-#cp -f /boot/liveramfs-$KERNEL.img /run/initramfs/live/isolinux/initrd0.img
 ls -l /boot/
 
 # Set reasonable defaults
 if ! [ -e /etc/sysconfig/desktop ]; then
-	cat >/etc/sysconfig/desktop <<'EOF'
+    cat >/etc/sysconfig/desktop <<'EOF'
 DISPLAYMANAGER=#DISPLAYMANAGER#
 DESKTOP=#DESKTOP#
 EOF
@@ -214,45 +147,44 @@ fi
 #hack for nscd loop error
 while (ps -e | grep nscd)
 do
-	killall -s 9 nscd
+    killall -s 9 nscd
 done
 
-echo ""
-echo "###################################### Build ISO >> "
-echo ""
+echo "## End of ISO post procedure ##"
 %end
 
 %post --nochroot
+echo "## Starting ISO build post nochroot procedure ##"
+
 #hack to try to stop umount probs
 while (.///lsof /dev/loop* | grep -v "$0" | grep "$INSTALL_ROOT")
 do
-	sleep 5s
+    sleep 5s
 done
 
-cp -rfT 	.///extraconfig/etc $INSTALL_ROOT/etc/
-cp -rfT 	.///extraconfig/usr $INSTALL_ROOT/usr/
-cp -rfT 	.///extraconfig/var $INSTALL_ROOT/var/
+echo "## Installing various config files ##"
+
 # mdkapplet tries to create these directories on startup - but crashes
 # because it's not root. Let's create the directories here until we have
 # a proper fix.
 mkdir -p $INSTALL_ROOT/var/cache/urpmi/partial $INSTALL_ROOT/var/cache/urpmi/rpms
-cp -rfT 	.///extraconfig/var $INSTALL_ROOT/root/
-cp -rfT		.///extraconfig/etc/skel $INSTALL_ROOT/home/live/
+
+cp -rfT .///extraconfig/etc $INSTALL_ROOT/etc/
+cp -rfT .///extraconfig/usr $INSTALL_ROOT/usr/
+cp -rfT .///extraconfig/var $INSTALL_ROOT/var/
+cp -rfT .///welcome.jpg $INSTALL_ROOT/splash.jpg
+cp -rfT .///welcome.jpg $INSTALL_ROOT/welcome.jpg
+cp -rfT .///extraconfig/var $INSTALL_ROOT/root/
+cp -rfT .///extraconfig/etc/skel $INSTALL_ROOT/home/live/
 chown -R 500:500 $INSTALL_ROOT/home/live/
 chmod -R 0777 $INSTALL_ROOT/home/live/.local
 chmod -R 0777 $INSTALL_ROOT/home/live/.kde4
-cp -rfT		.///welcome.jpg $INSTALL_ROOT/splash.jpg
-cp -rfT		.///welcome.jpg $INSTALL_ROOT/welcome.jpg
-#mkdir -p $INSTALL_ROOT/var/run/serverinstall
-#cp .///extraconfig/squashfsx86_64.img $INSTALL_ROOT/var/run/serverinstall/squashfs.img
 
-#delete icon cache
-#rm -f $INSTALL_ROOT/usr/share/icons/gnome/icon-theme.cache
-#rm -f $INSTALL_ROOT/usr/share/icons/nuoveXT2/icon-theme.cache
-#rm -f $INSTALL_ROOT/home/live/.face.icon
 mkdir -p $INSTALL_ROOT/home/live/.kde4/env
 echo "export KDEVARTMP=/tmp" > $INSTALL_ROOT/home/live/.kde4/env/00-live.sh
 echo "export KDETMP=/tmp" >> $INSTALL_ROOT/home/live/.kde4/env/00-live.sh
+
+#delete icon cache
 find /usr/share/icons/ -name "*.cache" -type f -delete
 
 # Don't start akonadi
@@ -261,6 +193,7 @@ if [ -e $INSTALL_ROOT/home/live/.kde4/.config/akonadi/akonadiserverrc ]; then
 else
 	mkdir -p $INSTALL_ROOT/home/live/.kde4/.config/akonadi
 	cat >$INSTALL_ROOT/home/live/.kde4/.config/akonadi/akonadiserverrc <<'EOF'
+
 [%General]
 Driver=QMYSQL
 
@@ -274,13 +207,15 @@ StartServer=false
 [Debug]
 Tracer=null
 EOF
-	chown -R 500:500 $INSTALL_ROOT/home/live/.kde4/.config/akonadi
+    chown -R 500:500 $INSTALL_ROOT/home/live/.kde4/.config/akonadi
 fi
 
 mkdir -p $INSTALL_ROOT/home/live/.cache
 chown 500:500 $INSTALL_ROOT/home/live/.cache
 
 # install repos
+echo "## Installing default urpmi repositories for end user ##"
+
 cp -rfT /etc/resolv.conf $INSTALL_ROOT/etc/resolv.conf
 /usr/sbin/urpmi.removemedia -a
 /usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib --mirrorlist
@@ -292,15 +227,18 @@ echo > $INSTALL_ROOT/etc/resolv.conf
 #ssh key don't need
 rm -f $INSTALL_ROOT/etc/ssh/*key*
 
-cp -rfT		.///.counter $INSTALL_ROOT/etc/isonumber
-mkdir -p $LIVE_ROOT/isolinux/
-cp #PATH#/extraconfig/memdisk $LIVE_ROOT/isolinux/
-cp #PATH#/extraconfig/sgb.iso $LIVE_ROOT/isolinux/
+echo "## Copying various files ##"
 
-cp -f		.///root/GPL $LIVE_ROOT/
-#mkdir -p 	$LIVE_ROOT/Addons
-#cp /usr/bin/livecd-iso-to-disk $LIVE_ROOT/Addons/
-#chmod +x 	$LIVE_ROOT/Addons/livecd-iso-to-disk
+cp -rfT .///.counter $INSTALL_ROOT/etc/isonumber
+mkdir -p $INSTALL_ROOT/isolinux/
+cp #PATH#/extraconfig/memdisk $INSTALL_ROOT/isolinux/
+cp #PATH#/extraconfig/sgb.iso $INSTALL_ROOT/isolinux/
+cp -f .///root/GPL $LIVE_ROOT/
+
+echo "## Generating rpm file list ##"
+
 rpm --root $INSTALL_ROOT -qa | sort > $LIVE_ROOT/rpm.lst
 ./total_sum_counter.pl -r 640 -h 10 -w $INSTALL_ROOT/ -o $INSTALL_ROOT/etc/minsysreqs
+
+echo "## End of ISO post nochroot procedure ##"
 %end
