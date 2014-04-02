@@ -26,9 +26,9 @@ TZ="Universal"
 SVCEN="acpid,alsa,atd,avahi-daemon,irqbalance,netfs,network,network-up,partmon,resolvconf,rpcbind,sound,udev-post,mandrake_everytime,crond"
 SVCDIS="sshd,pptp,pppoe,ntpd,iptables,ip6tables,shorewall,nfs-server,mysqld,abrtd,mysql,postfix,cups"
 
-#PKGLISTFILE=iso-pkg-lists/omdv-kde4.lst
+PKGLISTFILE=iso-pkg-lists/omdv-kde4.lst
 #PKGLISTFILE=iso-pkg-lists/omdv_iso.lst
-PKGLISTFILE=iso-pkg-lists/omdv_iso_minimal.lst
+#PKGLISTFILE=iso-pkg-lists/omdv_iso_minimal.lst
 
 DIRNAME=$(dirname $0)
 cd $DIRNAME
