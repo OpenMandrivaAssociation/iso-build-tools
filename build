@@ -1,5 +1,8 @@
-#!/bin/sh -x
-set -x
+#!/bin/sh
+
+#set -x
+echo "## Welcome inside build scipt. ##"
+
 modprobe loop
 losetup -a
 losetup -d /dev/loop*
@@ -15,11 +18,17 @@ losetup -d /dev/loop*
 [ -z "$VERSION" ] && VERSION="2014.0"
 [ -z "$RELEASE_ID" ] && RELEASE_ID="$4"
 [ -z "$RELEASE_ID" ] && RELEASE_ID="alpha.`date +%Y%m%d`"
+
+echo "## Current product build is $ARCHS $TREE $VERSION $RELEASE_ID ##"
+
 REPOURL="http://abf-downloads.rosalinux.ru/$TREE/repository/#ARCH#"
 TZ="Universal"
-SVCEN="acpid,alsa,atd,avahi-daemon,prefdm,irqbalance,mandi,dbus,netfs,network,network-up,partmon,resolvconf,rpcbind,rsyslog,sound,udev-post,mandrake_everytime,crond"
+SVCEN="acpid,alsa,atd,avahi-daemon,irqbalance,netfs,network,network-up,partmon,resolvconf,rpcbind,sound,udev-post,mandrake_everytime,crond"
 SVCDIS="sshd,pptp,pppoe,ntpd,iptables,ip6tables,shorewall,nfs-server,mysqld,abrtd,mysql,postfix,cups"
+
 PKGLISTFILE=iso-pkg-lists/omdv-kde4.lst
+#PKGLISTFILE=iso-pkg-lists/omdv_iso.lst
+#PKGLISTFILE=iso-pkg-lists/omdv_iso_minimal.lst
 
 DIRNAME=$(dirname $0)
 cd $DIRNAME
@@ -29,10 +38,11 @@ d=`date +%Y.%m.%d-%H.%M`
 echo "$i.$d" > ${build_root}/version.txt
 
 if [ "$RELEASE_ID" = "final" ]; then
-	product_id="OpenMandriva.$VERSION"
+    product_id="OpenMandriva.$VERSION"
 else
-	product_id="OpenMandriva.$RELEASE_ID"
+    product_id="OpenMandriva.$RELEASE_ID"
 fi
+
 product_name_file="${build_root}/.name.txt" ; touch ${product_name_file}
 
 counter="${build_root}/.counter"
@@ -47,6 +57,7 @@ ks="${build_root}/.ks"
 [ -z "$DESKTOP" ] && DESKTOP=kde4
 
 # build different architectures
+export DURING_INSTALL=true
 for arch in $ARCHS; do
 	cp -f ks.template ${ks}
 	sed -i -e "s|#REPOURL#|${REPOURL}|g" ${ks}
@@ -62,15 +73,19 @@ for arch in $ARCHS; do
 	mkdir -p $build_root/${product_id}/
 	LABEL=${product_id}.$arch
 	[ `echo $LABEL |wc -m` -gt 32 ] && LABEL="OpenMandriva_${VERSION}"
-	livecd-creator -d -v --config=${ks} --fslabel=$LABEL
 
+	echo "## Starting livecd-creator tool. ##"
+
+	livecd-creator -d -v --config=${ks} --fslabel=$LABEL
+    
+	echo "## End of livecd-creator procedure##"
+    
 	[ "$LABEL" != "${product_id}.$arch" ] && mv $LABEL.iso ${product_id}.$arch.iso
 	mv ${product_id}.$arch.iso $build_root/${product_id}/
 	cd $build_root/${product_id}/
 	md5sum  ${product_id}.$arch.iso > ${product_id}.$arch.iso.md5sum
 	sha1sum ${product_id}.$arch.iso > ${product_id}.$arch.iso.sha1sum
 
-	echo ""
-	echo "          ALL DONE!        $build_root/${product_id}/${product_id}.$arch.iso"
-	echo ""
+	echo "## ALL DONE! $build_root/${product_id}/${product_id}.$arch.iso ##"
 done
+unset DURING_INSTALL
