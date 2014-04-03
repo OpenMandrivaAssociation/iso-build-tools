@@ -109,6 +109,8 @@ echo "## Mounting sysfs ##"
 # Sysfs must be mounted for dracut to work!
 mount -t sysfs /sys /sys
 
+mkdir -p $INSTALL_ROOT/isolinux/
+
 pushd /lib/modules/
 KERNEL=$(echo *)
 popd
@@ -123,6 +125,7 @@ echo "## Rebuilding initramfs ##"
 
 # rebuild liveramfs
 echo "## Rebuilding liveramfs ##"
+mkdir -p $INSTALL_ROOT/isolinux/
 /usr/sbin/dracut -N -f --mount "tmpfs /var/tmp tmpfs defaults 0 0" -o " aufs-mount bash rescue resume network lvm nfs ifcfg cifs multipath mdraid dmraid " --no-early-microcode --nofscks --noprelink $INSTALL_ROOT/boot/liveramfs-$KERNEL.img $KERNEL --quiet
 
 echo "## Installing initrd0 inside isolinux ##"
@@ -222,7 +225,6 @@ rm -f $INSTALL_ROOT/etc/ssh/*key*
 echo "## Copying various files ##"
 
 cp -rfT .///.counter $INSTALL_ROOT/etc/isonumber
-mkdir -p $INSTALL_ROOT/isolinux/
 cp .///extraconfig/memdisk $INSTALL_ROOT/isolinux/
 cp .///extraconfig/sgb.iso $INSTALL_ROOT/isolinux/
 cp -f .///root/GPL $INSTALL_ROOT/
