@@ -227,9 +227,9 @@ echo "## Copying various files ##"
 
 cp -rfT .///.counter $INSTALL_ROOT/etc/isonumber
 mkdir -p $INSTALL_ROOT/isolinux/
-cp #PATH#/extraconfig/memdisk $INSTALL_ROOT/isolinux/
-cp #PATH#/extraconfig/sgb.iso $INSTALL_ROOT/isolinux/
-cp -f .///root/GPL $LIVE_ROOT/
+cp .///extraconfig/memdisk $INSTALL_ROOT/isolinux/
+cp .///extraconfig/sgb.iso $INSTALL_ROOT/isolinux/
+cp -f .///root/GPL $INSTALL_ROOT/
 
 echo "## Generating rpm file list ##"
 
