@@ -167,10 +167,8 @@ mkdir -p $INSTALL_ROOT/var/cache/urpmi/partial $INSTALL_ROOT/var/cache/urpmi/rpm
 
 cp -rfT .///extraconfig/etc $INSTALL_ROOT/etc/
 cp -rfT .///extraconfig/usr $INSTALL_ROOT/usr/
-cp -rfT .///extraconfig/var $INSTALL_ROOT/var/
 cp -rfT .///welcome.jpg $INSTALL_ROOT/splash.jpg
 cp -rfT .///welcome.jpg $INSTALL_ROOT/welcome.jpg
-cp -rfT .///extraconfig/var $INSTALL_ROOT/root/
 cp -rfT .///extraconfig/etc/skel $INSTALL_ROOT/home/live/
 chown -R 500:500 $INSTALL_ROOT/home/live/
 chmod -R 0777 $INSTALL_ROOT/home/live/.local
@@ -215,7 +213,7 @@ echo "## Installing default urpmi repositories for end user ##"
 cp -rfT /etc/resolv.conf $INSTALL_ROOT/etc/resolv.conf
 /usr/sbin/urpmi.removemedia -a
 /usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib --mirrorlist
-/usr/sbin/chroot $INSTALL_ROOT urpmi.update -a
+/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.update -a
 
 echo > $INSTALL_ROOT/etc/resolv.conf
 #end of it
