@@ -38,7 +38,7 @@ parsePkgList() {
 # dependencies.
 # Packages go to /target/dir/rpms
 getPackages() {
-	$SUDO urpmi.addmedia --urpmi-root "$2" --distrib http://abf-downloads.rosalinux.ru/cooker/repository/$ARCH
+	$SUDO urpmi.addmedia --urpmi-root "$2" --distrib http://abf-downloads.abf.io/cooker/repository/$ARCH
 	$SUDO urpmi.update --urpmi-root "$2" -a
 	parsePkgList "$1" |xargs $SUDO urpmi --urpmi-root "$ROOT" --no-install --download-all "$2" --auto --prefer /default-kde4-config/
 }
@@ -49,7 +49,7 @@ getPackages() {
 createChroot() {
 	# Make sure /proc, /sys and friends are mounted so %post scripts can use them
 	$SUDO mkdir -p "$2"/proc "$2"/sys
-	$SUDO urpmi.addmedia --urpmi-root "$2" --distrib http://abf-downloads.rosalinux.ru/cooker/repository/$ARCH
+	$SUDO urpmi.addmedia --urpmi-root "$2" --distrib http://abf-downloads.abf.io/cooker/repository/$ARCH
 	$SUDO urpmi.update --urpmi-root "$2" -a
 	$SUDO mount --bind /proc "$2"/proc
 	$SUDO mount --bind /sys "$2"/sys
@@ -161,7 +161,7 @@ ROOT="`mktemp -d /tmp/liverootXXXXXX`"
 [ -z "$ROOT" ] && ROOT=/tmp/liveroot.$$
 $SUDO mkdir -p "$ROOT"/tmp
 
-[ -d iso-pkg-lists ] || git clone https://abf.rosalinux.ru/openmandriva/iso-pkg-lists.git
+[ -d iso-pkg-lists ] || git clone https://abf.io/openmandriva/iso-pkg-lists.git
 cd iso-pkg-lists
 # getPackages "${DIST}-${TYPE}.lst" /tmp/packages
 createChroot "${DIST}-${TYPE}.lst" "$ROOT"

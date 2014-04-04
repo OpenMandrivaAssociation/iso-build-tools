@@ -21,7 +21,7 @@ losetup -d /dev/loop*
 
 echo "## Current product build is $ARCHS $TREE $VERSION $RELEASE_ID ##"
 
-REPOURL="http://abf-downloads.rosalinux.ru/$TREE/repository/#ARCH#"
+REPOURL="http://abf-downloads.abf.io/$TREE/repository/#ARCH#"
 TZ="Universal"
 SVCEN="acpid,alsa,atd,avahi-daemon,irqbalance,netfs,network,network-up,partmon,resolvconf,rpcbind,sound,udev-post,mandrake_everytime,crond"
 SVCDIS="sshd,pptp,pppoe,ntpd,iptables,ip6tables,shorewall,nfs-server,mysqld,abrtd,mysql,postfix,cups"

@@ -36,9 +36,9 @@ CHROOTNAME="buildchroot-$EXTARCH"
 [ -z "$VERSION" ] && VERSION="`date +%Y.0`"
 
 
-REPOPATH="http://abf-downloads.rosalinux.ru/$TREE/repository/$EXTARCH/"
-SRCPATH="https://abf.rosalinux.ru/openmandriva/$BLDNAME.git"
-PKGLIST="https://abf.rosalinux.ru/openmandriva/iso-pkg-lists.git"
+REPOPATH="http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/"
+SRCPATH="https://abf.io/openmandriva/$BLDNAME.git"
+PKGLIST="https://abf.io/openmandriva/iso-pkg-lists.git"
 LOGDIR="."
 BRANCH="master"
 CHROOTOPTS="$CHROOTNAME /bin/su root -c"
