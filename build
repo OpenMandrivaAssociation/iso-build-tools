@@ -18,18 +18,17 @@ losetup -d /dev/loop*
 [ -z "$VERSION" ] && VERSION="2014.0"
 [ -z "$RELEASE_ID" ] && RELEASE_ID="$4"
 [ -z "$RELEASE_ID" ] && RELEASE_ID="alpha.`date +%Y%m%d`"
+[ -z "$DE" ] && DE="$5"
+[ -z "$DE" ] && DE=kde4
 
-echo "## Current product build is $ARCHS $TREE $VERSION $RELEASE_ID ##"
+echo "## Current product build is $ARCHS $TREE $VERSION $RELEASE_ID $DE##"
 
 REPOURL="http://abf-downloads.abf.io/$TREE/repository/#ARCH#"
 TZ="Universal"
 SVCEN="acpid,alsa,atd,avahi-daemon,irqbalance,netfs,network,network-up,partmon,resolvconf,rpcbind,sound,udev-post,mandrake_everytime,crond"
 SVCDIS="sshd,pptp,pppoe,ntpd,iptables,ip6tables,shorewall,nfs-server,mysqld,abrtd,mysql,postfix,cups"
 
-PKGLISTFILE=iso-pkg-lists/omdv-kde4.lst
-#PKGLISTFILE=iso-pkg-lists/omdv-mate.lst
-#PKGLISTFILE=iso-pkg-lists/omdv_iso.lst
-#PKGLISTFILE=iso-pkg-lists/omdv_iso_minimal.lst
+PKGLISTFILE=iso-pkg-lists/omdv-$DE.lst
 
 DIRNAME=$(dirname $0)
 cd $DIRNAME
