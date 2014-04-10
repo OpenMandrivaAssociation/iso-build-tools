@@ -35,8 +35,11 @@ CHROOTNAME="buildchroot-$EXTARCH"
 [ -z "$VERSION" ] && VERSION="$4"
 [ -z "$VERSION" ] && VERSION="`date +%Y.0`"
 
-[ -z "$DE" ] && DE="$5"
-[ -z "$DE" ] && DE="kde4"
+[ -z "$DESKTOP" ] && DESKTOP="$5"
+[ -z "$DESKTOP" ] && DESKTOP="kde4"
+
+[ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER="$5"
+[ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER="kdm"
 
 REPOPATH="http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/"
 SRCPATH="https://abf.io/openmandriva/$BLDNAME.git"
@@ -113,7 +116,7 @@ echo "## Beginning ISO creation. ##"
 #
 # ISO build starts here !
 #
-chroot $CHROOTOPTS "sh -x /$BLDNAME/build $EXTARCH $TREE $VERSION $RELEASE_ID $DE" 2>&1 |tee $LOGDIR/build.log
+chroot $CHROOTOPTS "sh -x /$BLDNAME/build $EXTARCH $TREE $VERSION $RELEASE_ID $DESKTOP $DISPLAYMANAGER" 2>&1 |tee $LOGDIR/build.log
 
 mv $CHROOTNAME/$BLDNAME/*/*.iso* $LOGDIR/
 ls -l $LOGDIR/*.iso*

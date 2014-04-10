@@ -18,17 +18,20 @@ losetup -d /dev/loop*
 [ -z "$VERSION" ] && VERSION="2014.0"
 [ -z "$RELEASE_ID" ] && RELEASE_ID="$4"
 [ -z "$RELEASE_ID" ] && RELEASE_ID="alpha.`date +%Y%m%d`"
-[ -z "$DE" ] && DE="$5"
-[ -z "$DE" ] && DE=kde4
+[ -z "$DESKTOP" ] && DESKTOP="$5"
+[ -z "$DESKTOP" ] && DESKTOP=kde4
+[ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER="$6"
+[ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER=kdm
 
-echo "## Current product build is $ARCHS $TREE $VERSION $RELEASE_ID $DE##"
+
+echo "## Current product build is $ARCHS $TREE $VERSION $RELEASE_ID $DESKTOP##"
 
 REPOURL="http://abf-downloads.abf.io/$TREE/repository/#ARCH#"
 TZ="Universal"
 SVCEN="acpid,alsa,atd,avahi-daemon,irqbalance,netfs,network,network-up,partmon,resolvconf,rpcbind,sound,udev-post,mandrake_everytime,crond"
 SVCDIS="sshd,pptp,pppoe,ntpd,iptables,ip6tables,shorewall,nfs-server,mysqld,abrtd,mysql,postfix,cups"
 
-PKGLISTFILE=iso-pkg-lists/omdv-$DE.lst
+PKGLISTFILE=iso-pkg-lists/omdv-$DESKTOP.lst
 
 DIRNAME=$(dirname $0)
 cd $DIRNAME
@@ -38,9 +41,9 @@ d=`date +%Y.%m.%d-%H.%M`
 echo "$i.$d" > ${build_root}/version.txt
 
 if [ "$RELEASE_ID" = "final" ]; then
-    product_id="OpenMandriva.$VERSION"
+    product_id="OpenMandriva.${VERSION}-$DESKTOP"
 else
-    product_id="OpenMandriva.$RELEASE_ID"
+    product_id="OpenMandriva.${RELEASE_ID}-$DESKTOP"
 fi
 
 product_name_file="${build_root}/.name.txt" ; touch ${product_name_file}
@@ -52,9 +55,6 @@ i=`expr $i + 1`
 echo $i > ${counter}
 
 ks="${build_root}/.ks"
-
-[ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER=kdm
-[ -z "$DESKTOP" ] && DESKTOP=kde4
 
 # build different architectures
 export DURING_INSTALL=true

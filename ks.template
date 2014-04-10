@@ -66,7 +66,7 @@ echo "## Configure systemd services ##"
 systemctl enable NetworkManager.service
 
 # Enable DM - use you DM service name!
-systemctl enable kdm.service
+systemctl enable #DISPLAYMANAGER#.service
 
 # turn off atd
 systemctl --no-reload disable atd.service
