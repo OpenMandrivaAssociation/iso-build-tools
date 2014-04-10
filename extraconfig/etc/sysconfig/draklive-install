@@ -1,1 +1,2 @@
-remove_unused_packages=yes
+# untill this is not fixed https://issues.openmandriva.org/show_bug.cgi?id=654
+remove_unused_packages=no
