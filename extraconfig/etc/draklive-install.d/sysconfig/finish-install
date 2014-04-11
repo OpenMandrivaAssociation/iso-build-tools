@@ -1,10 +1,9 @@
-country=no
 timezone=no
 network=no
 keyboard=no
 language=no
 country=no
-remove_unused_packages=no
+remove_unused_packages=yes
 license=no
 authentication=no
 FINISH_INSTALL=yes

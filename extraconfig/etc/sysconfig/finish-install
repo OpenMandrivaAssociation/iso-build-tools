@@ -1,3 +1,5 @@
+# this is the version used when running the live cd
+# beware of enabling anything which may make major changes to the filesystem
 FINISH_INSTALL=yes
 authentication=no
 network=no

@@ -1,2 +1,3 @@
-# untill this is not fixed https://issues.openmandriva.org/show_bug.cgi?id=654
+# we dont do this hear as it modifies the image which takes a long time
+# this is set to yes in the version of the file copied over to the new installation
 remove_unused_packages=no
