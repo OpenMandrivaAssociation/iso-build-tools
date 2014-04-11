@@ -38,7 +38,7 @@ CHROOTNAME="buildchroot-$EXTARCH"
 [ -z "$DESKTOP" ] && DESKTOP="$5"
 [ -z "$DESKTOP" ] && DESKTOP="kde4"
 
-[ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER="$5"
+[ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER="$6"
 [ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER="kdm"
 
 REPOPATH="http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/"
