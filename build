@@ -17,12 +17,20 @@ losetup -d /dev/loop*
 [ -z "$VERSION" ] && VERSION="$3"
 [ -z "$VERSION" ] && VERSION="2014.0"
 [ -z "$RELEASE_ID" ] && RELEASE_ID="$4"
-[ -z "$RELEASE_ID" ] && RELEASE_ID="alpha.`date +%Y%m%d`"
+[ -z "$RELEASE_ID" ] && RELEASE_ID="alpha"
 [ -z "$DESKTOP" ] && DESKTOP="$5"
 [ -z "$DESKTOP" ] && DESKTOP=kde4
 [ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER="$6"
 [ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER=kdm
 
+if [ "$RELEASE_ID" == "final" ]; then
+    product_id="OpenMandriva.${VERSION}-$DESKTOP"
+else
+    if [[ "$RELEASE_ID" == "alpha" ]]; then
+    	RELEASE_ID="$RELEASE_ID.`date +%Y%m%d`"
+    fi
+    product_id="OpenMandriva.${VERSION}-${RELEASE_ID}-$DESKTOP"
+fi
 
 echo "## Current product build is $ARCHS $TREE $VERSION $RELEASE_ID $DESKTOP##"
 
@@ -39,12 +47,6 @@ cd $DIRNAME
 build_root="./"
 d=`date +%Y.%m.%d-%H.%M`
 echo "$i.$d" > ${build_root}/version.txt
-
-if [ "$RELEASE_ID" == "final" ]; then
-    product_id="OpenMandriva.${VERSION}-$DESKTOP"
-else
-    product_id="OpenMandriva.${VERSION}-${RELEASE_ID}-$DESKTOP"
-fi
 
 product_name_file="${build_root}/.name.txt" ; touch ${product_name_file}
 
