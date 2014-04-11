@@ -33,7 +33,7 @@ CHROOTNAME="buildchroot-$EXTARCH"
 [ -z "$VERSION" ] && VERSION="`date +%Y.0`"
 
 [ -z "$RELEASE_ID" ] && RELEASE_ID="$4"
-[ -z "$RELEASE_ID" ] && RELEASE_ID="alpha.`date +%Y%m%d`"
+[ -z "$RELEASE_ID" ] && RELEASE_ID="alpha"
 
 [ -z "$DESKTOP" ] && DESKTOP="$5"
 [ -z "$DESKTOP" ] && DESKTOP="kde4"

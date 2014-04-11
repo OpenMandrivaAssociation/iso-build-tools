@@ -7,21 +7,12 @@ modprobe loop
 losetup -a
 losetup -d /dev/loop*
 
-#ARCHS="i586 x86_64"
-#ARCHS="x86_64"
-#ARCHS=i586
 [ -z "$ARCHS" ] && ARCHS="$1"
-[ -z "$ARCHS" ] && ARCHS=x86_64
 [ -z "$TREE" ] && TREE="$2"
-[ -z "$TREE" ] && TREE=cooker
 [ -z "$VERSION" ] && VERSION="$3"
-[ -z "$VERSION" ] && VERSION="2014.0"
 [ -z "$RELEASE_ID" ] && RELEASE_ID="$4"
-[ -z "$RELEASE_ID" ] && RELEASE_ID="alpha"
 [ -z "$DESKTOP" ] && DESKTOP="$5"
-[ -z "$DESKTOP" ] && DESKTOP=kde4
 [ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER="$6"
-[ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER=kdm
 
 if [ "$RELEASE_ID" == "final" ]; then
     product_id="OpenMandriva.${VERSION}-$DESKTOP"
