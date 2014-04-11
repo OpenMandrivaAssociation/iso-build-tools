@@ -40,10 +40,10 @@ build_root="./"
 d=`date +%Y.%m.%d-%H.%M`
 echo "$i.$d" > ${build_root}/version.txt
 
-if [ "$RELEASE_ID" = "final" ]; then
+if [ "$RELEASE_ID" == "final" ]; then
     product_id="OpenMandriva.${VERSION}-$DESKTOP"
 else
-    product_id="OpenMandriva.${RELEASE_ID}-$DESKTOP"
+    product_id="OpenMandriva.${VERSION}-${RELEASE_ID}-$DESKTOP"
 fi
 
 product_name_file="${build_root}/.name.txt" ; touch ${product_name_file}
