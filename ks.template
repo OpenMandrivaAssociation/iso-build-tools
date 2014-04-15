@@ -10,8 +10,9 @@ services --disabled=#SVCDIS#
 
 repo --name=Main --baseurl=#REPOURL#/main/release
 repo --name=Contrib --baseurl=#REPOURL#/contrib/release
-repo --name=Non-Free --baseurl=#REPOURL#/non-free/release
-repo --name=Restricted --baseurl=#REPOURL#/restricted/release
+# (tpg) we support FREE world here !
+#repo --name=Non-Free --baseurl=#REPOURL#/non-free/release
+#repo --name=Restricted --baseurl=#REPOURL#/restricted/release
 
 %packages
 %include .///#PKGLISTFILE#
