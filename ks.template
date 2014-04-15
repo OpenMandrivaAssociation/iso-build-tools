@@ -11,7 +11,9 @@ services --disabled=#SVCDIS#
 repo --name=Main --baseurl=#REPOURL#/main/release
 repo --name=Contrib --baseurl=#REPOURL#/contrib/release
 # (tpg) we support FREE world here !
-#repo --name=Non-Free --baseurl=#REPOURL#/non-free/release
+# Unfortunately non-free is currently needed to grab firmware files.
+# May want to move them to yet another repository
+repo --name=Non-Free --baseurl=#REPOURL#/non-free/release
 #repo --name=Restricted --baseurl=#REPOURL#/restricted/release
 
 %packages
