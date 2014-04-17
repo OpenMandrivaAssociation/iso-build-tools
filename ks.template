@@ -216,7 +216,7 @@ echo "## Installing default urpmi repositories for end user ##"
 
 cp -rfT /etc/resolv.conf $INSTALL_ROOT/etc/resolv.conf
 /usr/sbin/urpmi.removemedia -a
-/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib --mirrorlist --wget -no-md5sum
+/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib --mirrorlist --wget --no-md5sum
 #/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib http://abf-downloads.abf.io/#TREE#/repository/#ARCH#
 /usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.update -a -ff --wget --force-key
 
