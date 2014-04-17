@@ -81,13 +81,13 @@ echo $REPOPATH
 echo $EXTARCH
 if [ -d "$CHROOTNAME" ]; then
 	echo "## Chroot $CHROOTNAME exists. Using existing chroot. ##"
-	urpmi.update --urpmi-root $CHROOTNAME main
+	urpmi.update --wget --urpmi-root $CHROOTNAME main
 	umount_all
 else
 	echo "## Chroot $CHROOTNAME is missing. Creating chroot. ##"
 	mkdir $CHROOTNAME
-	urpmi.addmedia --urpmi-root $CHROOTNAME --distrib --all-media $REPOPATH > $LOGDIR/addrepo.log 2>&1
-	urpmi.update --urpmi-root $CHROOTNAME main
+	urpmi.addmedia --wget --urpmi-root $CHROOTNAME --distrib --all-media $REPOPATH > $LOGDIR/addrepo.log 2>&1
+	urpmi.update --wget --urpmi-root $CHROOTNAME main
 	urpmi --no-suggests --no-verify-rpm --fastunsafe --ignoresize --debug --verbose --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi rpm locales-en rpm-build livecd-tools syslinux yum lorax grub-efi grub-efi-efi git --prefer /default-kde4-config/ --prefer /distro-theme-OpenMandriva/ --auto
 	mkdir -p $CHROOTNAME/dev
 	mkdir -p $CHROOTNAME/dev/pts
