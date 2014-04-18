@@ -10,8 +10,11 @@ services --disabled=#SVCDIS#
 
 repo --name=Main --baseurl=#REPOURL#/main/release
 repo --name=Contrib --baseurl=#REPOURL#/contrib/release
+# (tpg) we support FREE world here !
+# Unfortunately non-free is currently needed to grab firmware files.
+# May want to move them to yet another repository
 repo --name=Non-Free --baseurl=#REPOURL#/non-free/release
-repo --name=Restricted --baseurl=#REPOURL#/restricted/release
+#repo --name=Restricted --baseurl=#REPOURL#/restricted/release
 
 %packages
 %include .///#PKGLISTFILE#
@@ -39,7 +42,7 @@ if [ -f /usr/share/config/kdm/kdmrc ]; then
 fi
 
 # Allow urpmi to work
-/usr/sbin/urpmi.addmedia --distrib http://abf-downloads.rosalinux.ru/#TREE#/repository/#ARCH#
+/usr/sbin/urpmi.addmedia --distrib --wget http://abf-downloads.abf.io/#TREE#/repository/#ARCH#
 
 # ldetect stuff
 /usr/sbin/update-ldetect-lst
@@ -61,14 +64,12 @@ popd
 # a proper fix.
 mkdir -p /var/cache/urpmi/partial /var/cache/urpmi/rpms
 
-
-
 # SYSTEMD STUFF
 echo "## Configure systemd services ##"
 systemctl enable NetworkManager.service
 
 # Enable DM - use you DM service name!
-systemctl enable kdm.service
+systemctl enable #DISPLAYMANAGER#.service
 
 # turn off atd
 systemctl --no-reload disable atd.service
@@ -111,6 +112,8 @@ echo "## Mounting sysfs ##"
 # Sysfs must be mounted for dracut to work!
 mount -t sysfs /sys /sys
 
+mkdir -p $INSTALL_ROOT/isolinux/
+
 pushd /lib/modules/
 KERNEL=$(echo *)
 popd
@@ -129,8 +132,9 @@ echo "## Rebuilding liveramfs ##"
 
 echo "## Installing initrd0 inside isolinux ##"
 mkdir -p /run/initramfs/live/isolinux/
+rm -rf /run/initramfs/live/isolinux/initrd0.img
 ln -s /boot/liveramfs-$KERNEL.img /run/initramfs/live/isolinux/initrd0.img
-ls -l /boot/
+
 
 # Set reasonable defaults
 if ! [ -e /etc/sysconfig/desktop ]; then
@@ -167,10 +171,8 @@ mkdir -p $INSTALL_ROOT/var/cache/urpmi/partial $INSTALL_ROOT/var/cache/urpmi/rpm
 
 cp -rfT .///extraconfig/etc $INSTALL_ROOT/etc/
 cp -rfT .///extraconfig/usr $INSTALL_ROOT/usr/
-cp -rfT .///extraconfig/var $INSTALL_ROOT/var/
 cp -rfT .///welcome.jpg $INSTALL_ROOT/splash.jpg
 cp -rfT .///welcome.jpg $INSTALL_ROOT/welcome.jpg
-cp -rfT .///extraconfig/var $INSTALL_ROOT/root/
 cp -rfT .///extraconfig/etc/skel $INSTALL_ROOT/home/live/
 chown -R 500:500 $INSTALL_ROOT/home/live/
 chmod -R 0777 $INSTALL_ROOT/home/live/.local
@@ -214,8 +216,9 @@ echo "## Installing default urpmi repositories for end user ##"
 
 cp -rfT /etc/resolv.conf $INSTALL_ROOT/etc/resolv.conf
 /usr/sbin/urpmi.removemedia -a
-/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib --mirrorlist
-/usr/sbin/chroot $INSTALL_ROOT urpmi.update -a
+/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib --mirrorlist --wget --no-md5sum
+#/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib http://abf-downloads.abf.io/#TREE#/repository/#ARCH#
+/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.update -a -ff --wget --force-key
 
 echo > $INSTALL_ROOT/etc/resolv.conf
 #end of it
@@ -226,10 +229,9 @@ rm -f $INSTALL_ROOT/etc/ssh/*key*
 echo "## Copying various files ##"
 
 cp -rfT .///.counter $INSTALL_ROOT/etc/isonumber
-mkdir -p $INSTALL_ROOT/isolinux/
-cp #PATH#/extraconfig/memdisk $INSTALL_ROOT/isolinux/
-cp #PATH#/extraconfig/sgb.iso $INSTALL_ROOT/isolinux/
-cp -f .///root/GPL $LIVE_ROOT/
+cp .///extraconfig/memdisk $INSTALL_ROOT/isolinux/
+cp .///extraconfig/sgb.iso $INSTALL_ROOT/isolinux/
+cp -f .///root/GPL $INSTALL_ROOT/
 
 echo "## Generating rpm file list ##"
 

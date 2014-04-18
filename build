@@ -7,28 +7,30 @@ modprobe loop
 losetup -a
 losetup -d /dev/loop*
 
-#ARCHS="i586 x86_64"
-#ARCHS="x86_64"
-#ARCHS=i586
 [ -z "$ARCHS" ] && ARCHS="$1"
-[ -z "$ARCHS" ] && ARCHS=x86_64
 [ -z "$TREE" ] && TREE="$2"
-[ -z "$TREE" ] && TREE=cooker
 [ -z "$VERSION" ] && VERSION="$3"
-[ -z "$VERSION" ] && VERSION="2014.0"
 [ -z "$RELEASE_ID" ] && RELEASE_ID="$4"
-[ -z "$RELEASE_ID" ] && RELEASE_ID="alpha.`date +%Y%m%d`"
+[ -z "$DESKTOP" ] && DESKTOP="$5"
+[ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER="$6"
 
-echo "## Current product build is $ARCHS $TREE $VERSION $RELEASE_ID ##"
+if [ "$RELEASE_ID" == "final" ]; then
+    product_id="OpenMandriva.${VERSION}-$DESKTOP"
+else
+    if [[ "$RELEASE_ID" == "alpha" ]]; then
+    	RELEASE_ID="$RELEASE_ID.`date +%Y%m%d`"
+    fi
+    product_id="OpenMandriva.${VERSION}-${RELEASE_ID}-$DESKTOP"
+fi
 
-REPOURL="http://abf-downloads.rosalinux.ru/$TREE/repository/#ARCH#"
+echo "## Current product build is $ARCHS $TREE $VERSION $RELEASE_ID $DESKTOP##"
+
+REPOURL="http://abf-downloads.abf.io/$TREE/repository/#ARCH#"
 TZ="Universal"
 SVCEN="acpid,alsa,atd,avahi-daemon,irqbalance,netfs,network,network-up,partmon,resolvconf,rpcbind,sound,udev-post,mandrake_everytime,crond"
 SVCDIS="sshd,pptp,pppoe,ntpd,iptables,ip6tables,shorewall,nfs-server,mysqld,abrtd,mysql,postfix,cups"
 
-PKGLISTFILE=iso-pkg-lists/omdv-kde4.lst
-#PKGLISTFILE=iso-pkg-lists/omdv_iso.lst
-#PKGLISTFILE=iso-pkg-lists/omdv_iso_minimal.lst
+PKGLISTFILE=iso-pkg-lists/omdv-$DESKTOP.lst
 
 DIRNAME=$(dirname $0)
 cd $DIRNAME
@@ -36,12 +38,6 @@ cd $DIRNAME
 build_root="./"
 d=`date +%Y.%m.%d-%H.%M`
 echo "$i.$d" > ${build_root}/version.txt
-
-if [ "$RELEASE_ID" = "final" ]; then
-    product_id="OpenMandriva.$VERSION"
-else
-    product_id="OpenMandriva.$RELEASE_ID"
-fi
 
 product_name_file="${build_root}/.name.txt" ; touch ${product_name_file}
 
@@ -52,9 +48,6 @@ i=`expr $i + 1`
 echo $i > ${counter}
 
 ks="${build_root}/.ks"
-
-[ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER=kdm
-[ -z "$DESKTOP" ] && DESKTOP=kde4
 
 # build different architectures
 export DURING_INSTALL=true
