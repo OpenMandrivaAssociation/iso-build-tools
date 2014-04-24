@@ -35,6 +35,9 @@ echo "## Adding live user ##"
 /bin/mkdir -p /home/live
 /bin/cp -rfT /etc/skel /home/live/
 /bin/chown -R live:live /home/live
+/bin/mkdir /home/live/Desktop
+/bin/chown -R live:live /home/live/Desktop
+/bin/cp /usr/share/applications/openmandriva-draklive-install.desktop /home/live/Desktop
 # usermod -a -G cdrom live
 # enable live user autologin
 if [ -f /usr/share/config/kdm/kdmrc ]; then
