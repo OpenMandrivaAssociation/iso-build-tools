@@ -69,45 +69,45 @@ mkdir -p /var/cache/urpmi/partial /var/cache/urpmi/rpms
 
 # SYSTEMD STUFF
 echo "## Configure systemd services ##"
-systemctl enable NetworkManager.service
+systemctl enable NetworkManager.service 2> /dev/null || :
 
 # Enable DM - use you DM service name!
-systemctl enable #DISPLAYMANAGER#.service
+systemctl enable #DISPLAYMANAGER#.service 2> /dev/null || :
 
 # turn off atd
-systemctl --no-reload disable atd.service
-systemctl stop atd.service
+systemctl --no-reload disable atd.service 2> /dev/null || :
+systemctl stop atd.service 2> /dev/null || :
 
 # turn of crond
-systemctl --no-reload disable crond.service
-systemctl stop crond.service
+systemctl --no-reload disable crond.service 2> /dev/null || :
+systemctl stop crond.service 2> /dev/null || :
 
 # turn of lm_sensors
-systemctl --no-reload disable lm_sensors.service
-systemctl --no-reload disable sensord.service
-systemctl stop lm_sensors.service
-systemctl stop sensord.service
+systemctl --no-reload disable lm_sensors.service 2> /dev/null || :
+systemctl --no-reload disable sensord.service 2> /dev/null || :
+systemctl stop lm_sensors.service 2> /dev/null || :
+systemctl stop sensord.service 2> /dev/null || :
 
 # turn of microcode_ctl
-systemctl --no-reload disable microcode_ctl.service
-systemctl stop microcode_ctl.service
+systemctl --no-reload disable microcode_ctl.service 2> /dev/null || :
+systemctl stop microcode_ctl.service 2> /dev/null || :
 
 # turn off mdmonitor by default
-systemctl --no-reload disable mdmonitor.service
-systemctl --no-reload disable mdmonitor-takeover.service
-systemctl stop mdmonitor.service
-systemctl stop mdmonitor-takeover.service
+systemctl --no-reload disable mdmonitor.service 2> /dev/null || :
+systemctl --no-reload disable mdmonitor-takeover.service 2> /dev/null || :
+systemctl stop mdmonitor.service 2> /dev/null || :
+systemctl stop mdmonitor-takeover.service 2> /dev/null || :
 
 # turn of saslauthd
-systemctl --no-reload disable saslauthd.service
-systemctl stop saslauthd.service
+systemctl --no-reload disable saslauthd.service 2> /dev/null || :
+systemctl stop saslauthd.service 2> /dev/null || :
 
 # END SYSTEMD STUFF
 
 ###chkconfig###
-/sbin/chkconfig --add checkflashboot
-echo "RUN CHKSESSION"
-chksession -g
+#/sbin/chkconfig --add checkflashboot
+#echo "RUN CHKSESSION"
+#chksession -g
 #####
 
 echo "## Mounting sysfs ##"
@@ -138,7 +138,6 @@ mkdir -p /run/initramfs/live/isolinux/
 rm -rf /run/initramfs/live/isolinux/initrd0.img
 ln -s /boot/liveramfs-$KERNEL.img /run/initramfs/live/isolinux/initrd0.img
 
-
 # Set reasonable defaults
 if ! [ -e /etc/sysconfig/desktop ]; then
     cat >/etc/sysconfig/desktop <<'EOF'
@@ -152,6 +151,8 @@ while (ps -e | grep nscd)
 do
     killall -s 9 nscd
 done
+
+
 
 echo "## End of ISO post procedure ##"
 %end
@@ -227,7 +228,7 @@ echo "## Adding 32-bit media repository ##"
 else
 echo "## 32-bit media repository not needed ##"
 fi
-
+#update urpmi medias
 /usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.update -a -ff --wget --force-key
 
 echo > $INSTALL_ROOT/etc/resolv.conf
@@ -246,7 +247,14 @@ cp -f .///root/GPL $INSTALL_ROOT/
 echo "## Generating rpm file list ##"
 
 rpm --root $INSTALL_ROOT -qa | sort > $LIVE_ROOT/rpm.lst
-./total_sum_counter.pl -r 640 -h 10 -w $INSTALL_ROOT/ -o $INSTALL_ROOT/etc/minsysreqs
+if [ "#ARCH#" = "x86_64" ];  then
+./total_sum_counter.pl -r 1536 -h 10 -w $INSTALL_ROOT/ -o $INSTALL_ROOT/etc/minsysreqs
+else
+./total_sum_counter.pl -r 1024 -h 10 -w $INSTALL_ROOT/ -o $INSTALL_ROOT/etc/minsysreqs
+fi
+
+#remove rpm db files to save some space
+rm -f /var/lib/rpm/__db.*
 
 echo "## End of ISO post nochroot procedure ##"
 %end
