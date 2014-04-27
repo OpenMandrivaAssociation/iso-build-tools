@@ -105,9 +105,9 @@ systemctl stop saslauthd.service
 # END SYSTEMD STUFF
 
 ###chkconfig###
-/sbin/chkconfig --add checkflashboot
-echo "RUN CHKSESSION"
-chksession -g
+#/sbin/chkconfig --add checkflashboot
+#echo "RUN CHKSESSION"
+#chksession -g
 #####
 
 echo "## Mounting sysfs ##"
@@ -137,7 +137,6 @@ echo "## Installing initrd0 inside isolinux ##"
 mkdir -p /run/initramfs/live/isolinux/
 rm -rf /run/initramfs/live/isolinux/initrd0.img
 ln -s /boot/liveramfs-$KERNEL.img /run/initramfs/live/isolinux/initrd0.img
-
 
 # Set reasonable defaults
 if ! [ -e /etc/sysconfig/desktop ]; then
@@ -230,7 +229,7 @@ echo "## Adding 32-bit media repository ##"
 else
 echo "## 32-bit media repository not needed ##"
 fi
-
+#update urpmi medias
 /usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.update -a -ff --wget --force-key
 
 echo > $INSTALL_ROOT/etc/resolv.conf
