@@ -247,7 +247,11 @@ cp -f .///root/GPL $INSTALL_ROOT/
 echo "## Generating rpm file list ##"
 
 rpm --root $INSTALL_ROOT -qa | sort > $LIVE_ROOT/rpm.lst
-./total_sum_counter.pl -r 640 -h 10 -w $INSTALL_ROOT/ -o $INSTALL_ROOT/etc/minsysreqs
+if [ "#ARCH#" = "x86_64" ];  then
+./total_sum_counter.pl -r 1536 -h 10 -w $INSTALL_ROOT/ -o $INSTALL_ROOT/etc/minsysreqs
+else
+./total_sum_counter.pl -r 1024 -h 10 -w $INSTALL_ROOT/ -o $INSTALL_ROOT/etc/minsysreqs
+fi
 
 #remove rpm db files to save some space
 rm -f /var/lib/rpm/__db.*
