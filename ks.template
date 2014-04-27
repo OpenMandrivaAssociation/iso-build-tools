@@ -153,6 +153,9 @@ do
     killall -s 9 nscd
 done
 
+#remove rpm db files to save some space
+rm -f /var/lib/rpm/__db.*
+
 echo "## End of ISO post procedure ##"
 %end
 
