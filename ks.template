@@ -69,38 +69,38 @@ mkdir -p /var/cache/urpmi/partial /var/cache/urpmi/rpms
 
 # SYSTEMD STUFF
 echo "## Configure systemd services ##"
-systemctl enable NetworkManager.service
+systemctl enable NetworkManager.service 2> /dev/null || :
 
 # Enable DM - use you DM service name!
-systemctl enable #DISPLAYMANAGER#.service
+systemctl enable #DISPLAYMANAGER#.service 2> /dev/null || :
 
 # turn off atd
-systemctl --no-reload disable atd.service
-systemctl stop atd.service
+systemctl --no-reload disable atd.service 2> /dev/null || :
+systemctl stop atd.service 2> /dev/null || :
 
 # turn of crond
-systemctl --no-reload disable crond.service
-systemctl stop crond.service
+systemctl --no-reload disable crond.service 2> /dev/null || :
+systemctl stop crond.service 2> /dev/null || :
 
 # turn of lm_sensors
-systemctl --no-reload disable lm_sensors.service
-systemctl --no-reload disable sensord.service
-systemctl stop lm_sensors.service
-systemctl stop sensord.service
+systemctl --no-reload disable lm_sensors.service 2> /dev/null || :
+systemctl --no-reload disable sensord.service 2> /dev/null || :
+systemctl stop lm_sensors.service 2> /dev/null || :
+systemctl stop sensord.service 2> /dev/null || :
 
 # turn of microcode_ctl
-systemctl --no-reload disable microcode_ctl.service
-systemctl stop microcode_ctl.service
+systemctl --no-reload disable microcode_ctl.service 2> /dev/null || :
+systemctl stop microcode_ctl.service 2> /dev/null || :
 
 # turn off mdmonitor by default
-systemctl --no-reload disable mdmonitor.service
-systemctl --no-reload disable mdmonitor-takeover.service
-systemctl stop mdmonitor.service
-systemctl stop mdmonitor-takeover.service
+systemctl --no-reload disable mdmonitor.service 2> /dev/null || :
+systemctl --no-reload disable mdmonitor-takeover.service 2> /dev/null || :
+systemctl stop mdmonitor.service 2> /dev/null || :
+systemctl stop mdmonitor-takeover.service 2> /dev/null || :
 
 # turn of saslauthd
-systemctl --no-reload disable saslauthd.service
-systemctl stop saslauthd.service
+systemctl --no-reload disable saslauthd.service 2> /dev/null || :
+systemctl stop saslauthd.service 2> /dev/null || :
 
 # END SYSTEMD STUFF
 
