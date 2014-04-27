@@ -45,7 +45,7 @@ if [ -f /usr/share/config/kdm/kdmrc ]; then
 fi
 
 # Allow urpmi to work
-/usr/sbin/urpmi.addmedia --distrib --wget http://abf-downloads.abf.io/#TREE#/repository/#ARCH#
+/usr/sbin/urpmi.addmedia --distrib http://abf-downloads.abf.io/#TREE#/repository/#ARCH#
 
 # ldetect stuff
 /usr/sbin/update-ldetect-lst
