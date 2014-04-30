@@ -108,17 +108,23 @@ echo "## Making sure we have the latest from $BLDNAME. ##"
 # so any local changes are sure to get in
 # May want to remove the rm -rf line below once things have stabilized.
 rm -rf "$CHROOTNAME/$BLDNAME"
-
 if [ ! -d "$CHROOTNAME/$BLDNAME" ]; then
-	if [ -d "`dirname $0`"/.git ]; then
-		# If possible, copy the running instance to save some network traffic
+	if [ -d "`dirname $0`"]; then
+	# copy the running instance to save some network traffic
 		cp -a `dirname $0` $CHROOTNAME/$BLDNAME
-		chroot $CHROOTOPTS "cd /$BLDNAME; git pull"
-	else
-		chroot $CHROOTOPTS "cd / && git clone -b $BRANCH $SRCPATH"
-		chroot $CHROOTOPTS "cd /$BLDNAME; git clone -b $BRANCH $PKGLIST"
 	fi
 fi
+
+#if [ ! -d "$CHROOTNAME/$BLDNAME" ]; then
+#	if [ -d "`dirname $0`"/.git ]; then
+#		# If possible, copy the running instance to save some network traffic
+#		cp -a `dirname $0` $CHROOTNAME/$BLDNAME
+#		chroot $CHROOTOPTS "cd /$BLDNAME; git pull"
+#	else
+#		chroot $CHROOTOPTS "cd / && git clone -b $BRANCH $SRCPATH"
+#		chroot $CHROOTOPTS "cd /$BLDNAME; git clone -b $BRANCH $PKGLIST"
+#	fi
+#fi
 
 echo "## Beginning ISO creation. ##"
 #set -x
