@@ -62,18 +62,18 @@ error() {
 # Don't leave potentially dangerous stuff if we had to error out...
 trap error ERR
 
-pushd "$OURDIR"
-[ -d iso-pkg-lists ] || git clone -b $BRANCH $PKGLIST
-popd
+#pushd "$OURDIR"
+#[ -d iso-pkg-lists ] || git clone -b $BRANCH $PKGLIST
+#popd
 
 ### possible fix for timed out GIT pulls
-#PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-${BRANCH}.tar.gz"
-#if [ ! -d iso-pkg-lists ]; then
-#	wget -O iso-pkg-lists-${BRANCH}.tar.gz --content-disposition ${PKGLIST}
-#	tar -xzf iso-pkg-lists-${BRANCH}.tar.gz
-#	mv -f iso-pkg-lists-${BRANCH} iso-pkg-lists
-#	rm -f iso-pkg-lists-${BRANCH}.tar.gz
-#fi
+PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-${BRANCH}.tar.gz"
+if [ ! -d iso-pkg-lists ]; then
+	wget -O iso-pkg-lists-${BRANCH}.tar.gz --content-disposition ${PKGLIST}
+	tar -xzf iso-pkg-lists-${BRANCH}.tar.gz
+	mv -f iso-pkg-lists-${BRANCH} iso-pkg-lists
+	rm -f iso-pkg-lists-${BRANCH}.tar.gz
+fi
 ###
 
 echo $CHROOTNAME
