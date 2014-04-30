@@ -225,6 +225,12 @@ cp -rfT /etc/resolv.conf $INSTALL_ROOT/etc/resolv.conf
 if [ "#ARCH#" = "x86_64" ]; then
 echo "## Adding 32-bit media repository ##"
 /usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.2014.0.i586.list' 'Main32' 'media/main/release'
+
+if [[ $? != 0 ]]; then 
+echo "## Adding 32-bit media FAILED ##";
+exit 1; 
+fi
+
 else
 echo "## 32-bit media repository not needed ##"
 fi
