@@ -62,9 +62,9 @@ error() {
 # Don't leave potentially dangerous stuff if we had to error out...
 trap error ERR
 
-#pushd "$OURDIR"
-#[ -d iso-pkg-lists ] || git clone -b $BRANCH $PKGLIST
-#popd
+##pushd "$OURDIR"
+##[ -d iso-pkg-lists ] || git clone -b $BRANCH $PKGLIST
+##popd
 
 ### possible fix for timed out GIT pulls
 PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-${BRANCH}.tar.gz"
