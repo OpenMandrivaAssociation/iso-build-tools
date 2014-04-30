@@ -109,7 +109,7 @@ echo "## Making sure we have the latest from $BLDNAME. ##"
 # May want to remove the rm -rf line below once things have stabilized.
 rm -rf "$CHROOTNAME/$BLDNAME"
 if [ ! -d "$CHROOTNAME/$BLDNAME" ]; then
-	if [ -d "`dirname $0`"]; then
+	if [ -d "`dirname $0`" ]; then
 	# copy the running instance to save some network traffic
 		cp -a `dirname $0` $CHROOTNAME/$BLDNAME
 	fi
