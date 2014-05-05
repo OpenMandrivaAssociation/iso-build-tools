@@ -157,7 +157,7 @@ done
 echo "## End of ISO post procedure ##"
 %end
 
-%post --nochroot
+%post --nochroot --erroronfail
 echo "## Starting ISO build post nochroot procedure ##"
 
 #hack to try to stop umount probs
@@ -224,11 +224,11 @@ cp -rfT /etc/resolv.conf $INSTALL_ROOT/etc/resolv.conf
 #/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib http://abf-downloads.abf.io/#TREE#/repository/#ARCH#
 if [ "#ARCH#" = "x86_64" ]; then
 echo "## Adding 32-bit media repository ##"
-/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.2014.0.i586.list' 'Main32' 'media/main/release'
+/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.2014.0.i586.list' 'Main32' 'media/main/release'
 
-if [[ $? != 0 ]]; then 
+if [[ $? != 0 ]]; then
 echo "## Adding 32-bit media FAILED ##";
-exit 1; 
+exit 1;
 fi
 
 else

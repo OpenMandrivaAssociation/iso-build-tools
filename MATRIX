@@ -62,18 +62,20 @@ error() {
 # Don't leave potentially dangerous stuff if we had to error out...
 trap error ERR
 
-#pushd "$OURDIR"
-#[ -d iso-pkg-lists ] || git clone -b $BRANCH $PKGLIST
-#popd
+## pushd "$OURDIR"
+## [ -d iso-pkg-lists ] || git clone -b $BRANCH $PKGLIST
+## popd
 
 ### possible fix for timed out GIT pulls
+pushd "$OURDIR"
 PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-${BRANCH}.tar.gz"
 if [ ! -d iso-pkg-lists ]; then
-	wget -O iso-pkg-lists-${BRANCH}.tar.gz --content-disposition ${PKGLIST}
+	wget --tries=10 -O iso-pkg-lists-${BRANCH}.tar.gz --content-disposition ${PKGLIST}
 	tar -xzf iso-pkg-lists-${BRANCH}.tar.gz
 	mv -f iso-pkg-lists-${BRANCH} iso-pkg-lists
 	rm -f iso-pkg-lists-${BRANCH}.tar.gz
 fi
+popd
 ###
 
 echo $CHROOTNAME
@@ -88,7 +90,7 @@ else
 	mkdir $CHROOTNAME
 	urpmi.addmedia --wget --urpmi-root $CHROOTNAME --distrib --all-media $REPOPATH > $LOGDIR/addrepo.log 2>&1
 	urpmi.update --wget --urpmi-root $CHROOTNAME main
-	urpmi --no-suggests --no-verify-rpm --fastunsafe --ignoresize --debug --verbose --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi rpm locales-en rpm-build livecd-tools syslinux yum lorax grub-efi grub-efi-efi git --prefer /default-kde4-config/ --prefer /distro-theme-OpenMandriva/ --auto
+	urpmi --no-suggests --no-verify-rpm --fastunsafe --ignoresize --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi rpm locales-en rpm-build livecd-tools syslinux yum lorax grub-efi grub-efi-efi git --prefer /distro-kde4-config-OpenMandriva/ --prefer /distro-theme-OpenMandriva/ --auto
 	mkdir -p $CHROOTNAME/dev
 	mkdir -p $CHROOTNAME/dev/pts
 	mkdir -p $CHROOTNAME/proc
@@ -108,17 +110,23 @@ echo "## Making sure we have the latest from $BLDNAME. ##"
 # so any local changes are sure to get in
 # May want to remove the rm -rf line below once things have stabilized.
 rm -rf "$CHROOTNAME/$BLDNAME"
-
 if [ ! -d "$CHROOTNAME/$BLDNAME" ]; then
-	if [ -d "`dirname $0`"/.git ]; then
-		# If possible, copy the running instance to save some network traffic
+	if [ -d "`dirname $0`" ]; then
+	# copy the running instance to save some network traffic
 		cp -a `dirname $0` $CHROOTNAME/$BLDNAME
-		chroot $CHROOTOPTS "cd /$BLDNAME; git pull"
-	else
-		chroot $CHROOTOPTS "cd / && git clone -b $BRANCH $SRCPATH"
-		chroot $CHROOTOPTS "cd /$BLDNAME; git clone -b $BRANCH $PKGLIST"
 	fi
 fi
+
+#if [ ! -d "$CHROOTNAME/$BLDNAME" ]; then
+#	if [ -d "`dirname $0`"/.git ]; then
+#		# If possible, copy the running instance to save some network traffic
+#		cp -a `dirname $0` $CHROOTNAME/$BLDNAME
+#		chroot $CHROOTOPTS "cd /$BLDNAME; git pull"
+#	else
+#		chroot $CHROOTOPTS "cd / && git clone -b $BRANCH $SRCPATH"
+#		chroot $CHROOTOPTS "cd /$BLDNAME; git clone -b $BRANCH $PKGLIST"
+#	fi
+#fi
 
 echo "## Beginning ISO creation. ##"
 #set -x
