@@ -40,7 +40,7 @@ parsePkgList() {
 getPackages() {
 	$SUDO urpmi.addmedia --urpmi-root "$2" --distrib http://abf-downloads.abf.io/cooker/repository/$ARCH
 	$SUDO urpmi.update --urpmi-root "$2" -a
-	parsePkgList "$1" |xargs $SUDO urpmi --urpmi-root "$ROOT" --no-install --download-all "$2" --auto --prefer /default-kde4-config/
+	parsePkgList "$1" |xargs $SUDO urpmi --urpmi-root "$ROOT" --no-install --download-all --no-verify-rpm --fastunsafe --ignoresize "$2" --auto
 }
 
 # Usage: createChroot packages.lst /target/dir
@@ -53,7 +53,7 @@ createChroot() {
 	$SUDO urpmi.update --urpmi-root "$2" -a
 	$SUDO mount --bind /proc "$2"/proc
 	$SUDO mount --bind /sys "$2"/sys
-	parsePkgList "$1" |xargs $SUDO urpmi --urpmi-root "$2" --fastunsafe --auto --prefer /default-kde4-config/
+	parsePkgList "$1" |xargs $SUDO urpmi --urpmi-root "$2" --no-verify-rpm --fastunsafe --ignoresize --auto
 	$SUDO mount --bind /dev "$2"/dev
 	$SUDO install -c -m 755 $OURDIR/create-initramfs.sh $OURDIR/dracut-00-live.sh "$2"/boot/
 	$SUDO chroot "$2" /boot/create-initramfs.sh
@@ -151,7 +151,7 @@ EOF
 buildIso() {
 	$SUDO mkisofs -o "$1" -b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
-		-R -l -V OpenMandrivaLx "$2"
+		-R -l -V OpenMandriva "$2"
 	ls -l "$1"
 	$SUDO isohybrid "$1"
 	ls -l "$1"
