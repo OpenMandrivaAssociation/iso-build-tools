@@ -86,7 +86,7 @@ setupIsolinux() {
 UI vesamenu.c32
 DEFAULT boot
 PROMPT 0
-MENU TITLE Welcome to OpenMandriva LX
+MENU TITLE Welcome to OpenMandriva Lx
 MENU BACKGROUND splash.png
 TIMEOUT 50
 MENU WIDTH 78
@@ -110,19 +110,19 @@ MENU COLOR msg07 37;40 #90ffffff #a0000000 std
 MENU COLOR tabmsg 31;40 #30ffffff #00000000 std
 
 LABEL boot
-	MENU LABEL Boot OpenMandriva LX 2013.0
+	MENU LABEL Boot OpenMandriva Lx 2013.0
 	LINUX /boot/vmlinuz
 	INITRD /boot/initrd.img
 	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image rhgb vga=788 splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva
 
 LABEL install
-	MENU LABEL Install OpenMandriva LX 2013.0
+	MENU LABEL Install OpenMandriva Lx 2013.0
 	LINUX /boot/vmlinuz
 	INITRD /boot/initrd.img
 	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image rhgb vga=788 splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva install
 
 LABEL vesa
-	MENU LABEL Boot OpenMandriva LX 2013.0 in safe mode
+	MENU LABEL Boot OpenMandriva Lx 2013.0 in safe mode
 	LINUX /boot/vmlinuz
 	INITRD /boot/initrd.img
 	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image rhgb vga=788 splash=silent logo.nologo xdriver=vesa nokmsboot install root=live:/dev/disk/by-label/OpenMandriva
@@ -151,7 +151,7 @@ EOF
 buildIso() {
 	$SUDO mkisofs -o "$1" -b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
-		-R -l -V OpenMandriva "$2"
+		-R -l -V OpenMandrivaLx "$2"
 	ls -l "$1"
 	$SUDO isohybrid "$1"
 	ls -l "$1"
