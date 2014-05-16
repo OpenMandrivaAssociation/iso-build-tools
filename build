@@ -69,7 +69,7 @@ for arch in $ARCHS; do
 
 	echo "## Starting livecd-creator tool. ##"
 
-	livecd-creator -d -v --config=${ks} --fslabel=$LABEL --title="OpenMandrivaLx_${VERSION}"
+	livecd-creator -d -v --config=${ks} --fslabel=$LABEL --title="OpenMandrivaLx_${VERSION}" --debug
 
 	echo "## End of livecd-creator procedure##"
 
