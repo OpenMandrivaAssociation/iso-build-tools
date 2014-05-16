@@ -15,12 +15,12 @@ losetup -d /dev/loop*
 [ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER="$6"
 
 if [ "$RELEASE_ID" == "final" ]; then
-    product_id="OpenMandriva.${VERSION}-$DESKTOP"
+    product_id="OpenMandrivaLx.${VERSION}-$DESKTOP"
 else
     if [[ "$RELEASE_ID" == "alpha" ]]; then
     	RELEASE_ID="$RELEASE_ID.`date +%Y%m%d`"
     fi
-    product_id="OpenMandriva.${VERSION}-${RELEASE_ID}-$DESKTOP"
+    product_id="OpenMandrivaLx.${VERSION}-${RELEASE_ID}-$DESKTOP"
 fi
 
 echo "## Current product build is $ARCHS $TREE $VERSION $RELEASE_ID $DESKTOP##"
@@ -65,11 +65,11 @@ for arch in $ARCHS; do
 
 	mkdir -p $build_root/${product_id}/
 	LABEL=${product_id}.$arch
-	[ `echo $LABEL |wc -m` -gt 32 ] && LABEL="OpenMandriva_${VERSION}"
+	[ `echo $LABEL |wc -m` -gt 32 ] && LABEL="OpenMandrivaLx_${VERSION}"
 
 	echo "## Starting livecd-creator tool. ##"
 
-	livecd-creator -d -v --config=${ks} --fslabel=$LABEL --title="OpenMandriva_${VERSION}"
+	livecd-creator -d -v --config=${ks} --fslabel=$LABEL --title="OpenMandrivaLx_${VERSION}"
 
 	echo "## End of livecd-creator procedure##"
 
