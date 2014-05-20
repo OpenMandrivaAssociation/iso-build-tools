@@ -105,9 +105,9 @@ mount --bind /sys	$CHROOTNAME/sys
 cp /etc/resolv.conf	$CHROOTNAME/etc/
 
 #(tpg) workaround for ISO build
-pushd $CHROOTNAME/etc/
-ln -sf $CHROOTNAME/proc/mounts mtab
-popd
+#check if there is actually /proc/mounts on build host
+cat /proc/mounts
+ln -sf /proc/mounts $CHROOTNAME/etc/mtab
 
 echo "## Making sure we have the latest from $BLDNAME. ##"
 
