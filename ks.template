@@ -128,12 +128,12 @@ rpm -qa kernel-*
 echo "## Detected kernel version: $KERNEL ##"
 
 # rebuild initrd
-echo "## Rebuilding initramfs ##"
-/usr/sbin/dracut --add-drivers "isofs iso9660" /boot/initramfs-$KERNEL.img $KERNEL --force --quiet
+# echo "## Rebuilding initramfs ##"
+# /usr/sbin/dracut --add-drivers "isofs iso9660" /boot/initramfs-$KERNEL.img $KERNEL --force --quiet
 
 # rebuild liveramfs
-echo "## Rebuilding liveramfs ##"
-/usr/sbin/dracut -N -f --mount "tmpfs /var/tmp tmpfs defaults 0 0" -o " aufs-mount bash rescue resume network lvm nfs ifcfg cifs multipath mdraid dmraid " --no-early-microcode --nofscks --noprelink /boot/liveramfs-$KERNEL.img $KERNEL --quiet
+# echo "## Rebuilding liveramfs ##"
+# /usr/sbin/dracut -N -f --mount "tmpfs /var/tmp tmpfs defaults 0 0" -o " aufs-mount bash rescue resume network lvm nfs ifcfg cifs multipath mdraid dmraid " --no-early-microcode --nofscks --noprelink /boot/liveramfs-$KERNEL.img $KERNEL --quiet
 
 echo "## Installing initrd0 inside isolinux ##"
 mkdir -p /run/initramfs/live/isolinux/
