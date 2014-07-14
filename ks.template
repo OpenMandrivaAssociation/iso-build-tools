@@ -129,7 +129,7 @@ echo "## Detected kernel version: $KERNEL ##"
 
 # rebuild initrd
 echo "## Rebuilding initramfs ##"
-/usr/sbin/dracut --add-drivers "isofs iso9660" -o " aufs-mount bash rescue resume network lvm nfs ifcfg cifs multipath mdraid dmraid " --lzo --no-early-microcode --nofscks --noprelink /boot/initramfs-$KERNEL.img $KERNEL --force --quiet
+/usr/sbin/dracut -N -f --add-drivers "isofs iso9660" -o " aufs-mount bash rescue resume network lvm nfs ifcfg cifs multipath mdraid dmraid " --lzo --no-early-microcode --nofscks --noprelink /boot/initramfs-$KERNEL.img $KERNEL --force --quiet
 
 # rebuild liveramfs
 echo "## Rebuilding liveramfs ##"
