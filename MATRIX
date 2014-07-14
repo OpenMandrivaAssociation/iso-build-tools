@@ -104,6 +104,11 @@ mount --bind /proc	$CHROOTNAME/proc
 mount --bind /sys	$CHROOTNAME/sys
 cp /etc/resolv.conf	$CHROOTNAME/etc/
 
+#(tpg) workaround for ISO build
+#check if there is actually /proc/mounts on build host
+cat /proc/mounts
+ln -sf /proc/mounts $CHROOTNAME/etc/mtab
+
 echo "## Making sure we have the latest from $BLDNAME. ##"
 
 # For now, unconditionally overwrite the $BLDNAME instance inside the chroot

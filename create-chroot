@@ -40,7 +40,7 @@ parsePkgList() {
 getPackages() {
 	$SUDO urpmi.addmedia --urpmi-root "$2" --distrib http://abf-downloads.abf.io/cooker/repository/$ARCH
 	$SUDO urpmi.update --urpmi-root "$2" -a
-	parsePkgList "$1" |xargs $SUDO urpmi --urpmi-root "$ROOT" --no-install --download-all "$2" --auto --prefer /default-kde4-config/
+	parsePkgList "$1" |xargs $SUDO urpmi --urpmi-root "$ROOT" --no-install --download-all --no-verify-rpm --fastunsafe --ignoresize "$2" --auto
 }
 
 # Usage: createChroot packages.lst /target/dir
@@ -53,7 +53,7 @@ createChroot() {
 	$SUDO urpmi.update --urpmi-root "$2" -a
 	$SUDO mount --bind /proc "$2"/proc
 	$SUDO mount --bind /sys "$2"/sys
-	parsePkgList "$1" |xargs $SUDO urpmi --urpmi-root "$2" --fastunsafe --auto --prefer /default-kde4-config/
+	parsePkgList "$1" |xargs $SUDO urpmi --urpmi-root "$2" --no-verify-rpm --fastunsafe --ignoresize --auto
 	$SUDO mount --bind /dev "$2"/dev
 	$SUDO install -c -m 755 $OURDIR/create-initramfs.sh $OURDIR/dracut-00-live.sh "$2"/boot/
 	$SUDO chroot "$2" /boot/create-initramfs.sh
@@ -86,7 +86,7 @@ setupIsolinux() {
 UI vesamenu.c32
 DEFAULT boot
 PROMPT 0
-MENU TITLE Welcome to OpenMandriva LX
+MENU TITLE Welcome to OpenMandriva Lx
 MENU BACKGROUND splash.png
 TIMEOUT 50
 MENU WIDTH 78
@@ -110,22 +110,22 @@ MENU COLOR msg07 37;40 #90ffffff #a0000000 std
 MENU COLOR tabmsg 31;40 #30ffffff #00000000 std
 
 LABEL boot
-	MENU LABEL Boot OpenMandriva LX 2013.0
+	MENU LABEL Boot OpenMandriva Lx 2013.0
 	LINUX /boot/vmlinuz
 	INITRD /boot/initrd.img
-	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image rhgb vga=788 splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva
+	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image rhgb vga=current splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva
 
 LABEL install
-	MENU LABEL Install OpenMandriva LX 2013.0
+	MENU LABEL Install OpenMandriva Lx 2013.0
 	LINUX /boot/vmlinuz
 	INITRD /boot/initrd.img
-	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image rhgb vga=788 splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva install
+	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image rhgb vga=current splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva install
 
 LABEL vesa
-	MENU LABEL Boot OpenMandriva LX 2013.0 in safe mode
+	MENU LABEL Boot OpenMandriva Lx 2013.0 in safe mode
 	LINUX /boot/vmlinuz
 	INITRD /boot/initrd.img
-	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image rhgb vga=788 splash=silent logo.nologo xdriver=vesa nokmsboot install root=live:/dev/disk/by-label/OpenMandriva
+	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image rhgb vga=current splash=silent logo.nologo xdriver=vesa nokmsboot install root=live:/dev/disk/by-label/OpenMandriva
 
 LABEL memtest
 	MENU LABEL Test memory
