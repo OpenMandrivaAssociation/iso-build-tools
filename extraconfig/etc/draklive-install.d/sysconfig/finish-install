@@ -9,3 +9,4 @@ authentication=no
 FINISH_INSTALL=yes
 USERS=with_root
 urpmi=no
+TIMEZONE=simplified
