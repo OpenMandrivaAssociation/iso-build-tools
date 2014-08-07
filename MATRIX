@@ -88,7 +88,7 @@ if [ -d "$CHROOTNAME" ]; then
 else
 	echo "## Chroot $CHROOTNAME is missing. Creating chroot. ##"
 	mkdir $CHROOTNAME
-	urpmi.addmedia --wget --urpmi-root $CHROOTNAME --distrib --all-media $REPOPATH > $LOGDIR/addrepo.log 2>&1
+	urpmi.addmedia --wget --urpmi-root $CHROOTNAME --distrib $REPOPATH > $LOGDIR/addrepo.log 2>&1
 	urpmi.update --wget --urpmi-root $CHROOTNAME main
 	urpmi --no-suggests --no-verify-rpm --fastunsafe --ignoresize --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi rpm locales-en rpm-build livecd-tools syslinux yum lorax grub-efi grub-efi-efi git --prefer /distro-kde4-config-OpenMandriva/ --prefer /distro-theme-OpenMandriva/ --auto
 	mkdir -p $CHROOTNAME/dev
