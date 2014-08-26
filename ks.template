@@ -120,7 +120,9 @@ mount -t sysfs /sys /sys
 mkdir -p $INSTALL_ROOT/isolinux/
 
 pushd /lib/modules/
-KERNEL=$(echo *)
+# (tpg) when there are more than one kernel installed then script failse because of wrong syntax for dracut
+# anyways we need only one kernel here
+KERNEL=`echo * | tr -s " " "\012" | sort -rk1 | head -1`
 popd
 echo
 echo "## Generating kernel. System kernel is `uname -r`, installed kernels are: ##"
