@@ -17,7 +17,6 @@ repo --name=Contrib --baseurl=#REPOURL#/contrib/release
 # May want to move them to yet another repository
 repo --name=Non-Free --baseurl=#REPOURL#/non-free/release
 #repo --name=Restricted --baseurl=#REPOURL#/restricted/release
-repo --name=systemd --baseurl=http://abf-downloads.rosalinux.ru/openmandriva2014.0/container/2165235/x86_64/main/release/
 
 %packages
 %include .///#PKGLISTFILE#
