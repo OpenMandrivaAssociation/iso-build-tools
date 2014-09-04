@@ -95,7 +95,7 @@ else
 	mkdir $CHROOTNAME
 	urpmi.addmedia --wget --urpmi-root $CHROOTNAME old_main http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/main/release
 	urpmi.addmedia --wget --urpmi-root $CHROOTNAME perlurpm_update http://abf-downloads.rosalinux.ru/openmandriva2014.0/container/2186308/i586/main/release/
-	urpmi --urpmi-root $CHROOTNAME --root $CHROOTNAME --auto perl-URPM
+	urpmi --urpmi-root $CHROOTNAME --root $CHROOTNAME --auto --no-verify-rpm perl-URPM
 	urpmi.removemedia old_main
 	echo "## Adding repositories inside chroot. ##"
 	urpmi.addmedia --wget --urpmi-root $CHROOTNAME --distrib $REPOPATH > $LOGDIR/addrepo.log 2>&1
