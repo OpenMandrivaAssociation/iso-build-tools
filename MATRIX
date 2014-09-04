@@ -79,9 +79,10 @@ popd
 ###
 
 #Force update of critical packages
+urpmi.addmedia --wget perlurpm_update http://abf-downloads.rosalinux.ru/openmandriva2014.0/container/2186324/x86_64/main/release/
 urpmq --list-url
 urpmi.update -ff updates
-urpmi perl-URPM
+urpmi --no-verify-rpm perl-URPM
 
 echo $CHROOTNAME
 echo $REPOPATH
@@ -93,10 +94,6 @@ if [ -d "$CHROOTNAME" ]; then
 else
 	echo "## Chroot $CHROOTNAME is missing. Creating chroot. ##"
 	mkdir $CHROOTNAME
-	urpmi.addmedia --wget --urpmi-root $CHROOTNAME old_main http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/main/release
-	urpmi.addmedia --wget --urpmi-root $CHROOTNAME perlurpm_update http://abf-downloads.rosalinux.ru/openmandriva2014.0/container/2186308/i586/main/release/
-	urpmi --urpmi-root $CHROOTNAME --root $CHROOTNAME --auto --no-verify-rpm perl-URPM
-	urpmi.removemedia --urpmi-root $CHROOTNAME old_main
 	echo "## Adding repositories inside chroot. ##"
 	urpmi.addmedia --wget --urpmi-root $CHROOTNAME --distrib $REPOPATH > $LOGDIR/addrepo.log 2>&1
 	echo "## Updating repositories inside chroot. ##"
