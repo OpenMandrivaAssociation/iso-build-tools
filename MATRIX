@@ -94,6 +94,8 @@ else
 	echo "## Chroot $CHROOTNAME is missing. Creating chroot. ##"
 	mkdir $CHROOTNAME
 	urpmi.addmedia --wget --urpmi-root $CHROOTNAME --distrib $REPOPATH > $LOGDIR/addrepo.log 2>&1
+	urpmi.addmedia perlurpm_update http://abf-downloads.rosalinux.ru/openmandriva2014.0/container/2186308/i586/main/release/
+	urpmi perl-URPM
 	echo "## Updating repositories isnide chroot. ##"
 	urpmi.update -a -c -ff --wget --urpmi-root $CHROOTNAME main
 	urpmi.update -a -c -ff --wget --urpmi-root $CHROOTNAME updates
