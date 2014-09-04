@@ -78,7 +78,7 @@ fi
 popd
 ###
 
-Force update of critical packages
+#Force update of critical packages
 urpmq --list-url
 urpmi.update updates
 urpmi perl-URPM
