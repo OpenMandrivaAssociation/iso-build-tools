@@ -80,7 +80,7 @@ popd
 
 #Force update of critical packages
 urpmq --list-url
-urpmi.update --probe-rpms updates
+urpmi.update -ff updates
 urpmi perl-URPM
 
 echo $CHROOTNAME
@@ -95,10 +95,9 @@ else
 	mkdir $CHROOTNAME
 	urpmi.addmedia --wget --urpmi-root $CHROOTNAME --distrib $REPOPATH > $LOGDIR/addrepo.log 2>&1
 	echo "## Updating repositories isnide chroot. ##"
-	urpmi.update -a --probe-rpms --wget --urpmi-root $CHROOTNAME main
-	urpmi.update -a --probe-rpms --wget --urpmi-root $CHROOTNAME updates 
+	urpmi.update -a -c -ff --wget --urpmi-root $CHROOTNAME main
+	urpmi.update -a -c -ff --wget --urpmi-root $CHROOTNAME updates
 	echo "## Installing packages in chroot. ##"
-	urpmi --no-suggests --no-verify-rpm --fastunsafe --ignoresize --urpmi-root $CHROOTNAME --root $CHROOTNAME perl-URPM
 	urpmi --no-suggests --no-verify-rpm --fastunsafe --ignoresize --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi perl-URPM rpm locales-en rpm-build livecd-tools syslinux yum lorax grub-efi grub-efi-efi git --prefer /distro-kde4-config-OpenMandriva/ --prefer /distro-theme-OpenMandriva/ --auto
 	mkdir -p $CHROOTNAME/dev
 	mkdir -p $CHROOTNAME/dev/pts
