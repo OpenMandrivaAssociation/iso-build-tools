@@ -80,9 +80,9 @@ popd
 
 #Force update of critical packages
 urpmq --list-url
-urpmi.update updates
+urpmi.update -ff updates
 urpmi perl-URPM
-	
+
 echo $CHROOTNAME
 echo $REPOPATH
 echo $EXTARCH
@@ -94,8 +94,9 @@ else
 	echo "## Chroot $CHROOTNAME is missing. Creating chroot. ##"
 	mkdir $CHROOTNAME
 	urpmi.addmedia --wget --urpmi-root $CHROOTNAME --distrib $REPOPATH > $LOGDIR/addrepo.log 2>&1
-	urpmi.update -a --wget --urpmi-root $CHROOTNAME main
-	urpmi --no-suggests --no-verify-rpm --fastunsafe --ignoresize --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi rpm locales-en rpm-build livecd-tools syslinux yum lorax grub-efi grub-efi-efi git --prefer /distro-kde4-config-OpenMandriva/ --prefer /distro-theme-OpenMandriva/ --auto
+	urpmi.update -a -ff --wget --urpmi-root $CHROOTNAME main
+	urpmi.update -a -ff --wget --urpmi-root $CHROOTNAME updates 
+	urpmi --no-suggests --no-verify-rpm --fastunsafe --ignoresize --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi perl-URPM rpm locales-en rpm-build livecd-tools syslinux yum lorax grub-efi grub-efi-efi git --prefer /distro-kde4-config-OpenMandriva/ --prefer /distro-theme-OpenMandriva/ --auto
 	mkdir -p $CHROOTNAME/dev
 	mkdir -p $CHROOTNAME/dev/pts
 	mkdir -p $CHROOTNAME/proc
