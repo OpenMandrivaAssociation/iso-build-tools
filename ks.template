@@ -10,7 +10,7 @@ services --disabled=#SVCDIS#
 
 repo --name=Main --baseurl=#REPOURL#/main/release
 repo --name=MainUpdates --baseurl=#REPOURL#/main/updates
-#repo --name=MainTesting --baseurl=#REPOURL#/main/testing
+repo --name=MainTesting --baseurl=#REPOURL#/main/testing
 repo --name=Contrib --baseurl=#REPOURL#/contrib/release
 # (tpg) we support FREE world here !
 # Unfortunately non-free is currently needed to grab firmware files.
