@@ -79,7 +79,6 @@ popd
 ###
 
 #Force update of critical packages
-urpmi.addmedia --wget perlurpm_update http://abf-downloads.rosalinux.ru/openmandriva2014.0/container/2186324/x86_64/main/release/
 urpmq --list-url
 urpmi.update -ff updates
 urpmi --no-verify-rpm perl-URPM
