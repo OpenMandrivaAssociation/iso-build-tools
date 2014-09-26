@@ -78,19 +78,28 @@ fi
 popd
 ###
 
+#Force update of critical packages
+urpmq --list-url
+urpmi.update -ff updates
+urpmi --no-verify-rpm perl-URPM
+
 echo $CHROOTNAME
 echo $REPOPATH
 echo $EXTARCH
 if [ -d "$CHROOTNAME" ]; then
 	echo "## Chroot $CHROOTNAME exists. Using existing chroot. ##"
-	urpmi.update --wget --urpmi-root $CHROOTNAME main
+	urpmi.update -a --wget --urpmi-root $CHROOTNAME main
 	umount_all
 else
 	echo "## Chroot $CHROOTNAME is missing. Creating chroot. ##"
 	mkdir $CHROOTNAME
+	echo "## Adding repositories inside chroot. ##"
 	urpmi.addmedia --wget --urpmi-root $CHROOTNAME --distrib $REPOPATH > $LOGDIR/addrepo.log 2>&1
-	urpmi.update --wget --urpmi-root $CHROOTNAME main
-	urpmi --no-suggests --no-verify-rpm --fastunsafe --ignoresize --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi rpm locales-en rpm-build livecd-tools syslinux yum lorax grub-efi grub-efi-efi git --prefer /distro-kde4-config-OpenMandriva/ --prefer /distro-theme-OpenMandriva/ --auto
+	echo "## Updating repositories inside chroot. ##"
+	urpmi.update -a -c -ff --wget --urpmi-root $CHROOTNAME main
+	urpmi.update -a -c -ff --wget --urpmi-root $CHROOTNAME updates
+	echo "## Installing packages in chroot. ##"
+	urpmi --no-suggests --no-verify-rpm --fastunsafe --ignoresize --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi perl-URPM rpm locales-en rpm-build livecd-tools syslinux yum lorax grub-efi grub-efi-efi git --prefer /distro-kde4-config-OpenMandriva/ --prefer /distro-theme-OpenMandriva/ --auto
 	mkdir -p $CHROOTNAME/dev
 	mkdir -p $CHROOTNAME/dev/pts
 	mkdir -p $CHROOTNAME/proc

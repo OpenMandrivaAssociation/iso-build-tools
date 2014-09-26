@@ -12,10 +12,12 @@ repo --name=Main --baseurl=#REPOURL#/main/release
 repo --name=MainUpdates --baseurl=#REPOURL#/main/updates
 #repo --name=MainTesting --baseurl=#REPOURL#/main/testing
 repo --name=Contrib --baseurl=#REPOURL#/contrib/release
+repo --name=ContribUpdates --baseurl=#REPOURL#/contrib/updates
 # (tpg) we support FREE world here !
 # Unfortunately non-free is currently needed to grab firmware files.
 # May want to move them to yet another repository
 repo --name=Non-Free --baseurl=#REPOURL#/non-free/release
+repo --name=Non-FreeUpdates --baseurl=#REPOURL#/non-free/updates
 #repo --name=Restricted --baseurl=#REPOURL#/restricted/release
 
 %packages
