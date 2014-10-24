@@ -9,16 +9,20 @@ services --enabled=#SVCEN#
 services --disabled=#SVCDIS#
 
 repo --name=Main --baseurl=#REPOURL#/main/release
-repo --name=MainUpdates --baseurl=#REPOURL#/main/updates
-#repo --name=MainTesting --baseurl=#REPOURL#/main/testing
 repo --name=Contrib --baseurl=#REPOURL#/contrib/release
-repo --name=ContribUpdates --baseurl=#REPOURL#/contrib/updates
 # (tpg) we support FREE world here !
 # Unfortunately non-free is currently needed to grab firmware files.
 # May want to move them to yet another repository
 repo --name=Non-Free --baseurl=#REPOURL#/non-free/release
-repo --name=Non-FreeUpdates --baseurl=#REPOURL#/non-free/updates
 #repo --name=Restricted --baseurl=#REPOURL#/restricted/release
+#repo --name=MainTesting --baseurl=#REPOURL#/main/testing
+
+#updates are not for COOKER
+if [ "#TREE#" != "cooker" ]; then
+repo --name=MainUpdates --baseurl=#REPOURL#/main/updates
+repo --name=ContribUpdates --baseurl=#REPOURL#/contrib/updates
+repo --name=Non-FreeUpdates --baseurl=#REPOURL#/non-free/updates
+fi
 
 %packages
 %include .///#PKGLISTFILE#
@@ -226,12 +230,12 @@ echo "## Installing default urpmi repositories for end user ##"
 
 cp -rfT /etc/resolv.conf $INSTALL_ROOT/etc/resolv.conf
 /usr/sbin/urpmi.removemedia -a
-/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib --mirrorlist --wget --no-md5sum
-#/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib http://abf-downloads.abf.io/#TREE#/repository/#ARCH#
+#/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib --mirrorlist --wget --no-md5sum
+/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib http://abf-downloads.abf.io/#TREE#/repository/#ARCH#
 if [ "#ARCH#" = "x86_64" ]; then
 echo "## Adding 32-bit media repository ##"
-/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.2014.0.i586.list' 'Main32' 'media/main/release'
-/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.2014.0.i586.list' 'Main32Updates' 'media/main/updates'
+/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/#TREE#.i586.list' 'Main32' 'media/main/release'
+/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/#TREE#.i586.list' 'Main32Updates' 'media/main/updates'
 
 if [[ $? != 0 ]]; then
 echo "## Adding 32-bit media FAILED ##";
