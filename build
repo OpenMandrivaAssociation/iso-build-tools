@@ -27,7 +27,7 @@ echo "## Current product build is $ARCHS $TREE $VERSION $RELEASE_ID $DESKTOP##"
 
 REPOURL="http://abf-downloads.abf.io/$TREE/repository/#ARCH#"
 TZ="Universal"
-SVCEN="sshd,cups,chronyd,acpid,alsa,atd,avahi-daemon,irqbalance,netfs,resolvconf,rpcbind,sound,udev-post,mandrake_everytime,crond"
+SVCEN="sshd,cups,chronyd,acpid,alsa,atd,avahi-daemon,irqbalance,netfs,resolvconf,rpcbind,sound,udev-post,mandrake_everytime,crond,accounts-daemon"
 SVCDIS="pptp,pppoe,ntpd,iptables,ip6tables,shorewall,nfs-server,mysqld,abrtd,mysql,postfix"
 
 PKGLISTFILE=iso-pkg-lists/omdv-$DESKTOP.lst
