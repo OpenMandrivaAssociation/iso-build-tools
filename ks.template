@@ -18,11 +18,9 @@ repo --name=Non-Free --baseurl=#REPOURL#/non-free/release
 #repo --name=MainTesting --baseurl=#REPOURL#/main/testing
 
 #updates are not for COOKER
-if [ "#TREE#" != "cooker" ]; then
 repo --name=MainUpdates --baseurl=#REPOURL#/main/updates
 repo --name=ContribUpdates --baseurl=#REPOURL#/contrib/updates
 repo --name=Non-FreeUpdates --baseurl=#REPOURL#/non-free/updates
-fi
 
 %packages
 %include .///#PKGLISTFILE#
