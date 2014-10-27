@@ -18,9 +18,9 @@ repo --name=Non-Free --baseurl=#REPOURL#/non-free/release
 #repo --name=MainTesting --baseurl=#REPOURL#/main/testing
 
 #updates are not for COOKER
-repo --name=MainUpdates --baseurl=#REPOURL#/main/updates
-repo --name=ContribUpdates --baseurl=#REPOURL#/contrib/updates
-repo --name=Non-FreeUpdates --baseurl=#REPOURL#/non-free/updates
+#repo --name=MainUpdates --baseurl=#REPOURL#/main/updates
+#repo --name=ContribUpdates --baseurl=#REPOURL#/contrib/updates
+#repo --name=Non-FreeUpdates --baseurl=#REPOURL#/non-free/updates
 
 %packages
 %include .///#PKGLISTFILE#
@@ -233,7 +233,7 @@ cp -rfT /etc/resolv.conf $INSTALL_ROOT/etc/resolv.conf
 if [ "#ARCH#" = "x86_64" ]; then
 echo "## Adding 32-bit media repository ##"
 /usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/#TREE#.i586.list' 'Main32' 'media/main/release'
-/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/#TREE#.i586.list' 'Main32Updates' 'media/main/updates'
+#/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/#TREE#.i586.list' 'Main32Updates' 'media/main/updates'
 
 if [[ $? != 0 ]]; then
 echo "## Adding 32-bit media FAILED ##";
