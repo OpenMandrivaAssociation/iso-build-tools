@@ -20,6 +20,13 @@ repo --name=Non-Free --baseurl=#REPOURL#/non-free/release
 repo --name=Non-FreeUpdates --baseurl=#REPOURL#/non-free/updates
 #repo --name=Restricted --baseurl=#REPOURL#/restricted/release
 
+#add efi specific packages from itchka
+repo --name=grub2 --baseurl=http://abf-downloads.rosalinux.ru/itchka_personal/container/2325138/x86_64/main/release/
+repo --name=osprober --baseurl=http://abf-downloads.rosalinux.ru/itchka_personal/container/2325135/x86_64/main/release/
+repo --name=unifont --baseurl=http://abf-downloads.rosalinux.ru/itchka_personal/container/2325131/x86_64/main/release/
+repo --name=efivar --baseurl=http://abf-downloads.rosalinux.ru/itchka_personal/container/2325175/x86_64/main/release/
+repo --name=efibootmgr --baseurl=http://abf-downloads.rosalinux.ru/itchka_personal/container/2325177/x86_64/main/release/
+
 %packages
 %include .///#PKGLISTFILE#
 
