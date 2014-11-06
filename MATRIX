@@ -45,7 +45,7 @@ REPOPATH="http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/"
 SRCPATH="https://abf.io/openmandriva/$BLDNAME.git"
 PKGLIST="https://abf.io/openmandriva/iso-pkg-lists.git"
 LOGDIR="."
-BRANCH="master"
+BRANCH="openmandriva2014.0"
 CHROOTOPTS="$CHROOTNAME /bin/su root -c"
 
 umount_all() {
