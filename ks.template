@@ -84,17 +84,21 @@ systemctl enable #DISPLAYMANAGER#.service 2> /dev/null || :
 systemctl --no-reload disable atd.service 2> /dev/null || :
 systemctl stop atd.service 2> /dev/null || :
 
-# turn of crond
+# turn off crond
 systemctl --no-reload disable crond.service 2> /dev/null || :
 systemctl stop crond.service 2> /dev/null || :
 
-# turn of lm_sensors
+# turn off ldconfig
+systemctl --no-reload disable ldconfig.service 2> /dev/null || :
+systemctl stop ldconfig.service 2> /dev/null || :
+
+# turn off lm_sensors
 systemctl --no-reload disable lm_sensors.service 2> /dev/null || :
 systemctl --no-reload disable sensord.service 2> /dev/null || :
 systemctl stop lm_sensors.service 2> /dev/null || :
 systemctl stop sensord.service 2> /dev/null || :
 
-# turn of microcode_ctl
+# turn off microcode_ctl
 systemctl --no-reload disable microcode_ctl.service 2> /dev/null || :
 systemctl stop microcode_ctl.service 2> /dev/null || :
 
