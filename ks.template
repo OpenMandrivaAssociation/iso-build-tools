@@ -22,8 +22,6 @@ repo --name=Non-Free --baseurl=#REPOURL#/non-free/release
 #repo --name=ContribUpdates --baseurl=#REPOURL#/contrib/updates
 #repo --name=Non-FreeUpdates --baseurl=#REPOURL#/non-free/updates
 
-repo --name=GLIBC --baseurl=http://abf-downloads.rosalinux.ru/cooker/container/2332589/i586/main/release/
-
 %packages
 %include .///#PKGLISTFILE#
 
