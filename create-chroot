@@ -39,7 +39,7 @@ parsePkgList() {
 # Packages go to /target/dir/rpms
 getPackages() {
 	$SUDO urpmi.addmedia --urpmi-root "$2" --distrib http://abf-downloads.abf.io/cooker/repository/$ARCH
-	$SUDO urpmi.update --urpmi-root "$2" -a
+	$SUDO urpmi.update --urpmi-root "$2" -a -c -ff --wget
 	parsePkgList "$1" |xargs $SUDO urpmi --urpmi-root "$ROOT" --no-install --download-all --no-verify-rpm --fastunsafe --ignoresize "$2" --auto
 }
 
@@ -156,6 +156,11 @@ buildIso() {
 	$SUDO isohybrid "$1"
 	ls -l "$1"
 }
+
+#Force update of critical packages
+urpmq --list-url
+urpmi.update -ff updates
+urpmi --no-verify-rpm perl-URPM
 
 ROOT="`mktemp -d /tmp/liverootXXXXXX`"
 [ -z "$ROOT" ] && ROOT=/tmp/liveroot.$$
