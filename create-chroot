@@ -2,6 +2,7 @@
 DIST=omdv
 TYPE=kde4
 ARCH=`uname -m`
+BRANCH=cooker
 SUDO=sudo
 OURDIR=$(realpath $(dirname $0))
 [ "`id -u`" = "0" ] && SUDO=""
@@ -167,7 +168,24 @@ ROOT="`mktemp -d /tmp/liverootXXXXXX`"
 [ -z "$ROOT" ] && ROOT=/tmp/liveroot.$$
 $SUDO mkdir -p "$ROOT"/tmp
 
-[ -d iso-pkg-lists ] || git clone https://abf.io/openmandriva/iso-pkg-lists.git
+if [ -d iso-pkg-lists ]; then
+    rm -rf iso-pkg-lists
+fi
+
+### possible fix for timed out GIT pulls
+PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-${BRANCH}.tar.gz"
+if [ ! -d iso-pkg-lists ]; then
+    if [ $BRANCH = "cooker"]; then
+	BRANCH=master
+    fi
+
+    wget --tries=10 -O iso-pkg-lists-${BRANCH}.tar.gz --content-disposition ${PKGLIST}
+    tar -xf iso-pkg-lists-${BRANCH}.tar.gz
+    mv -f iso-pkg-lists-${BRANCH} iso-pkg-lists
+    rm -f iso-pkg-lists-${BRANCH}.tar.gz
+fi
+###
+
 cd iso-pkg-lists
 # getPackages "${DIST}-${TYPE}.lst" /tmp/packages
 createChroot "${DIST}-${TYPE}.lst" "$ROOT"
