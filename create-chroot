@@ -1,16 +1,46 @@
 #!/bin/bash
-DIST=omdv
+
+# Usage:
+# ./create-chroot EXTARCH TREE VERSION RELEASE_ID TYPE DISPLAYMANAGER
+# ./create-chroot x86_64 cooker 2015.0 alpha hawaii sddm
+#
+
+if [ "`id -u`" != "0" ]; then
+    # We need to be root for umount and friends to work...
+    exec sudo $0 "$@"
+    echo Run me as root
+    exit 1
+fi
+
+EXTARCH=`uname -m`
+TREE=cooker
+VERSION="`date +%Y.0`"
+RELEASE_ID=alpha
 TYPE=kde4
-ARCH=`uname -m`
-BRANCH=cooker
+DISPLAYMANAGER="kdm"
+REPOPATH="http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/"
+
 SUDO=sudo
 OURDIR=$(realpath $(dirname $0))
+LOGDIR="."
 [ "`id -u`" = "0" ] && SUDO=""
-[ "$ARCH" = "i386" ] && ARCH=i586
+[ "$EXTARCH" = "i386" ] && EXTARCH=i586
 
-[ -n "$1" ] && TYPE="$1"
-[ -n "$2" ] && ARCH="$2"
-[ -n "$3" ] && DIST="$3"
+[ -n "$1" ] && EXTARCH="$1"
+[ -n "$2" ] && TREE="$2"
+[ -n "$3" ] && VERSION="$3"
+[ -n "$4" ] && RELEASE_ID="$4"
+[ -n "$5" ] && TYPE="$5"
+[ -n "$6" ] && DISPLAYMANAGER="$6"
+
+if [ "$RELEASE_ID" == "final" ]; then
+    PRODUCT_ID="OpenMandrivaLx.${VERSION}-$TYPE"
+else
+    if [[ "$RELEASE_ID" == "alpha" ]]; then
+	RELEASE_ID="$RELEASE_ID.`date +%Y%m%d`"
+    fi
+    PRODUCT_ID="OpenMandrivaLx.${VERSION}-${RELEASE_ID}-$TYPE"
+fi
 
 # Usage: parsePkgList xyz.lst
 # Shows the list of packages in the package list file (including any packages
@@ -39,9 +69,9 @@ parsePkgList() {
 # dependencies.
 # Packages go to /target/dir/rpms
 getPackages() {
-	$SUDO urpmi.addmedia --urpmi-root "$2" --distrib http://abf-downloads.abf.io/cooker/repository/$ARCH
+	$SUDO urpmi.addmedia --urpmi-root "$2" --distrib $REPOPATH
 	$SUDO urpmi.update --urpmi-root "$2" -a -c -ff --wget
-	parsePkgList "$1" |xargs $SUDO urpmi --urpmi-root "$ROOT" --no-install --download-all --no-verify-rpm --fastunsafe --ignoresize "$2" --auto
+	parsePkgList "$1" |xargs $SUDO urpmi --urpmi-root "$ROOTNAME" --no-install --download-all --no-verify-rpm --fastunsafe --ignoresize "$2" --auto
 }
 
 # Usage: createChroot packages.lst /target/dir
@@ -50,7 +80,7 @@ getPackages() {
 createChroot() {
 	# Make sure /proc, /sys and friends are mounted so %post scripts can use them
 	$SUDO mkdir -p "$2"/proc "$2"/sys
-	$SUDO urpmi.addmedia --urpmi-root "$2" --distrib http://abf-downloads.abf.io/cooker/repository/$ARCH
+	$SUDO urpmi.addmedia --urpmi-root "$2" --distrib $REPOPATH
 	$SUDO urpmi.update -a -c -ff --wget --urpmi-root "$2" main
 	$SUDO urpmi.update -a -c -ff --wget --urpmi-root "$2" updates
 	$SUDO mount --bind /proc "$2"/proc
@@ -112,22 +142,22 @@ MENU COLOR msg07 37;40 #90ffffff #a0000000 std
 MENU COLOR tabmsg 31;40 #30ffffff #00000000 std
 
 LABEL boot
-	MENU LABEL Boot OpenMandriva Lx 2013.0
+	MENU LABEL Boot OpenMandriva Lx $VERSION
 	LINUX /boot/vmlinuz
 	INITRD /boot/initrd.img
-	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image rhgb vga=current splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva
+	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image quiet rhgb vga=current splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva
 
 LABEL install
-	MENU LABEL Install OpenMandriva Lx 2013.0
+	MENU LABEL Install OpenMandriva Lx $VERSION
 	LINUX /boot/vmlinuz
 	INITRD /boot/initrd.img
-	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image rhgb vga=current splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva install
+	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image quiet rhgb vga=current splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva install
 
 LABEL vesa
-	MENU LABEL Boot OpenMandriva Lx 2013.0 in safe mode
+	MENU LABEL Boot OpenMandriva Lx $VERSION in safe mode
 	LINUX /boot/vmlinuz
 	INITRD /boot/initrd.img
-	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image rhgb vga=current splash=silent logo.nologo xdriver=vesa nokmsboot install root=live:/dev/disk/by-label/OpenMandriva
+	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image quiet rhgb vga=current splash=silent logo.nologo xdriver=vesa nokmsboot install root=live:/dev/disk/by-label/OpenMandriva
 
 LABEL memtest
 	MENU LABEL Test memory
@@ -151,12 +181,20 @@ EOF
 # Usage: buildIso filename.iso rootdir
 # Builds an ISO file from the files in rootdir
 buildIso() {
+
+	LABEL=${PRODUCT_ID}.$EXTARCH
+	[ `echo $LABEL | wc -m` -gt 32 ] && LABEL="OpenMandrivaLx_${VERSION}"
+
 	$SUDO mkisofs -o "$1" -b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
-		-R -l -V OpenMandriva "$2"
+		-R -l -V $LABEL "$2"
+
 	ls -l "$1"
 	$SUDO isohybrid "$1"
 	ls -l "$1"
+
+	md5sum  ${PRODUCT_ID}.$EXTARCH.iso > ${PRODUCT_ID}.$EXTARCH.iso.md5sum
+	sha1sum ${PRODUCT_ID}.$EXTARCH.iso > ${PRODUCT_ID}.$EXTARCH.iso.sha1sum
 }
 
 #Force update of critical packages
@@ -164,9 +202,9 @@ urpmq --list-url
 urpmi.update -ff updates
 urpmi --no-verify-rpm perl-URPM cdrkit-genisoimage syslinux
 
-ROOT="`mktemp -d /tmp/liverootXXXXXX`"
-[ -z "$ROOT" ] && ROOT=/tmp/liveroot.$$
-$SUDO mkdir -p "$ROOT"/tmp
+ROOTNAME="`mktemp -d /tmp/liverootXXXXXX`"
+[ -z "$ROOTNAME" ] && ROOTNAME=/tmp/liveroot.$$
+$SUDO mkdir -p "$ROOTNAME"/tmp
 
 if [ -d iso-pkg-lists ]; then
     rm -rf iso-pkg-lists
@@ -174,7 +212,7 @@ fi
 
 ### possible fix for timed out GIT pulls
 if [ ! -d iso-pkg-lists ]; then
-    if [ $BRANCH = "cooker" ]; then
+    if [ $TREE = "cooker" ]; then
 	BRANCH=master
     fi
 
@@ -186,10 +224,19 @@ if [ ! -d iso-pkg-lists ]; then
 fi
 ###
 
-cd iso-pkg-lists
+pushd iso-pkg-lists
 # getPackages "${DIST}-${TYPE}.lst" /tmp/packages
-createChroot "${DIST}-${TYPE}.lst" "$ROOT"
-setupIsolinux "$ROOT"
-buildIso $OURDIR/OpenMandriva.iso "$ROOT"
-cd ..
+createChroot "${DIST}-${TYPE}.lst" "$ROOTNAME"
+setupIsolinux "$ROOTNAME"
+buildIso $OURDIR/$PRODUCT_ID.$EXTARCH.iso "$ROOTNAME"
+popd
 
+mv $ROOTNAME/iso-build-tools/*/*.iso* $LOGDIR/
+ls -l $LOGDIR/*.iso*
+
+if echo $OURDIR |grep -q /home/vagrant; then
+    # We're running in ABF -- adjust to its directory structure
+    mkdir -p /home/vagrant/results /home/vagrant/archives
+    mv $LOGDIR/*.iso* /home/vagrant/results/
+    mv $LOGDIR/*.log /home/vagrant/archives/
+fi
