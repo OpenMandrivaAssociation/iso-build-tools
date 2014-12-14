@@ -35,12 +35,12 @@ LOGDIR="."
 [ -n "$6" ] && DISPLAYMANAGER="$6"
 
 if [ "$RELEASE_ID" == "final" ]; then
-    PRODUCT_ID="OpenMandrivaLx.${VERSION}-$TYPE"
+    PRODUCT_ID="OpenMandrivaLx.$VERSION-$TYPE"
 else
     if [[ "$RELEASE_ID" == "alpha" ]]; then
 	RELEASE_ID="$RELEASE_ID.`date +%Y%m%d`"
     fi
-    PRODUCT_ID="OpenMandrivaLx.${VERSION}-${RELEASE_ID}-$TYPE"
+    PRODUCT_ID="OpenMandrivaLx.$VERSION-$RELEASE_ID-$TYPE"
 fi
 
 # Usage: parsePkgList xyz.lst
@@ -201,8 +201,8 @@ EOF
 # Builds an ISO file from the files in rootdir
 buildIso() {
 
-	LABEL=${PRODUCT_ID}.$EXTARCH
-	[ `echo $LABEL | wc -m` -gt 32 ] && LABEL="OpenMandrivaLx_${VERSION}"
+	LABEL=$PRODUCT_ID.$EXTARCH
+	[ `echo $LABEL | wc -m` -gt 32 ] && LABEL="OpenMandrivaLx_$VERSION"
 
 	$SUDO mkisofs -o "$1" -b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
@@ -213,8 +213,7 @@ buildIso() {
 	$SUDO isohybrid "$1"
 	ls -l "$1"
 
-	md5sum  ${PRODUCT_ID}.$EXTARCH.iso > ${PRODUCT_ID}.$EXTARCH.iso.md5sum
-	sha1sum ${PRODUCT_ID}.$EXTARCH.iso > ${PRODUCT_ID}.$EXTARCH.iso.sha1sum
+
 }
 
 #Force update of critical packages
@@ -236,11 +235,11 @@ if [ ! -d iso-pkg-lists ]; then
 	BRANCH=master
     fi
 
-    PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-${BRANCH}.tar.gz"
-    wget --tries=10 -O iso-pkg-lists-${BRANCH}.tar.gz --content-disposition ${PKGLIST}
-    tar -xf iso-pkg-lists-${BRANCH}.tar.gz
-    mv -f iso-pkg-lists-${BRANCH} iso-pkg-lists
-    rm -f iso-pkg-lists-${BRANCH}.tar.gz
+    PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-$BRANCH.tar.gz"
+    wget --tries=10 -O iso-pkg-lists-$BRANCH.tar.gz --content-disposition $PKGLIST
+    tar -xf iso-pkg-lists-$BRANCH.tar.gz
+    mv -f iso-pkg-lists-$BRANCH iso-pkg-lists
+    rm -f iso-pkg-lists-$BRANCH.tar.gz
 fi
 ###
 
@@ -251,12 +250,12 @@ setupIsolinux "$ROOTNAME"
 buildIso $OURDIR/$PRODUCT_ID.$EXTARCH.iso "$ROOTNAME"
 popd
 
-mv $ROOTNAME/iso-build-tools/*/*.iso* $LOGDIR/
-ls -l $LOGDIR/*.iso*
+md5sum  $OURDIR/$PRODUCT_ID.$EXTARCH.iso > $OURDIR/$PRODUCT_ID.$EXTARCH.iso.md5sum
+sha1sum $OURDIR/$PRODUCT_ID.$EXTARCH.iso > $OURDIR/$PRODUCT_ID.$EXTARCH.iso.sha1sum
 
 if echo $OURDIR |grep -q /home/vagrant; then
     # We're running in ABF -- adjust to its directory structure
     mkdir -p /home/vagrant/results /home/vagrant/archives
-    mv $LOGDIR/*.iso* /home/vagrant/results/
+    mv $OURDIR/*.iso* /home/vagrant/results/
     mv $LOGDIR/*.log /home/vagrant/archives/
 fi
