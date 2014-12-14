@@ -162,7 +162,7 @@ LABEL vesa
 	MENU LABEL Boot OpenMandriva Lx $VERSION in safe mode
 	LINUX /boot/vmlinuz
 	INITRD /boot/initrd.img
-	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image quiet rhgb vga=current splash=silent logo.nologo xdriver=vesa nokmsboot install root=live:/dev/disk/by-label/OpenMandriva
+	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image xdriver=vesa nomodeset plymouth.enable=0 vga=792 install root=live:/dev/disk/by-label/OpenMandriva
 
 LABEL memtest
 	MENU LABEL Test memory
