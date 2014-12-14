@@ -8,7 +8,18 @@
 if [ "`id -u`" != "0" ]; then
     # We need to be root for umount and friends to work...
     exec sudo $0 "$@"
-    echo Run me as root
+    echo Run me as root.
+    exit 1
+fi
+
+# check for arguments
+if [[ $@ ]]; then
+    true
+else
+    echo "Please run script wigh arguments."
+    echo "For example:"
+    echo "./create-chroot x86_64 cooker 2015.0 alpha hawaii sddm"
+    echo "Exiting."
     exit 1
 fi
 
