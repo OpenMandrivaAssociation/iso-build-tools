@@ -16,10 +16,10 @@ fi
 if [[ $@ ]]; then
     true
 else
-    echo "Please run script wigh arguments."
+    echo "Please run script with arguments."
     echo "omdv-build-iso.sh ARCH TREE VERSION RELEASE_ID TYPE DISPLAYMANAGER"
     echo "For example:"
-    echo "./omdv-build-iso.sh x86_64 cooker 2015.0 alpha hawaii sddm"
+    echo "./$0 x86_64 cooker 2015.0 alpha hawaii sddm"
     echo "Exiting."
     exit 1
 fi
@@ -254,7 +254,7 @@ buildIso() {
 	$SUDO mkisofs -o "$1" -b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		-P "OpenMandriva Association" -p "OpenMandriva Association" \
-		-R -J -l -V -r -hide-rr-moved -hide-joilet-trans-tbl $LABEL "$2"
+		-R -J -l -r -hide-rr-moved -hide-joilet-trans-tbl -V $LABEL "$2"
 
 	ls -l "$1"
 	$SUDO isohybrid "$1"
