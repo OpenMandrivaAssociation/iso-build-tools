@@ -117,6 +117,11 @@ setupIsolinux() {
             $SUDO cp "$1"/usr/lib/syslinux/$i "$1"/isolinux ;
         done
 
+	# copy boot menu background
+        cp -rfT $OURDIR/splash.jpg "$1"/isolinux/splash.png
+        # copy memtest
+        cp -rfT $OURDIR/extraconfig/memtest "$1"/isolinux/memtest
+
 	# kernel/initrd filenames referenced below are the ISO9660 names.
 	# syslinux doesn't support Rock Ridge.
 	cat >"$1"/isolinux/isolinux.cfg <<EOF
@@ -128,11 +133,11 @@ MENU BACKGROUND splash.png
 TIMEOUT 50
 MENU WIDTH 78
 MENU MARGIN 4
-MENU ROWS 5
+MENU ROWS 7
 MENU VSHIFT 10
-MENU TIMEOUTROW 13
-MENU TABMSGROW 11
-MENU CMDLINEROW 11
+MENU TIMEOUTROW 14
+MENU TABMSGROW 13
+MENU CMDLINEROW 12
 MENU HELPMSGROW 16
 MENU HELPMSGENDROW 29
 
@@ -166,7 +171,7 @@ LABEL vesa
 
 LABEL memtest
 	MENU LABEL Test memory
-	LINUX /boot/memtest.bin
+	LINUX /isolinux/memtest
 
 LABEL hardware
 	MENU LABEL Run hardware detection tool
