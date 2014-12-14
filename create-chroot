@@ -158,19 +158,19 @@ LABEL boot
 	MENU LABEL Boot OpenMandriva Lx $VERSION
 	LINUX /boot/vmlinuz
 	INITRD /boot/initrd.img
-	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image quiet rhgb vga=current splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva
+	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image quiet rhgb vga=current splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva locale.lang=en_EN vconsole.keymap=en
 
 LABEL install
 	MENU LABEL Install OpenMandriva Lx $VERSION
 	LINUX /boot/vmlinuz
 	INITRD /boot/initrd.img
-	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image quiet rhgb vga=current splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva install
+	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image quiet rhgb vga=current splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva locale.lang=en_EN vconsole.keymap=en install
 
 LABEL vesa
 	MENU LABEL Boot OpenMandriva Lx $VERSION in safe mode
 	LINUX /boot/vmlinuz
 	INITRD /boot/initrd.img
-	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image xdriver=vesa nomodeset plymouth.enable=0 vga=792 install root=live:/dev/disk/by-label/OpenMandriva
+	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image xdriver=vesa nomodeset plymouth.enable=0 vga=792 install root=live:/dev/disk/by-label/OpenMandriva locale.lang=en_EN vconsole.keymap=en
 
 LABEL supergrub
         MENU LABEL Run super grub2 disk
