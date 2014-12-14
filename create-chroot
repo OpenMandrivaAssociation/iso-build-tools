@@ -175,7 +175,7 @@ fi
 ### possible fix for timed out GIT pulls
 PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-${BRANCH}.tar.gz"
 if [ ! -d iso-pkg-lists ]; then
-    if [ $BRANCH = "cooker"]; then
+    if [ $BRANCH = "cooker" ]; then
 	BRANCH=master
     fi
 
