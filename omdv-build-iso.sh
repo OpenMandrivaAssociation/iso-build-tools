@@ -56,10 +56,10 @@ else
 fi
 
 umount_all() {
-    $SUDO umount "$2"/proc || :
-    $SUDO umount "$2"/sys || :
-    $SUDO umount "$2"/dev/pts || :
-    $SUDO umount "$2"/dev || :
+    $SUDO umount "$1"/proc || :
+    $SUDO umount "$1"/sys || :
+    $SUDO umount "$1"/dev/pts || :
+    $SUDO umount "$1"/dev || :
 }
 
 error() {
@@ -122,7 +122,7 @@ createChroot() {
 	$SUDO install -c -m 755 $OURDIR/create-initramfs.sh $OURDIR/dracut-00-live.sh "$2"/boot/
 	$SUDO chroot "$2" /boot/create-initramfs.sh
 	$SUDO rm "$2"/boot/create-initramfs.sh
-	umount_all
+	umount_all "$2"
 
 }
 
@@ -314,5 +314,6 @@ if echo $OURDIR |grep -q /home/vagrant; then
 fi
 
 # clean chroot
-umount_all
+umount_all "$CHROOTNAME"
+rm -rf "$ROOTNAME"
 
