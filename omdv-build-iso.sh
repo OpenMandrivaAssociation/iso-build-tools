@@ -141,24 +141,30 @@ setupIsolinux() {
 	$SUDO cp -f initrd-$KERNEL.img initrd.img
 	ls -l "$1"/boot/vmlinuz "$1"/boot/initrd.img
 	popd
-	$SUDO mkdir -p "$1"/isolinux
-	$SUDO chmod 1777 "$1"/isolinux
+
+	$SUDO mkdir -p "$2"/isolinux
+	$SUDO chmod 1777 "$2"/isolinux
 	# install isolinux programs
         for i in isolinux.bin vesamenu.c32 hdt.c32 poweroff.com chain.c32; do
-            $SUDO cp "$1"/usr/lib/syslinux/$i "$1"/isolinux ;
+            $SUDO cp "$1"/usr/lib/syslinux/$i "$2"/isolinux ;
         done
 
+	$SUDO mkdir -p "$2"/LiveOS
+	$SUDO mkdir -p "$2"/isolinux
+	$SUDO cp -a "$1"/isolinux/* "$2"/isolinux
+	$SUDO cp -a "$1"/boot/vmlinuz "$1"/isolinux/vmlinuz0
+	$SUDO cp -a "$1"/boot/initrd.img "$1"/isolinux/initrd0.img
 	# copy boot menu background
-        cp -rfT $OURDIR/splash.jpg "$1"/isolinux/splash.png
+        $SUDO cp -rfT $OURDIR/splash.jpg "$2"/isolinux/splash.png
         # copy memtest
-        cp -rfT $OURDIR/extraconfig/memtest "$1"/isolinux/memtest
+        $SUDO cp -rfT $OURDIR/extraconfig/memtest "$2"/isolinux/memtest
         # copy SuperGrub iso
-        cp -rfT $OURDIR/extraconfig/memdisk "$1"/isolinux/memdisk
-        cp -rfT $OURDIR/extraconfig/sgb.iso "$1"/isolinux/sgb.iso
+        $SUDO cp -rfT $OURDIR/extraconfig/memdisk "$2"/isolinux/memdisk
+        $SUDO cp -rfT $OURDIR/extraconfig/sgb.iso "$2"/isolinux/sgb.iso
 
 	# kernel/initrd filenames referenced below are the ISO9660 names.
 	# syslinux doesn't support Rock Ridge.
-	cat >"$1"/isolinux/isolinux.cfg <<EOF
+	$SUDO cat >"$2"/isolinux/isolinux.cfg <<EOF
 UI vesamenu.c32
 DEFAULT boot
 PROMPT 0
@@ -187,21 +193,21 @@ MENU COLOR tabmsg 31;40 #30ffffff #00000000 std
 
 LABEL boot
 	MENU LABEL Boot OpenMandriva Lx $VERSION
-	LINUX /boot/vmlinuz
-	INITRD /boot/initrd.img
-	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image quiet rhgb vga=current splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva locale.lang=en_EN vconsole.keymap=en
+	LINUX /isolinux/vmlinuz0
+	INITRD /isolinux/initrd0.img
+	APPEND initrd=/isolinux/initrd0.img rootfstype=auto ro rd.live.image quiet rhgb vga=current splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva locale.lang=en_EN vconsole.keymap=en
 
 LABEL install
 	MENU LABEL Install OpenMandriva Lx $VERSION
-	LINUX /boot/vmlinuz
-	INITRD /boot/initrd.img
-	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image quiet rhgb vga=current splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva locale.lang=en_EN vconsole.keymap=en install
+	LINUX /isolinux/vmlinuz0
+	INITRD /isolinux/initrd0.img
+	APPEND initrd=/isolinux/initrd0.img rootfstype=auto ro rd.live.image quiet rhgb vga=current splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva locale.lang=en_EN vconsole.keymap=en install
 
 LABEL vesa
 	MENU LABEL Boot OpenMandriva Lx $VERSION in safe mode
-	LINUX /boot/vmlinuz
-	INITRD /boot/initrd.img
-	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image xdriver=vesa nomodeset plymouth.enable=0 vga=792 install root=live:/dev/disk/by-label/OpenMandriva locale.lang=en_EN vconsole.keymap=en
+	LINUX /isolinux/vmlinuz0
+	INITRD /isolinux/initrd0.img
+	APPEND initrd=/isolinux/initrd0.img rootfstype=auto ro rd.live.image xdriver=vesa nomodeset plymouth.enable=0 vga=792 install root=live:/dev/disk/by-label/OpenMandriva locale.lang=en_EN vconsole.keymap=en
 
 LABEL supergrub
         MENU LABEL Run super grub2 disk
@@ -225,8 +231,18 @@ LABEL poweroff
 	MENU LABEL Turn off computer
 	COMBOOT poweroff.com
 EOF
-	$SUDO chmod 0755 "$1"/isolinux
+	$SUDO chmod 0755 "$2"/isolinux
 }
+
+createSquash() {
+
+    if [ -f "$1"/ISO/LiveOS/squashfs.img ]; then
+	$SUDO rm -rf "$2"/LiveOS/squashfs.img
+    fi
+        $SUDO mksquashfs "$1" "$2"/LiveOS/squashfs.img -comp xz
+
+}
+
 
 # Usage: buildIso filename.iso rootdir
 # Builds an ISO file from the files in rootdir
@@ -249,11 +265,13 @@ buildIso() {
 #Force update of critical packages
 urpmq --list-url
 urpmi.update -ff updates
-urpmi --no-verify-rpm perl-URPM cdrkit-genisoimage syslinux
+urpmi --no-verify-rpm perl-URPM cdrkit-genisoimage syslinux squashfs-tools
 
 ROOTNAME="`mktemp -d /tmp/liverootXXXXXX`"
 [ -z "$ROOTNAME" ] && ROOTNAME=/tmp/liveroot.$$
 $SUDO mkdir -p "$ROOTNAME"/tmp
+CHROOTNAME="$ROOTNAME"/BASE
+ISOROOTNAME="$ROOTNAME"/ISO
 
 if [ -d $OURDIR/iso-pkg-lists ]; then
     rm -rf $OURDIR/iso-pkg-lists
@@ -273,11 +291,12 @@ if [ ! -d $OURDIR/iso-pkg-lists ]; then
 fi
 ###
 
+# START ISO BUILD
 pushd iso-pkg-lists
-# getPackages "${DIST}-${TYPE}.lst" /tmp/packages
-createChroot "$DIST-$TYPE.lst" "$ROOTNAME"
-setupIsolinux "$ROOTNAME"
-buildIso $OURDIR/$PRODUCT_ID.$EXTARCH.iso "$ROOTNAME"
+createChroot "$DIST-$TYPE.lst" "$CHROOTNAME"
+setupIsolinux "$CHROOTNAME" "$ISOROOTNAME"
+createSquash "$CHROOTNAME" "$ISOROOTNAME"
+buildIso $OURDIR/$PRODUCT_ID.$EXTARCH.iso "$ISOROOTNAME"
 popd
 
 if [ ! -f $OURDIR/$PRODUCT_ID.$EXTARCH.iso ]; then
