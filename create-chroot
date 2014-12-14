@@ -43,6 +43,21 @@ else
     PRODUCT_ID="OpenMandrivaLx.$VERSION-$RELEASE_ID-$TYPE"
 fi
 
+mount_all() {
+    umount -f $ROOTNAME/sys || :
+    umount -f $ROOTNAME/proc || :
+    umount -f $ROOTNAME/dev/pts || :
+    umount -f $ROOTNAME/dev || :
+}
+
+error() {
+    umount_all
+    exit 1
+}
+
+# Don't leave potentially dangerous stuff if we had to error out...
+trap error ERR
+
 # Usage: parsePkgList xyz.lst
 # Shows the list of packages in the package list file (including any packages
 # mentioned by other package list files being %include-d)
@@ -50,15 +65,15 @@ parsePkgList() {
 	LINE=0
 	cat "$1" |while read r; do
 		LINE=$((LINE+1))
-		SANITIZED="`echo $r |sed -e 's,	, ,g;s,  *, ,g;s,^ ,,;s, $,,;s,#.*,,'`"
+		SANITIZED="`echo $r | sed -e 's,	, ,g;s,  *, ,g;s,^ ,,;s, $,,;s,#.*,,'`"
 		[ -z "$SANITIZED" ] && continue
-		if [ "`echo $SANITIZED |cut -b1-9`" = "%include " ]; then
-			INC="`echo $SANITIZED |cut -b10-`"
+		if [ "`echo $SANITIZED | cut -b1-9`" = "%include " ]; then
+			INC="`echo $SANITIZED | cut -b10-`"
 			if ! [ -e "$INC" ]; then
 				echo "ERROR: Package list doesn't exist: $INC (included from $1 line $LINE)" >&2
 				exit 1
 			fi
-			parsePkgList "`echo $SANITIZED |cut -b10-`"
+			parsePkgList "`echo $SANITIZED | cut -b10-`"
 			continue
 		fi
 		echo $SANITIZED
@@ -72,7 +87,7 @@ parsePkgList() {
 getPackages() {
 	$SUDO urpmi.addmedia --urpmi-root "$2" --distrib $REPOPATH
 	$SUDO urpmi.update --urpmi-root "$2" -a -c -ff --wget
-	parsePkgList "$1" |xargs $SUDO urpmi --urpmi-root "$ROOTNAME" --no-install --download-all --no-verify-rpm --fastunsafe --ignoresize "$2" --auto
+	parsePkgList "$1" | xargs $SUDO urpmi --urpmi-root "$ROOTNAME" --no-install --download-all --no-verify-rpm --fastunsafe --ignoresize "$2" --auto
 }
 
 # Usage: createChroot packages.lst /target/dir
@@ -80,36 +95,42 @@ getPackages() {
 # file and their dependencies in /target/dir
 createChroot() {
 	# Make sure /proc, /sys and friends are mounted so %post scripts can use them
-	$SUDO mkdir -p "$2"/proc "$2"/sys
+	$SUDO mkdir -p "$2"/proc "$2"/sys "$2"/dev "$2"/dev/pts
 	$SUDO urpmi.addmedia --urpmi-root "$2" --distrib $REPOPATH
 	$SUDO urpmi.update -a -c -ff --wget --urpmi-root "$2" main
 	$SUDO urpmi.update -a -c -ff --wget --urpmi-root "$2" updates
 	$SUDO mount --bind /proc "$2"/proc
 	$SUDO mount --bind /sys "$2"/sys
-	parsePkgList "$1" |xargs $SUDO urpmi --urpmi-root "$2" --no-verify-rpm --fastunsafe --ignoresize --auto
 	$SUDO mount --bind /dev "$2"/dev
+	$SUDO mount --bind /dev/pts "$2"/dev/pts
+
+	# start rpm packages installation
+	parsePkgList "$1" | xargs $SUDO urpmi --urpmi-root "$2" --no-verify-rpm --fastunsafe --ignoresize --auto
+
 	$SUDO install -c -m 755 $OURDIR/create-initramfs.sh $OURDIR/dracut-00-live.sh "$2"/boot/
 	$SUDO chroot "$2" /boot/create-initramfs.sh
 	$SUDO rm "$2"/boot/create-initramfs.sh
-	$SUDO umount "$2"/proc
-	$SUDO umount "$2"/sys
-	$SUDO umount "$2"/dev
+	$SUDO umount "$2"/proc || :
+	$SUDO umount "$2"/sys || :
+	$SUDO umount "$2"/dev/pts || :
+	$SUDO umount "$2"/dev || :
 }
 
 # Usage: setupIsoLinux /target/dir
 # Sets up isolinux to boot /target/dir
 setupIsolinux() {
-	cd "$1"/lib/modules
-	KERNEL=`ls -d --sort=time [0-9]* |head -n1 |sed -e 's,/$,,'`
-	cd -
-	cd "$1"/boot
+	pushd "$1"/lib/modules
+	KERNEL=`ls -d --sort=time [0-9]* | head -n1 |sed -e 's,/$,,'`
+	popd
+
+	pushd "$1"/boot
 	pwd
 	ls
 	echo $KERNEL
 	$SUDO cp -f vmlinuz-$KERNEL vmlinuz
 	$SUDO cp -f initrd-$KERNEL.img initrd.img
 	ls -l "$1"/boot/vmlinuz "$1"/boot/initrd.img
-	cd -
+	popd
 	$SUDO mkdir -p "$1"/isolinux
 	$SUDO chmod 1777 "$1"/isolinux
 	# install isolinux programs
@@ -213,7 +234,6 @@ buildIso() {
 	$SUDO isohybrid "$1"
 	ls -l "$1"
 
-
 }
 
 #Force update of critical packages
@@ -225,12 +245,12 @@ ROOTNAME="`mktemp -d /tmp/liverootXXXXXX`"
 [ -z "$ROOTNAME" ] && ROOTNAME=/tmp/liveroot.$$
 $SUDO mkdir -p "$ROOTNAME"/tmp
 
-if [ -d iso-pkg-lists ]; then
-    rm -rf iso-pkg-lists
+if [ -d $OURDIR/iso-pkg-lists ]; then
+    rm -rf $OURDIR/iso-pkg-lists
 fi
 
 ### possible fix for timed out GIT pulls
-if [ ! -d iso-pkg-lists ]; then
+if [ ! -d $OURDIR/iso-pkg-lists ]; then
     if [ $TREE = "cooker" ]; then
 	BRANCH=master
     fi
@@ -250,6 +270,11 @@ setupIsolinux "$ROOTNAME"
 buildIso $OURDIR/$PRODUCT_ID.$EXTARCH.iso "$ROOTNAME"
 popd
 
+if [ ! -f $OURDIR/$PRODUCT_ID.$EXTARCH.iso ]; then
+    umount_all
+    exit 1
+fi
+
 md5sum  $OURDIR/$PRODUCT_ID.$EXTARCH.iso > $OURDIR/$PRODUCT_ID.$EXTARCH.iso.md5sum
 sha1sum $OURDIR/$PRODUCT_ID.$EXTARCH.iso > $OURDIR/$PRODUCT_ID.$EXTARCH.iso.sha1sum
 
@@ -259,3 +284,5 @@ if echo $OURDIR |grep -q /home/vagrant; then
     mv $OURDIR/*.iso* /home/vagrant/results/
     mv $LOGDIR/*.log /home/vagrant/archives/
 fi
+
+umount_all
