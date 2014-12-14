@@ -151,9 +151,9 @@ setupIsolinux() {
 
 	$SUDO mkdir -p "$2"/LiveOS
 	$SUDO mkdir -p "$2"/isolinux
-	$SUDO cp -a "$1"/isolinux/* "$2"/isolinux
-	$SUDO cp -a "$1"/boot/vmlinuz "$1"/isolinux/vmlinuz0
-	$SUDO cp -a "$1"/boot/initrd.img "$1"/isolinux/initrd0.img
+	$SUDO cp -a "$1"/boot/vmlinuz "$2"/isolinux/vmlinuz0
+	$SUDO cp -a "$1"/boot/initrd.img "$2"/isolinux/initrd0.img
+
 	# copy boot menu background
         $SUDO cp -rfT $OURDIR/splash.jpg "$2"/isolinux/splash.png
         # copy memtest
