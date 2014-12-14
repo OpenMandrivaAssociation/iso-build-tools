@@ -56,10 +56,10 @@ else
 fi
 
 umount_all() {
-    umount -f $ROOTNAME/sys || :
-    umount -f $ROOTNAME/proc || :
-    umount -f $ROOTNAME/dev/pts || :
-    umount -f $ROOTNAME/dev || :
+    $SUDO umount "$2"/proc || :
+    $SUDO umount "$2"/sys || :
+    $SUDO umount "$2"/dev/pts || :
+    $SUDO umount "$2"/dev || :
 }
 
 error() {
@@ -117,15 +117,14 @@ createChroot() {
 	$SUDO mount --bind /dev/pts "$2"/dev/pts
 
 	# start rpm packages installation
-	parsePkgList "$1" | xargs $SUDO urpmi --urpmi-root "$2" --no-verify-rpm --fastunsafe --ignoresize --auto
+	parsePkgList "$1" | xargs $SUDO urpmi --urpmi-root "$2" --no-verify-rpm --fastunsafe --ignoresize --nolock --auto
 
 	$SUDO install -c -m 755 $OURDIR/create-initramfs.sh $OURDIR/dracut-00-live.sh "$2"/boot/
 	$SUDO chroot "$2" /boot/create-initramfs.sh
 	$SUDO rm "$2"/boot/create-initramfs.sh
-	$SUDO umount "$2"/proc || :
-	$SUDO umount "$2"/sys || :
-	$SUDO umount "$2"/dev/pts || :
-	$SUDO umount "$2"/dev || :
+	umount_all
+
+	
 }
 
 # Usage: setupIsoLinux /target/dir
@@ -294,7 +293,6 @@ if echo $OURDIR |grep -q /home/vagrant; then
     # We're running in ABF -- adjust to its directory structure
     mkdir -p /home/vagrant/results /home/vagrant/archives
     mv $OURDIR/*.iso* /home/vagrant/results/
-    mv $LOGDIR/*.log /home/vagrant/archives/
 fi
 
 # clean chroot
