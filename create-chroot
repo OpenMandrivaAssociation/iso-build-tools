@@ -162,7 +162,7 @@ buildIso() {
 #Force update of critical packages
 urpmq --list-url
 urpmi.update -ff updates
-urpmi --no-verify-rpm perl-URPM cdrkit-genisoimage
+urpmi --no-verify-rpm perl-URPM cdrkit-genisoimage syslinux
 
 ROOT="`mktemp -d /tmp/liverootXXXXXX`"
 [ -z "$ROOT" ] && ROOT=/tmp/liveroot.$$
