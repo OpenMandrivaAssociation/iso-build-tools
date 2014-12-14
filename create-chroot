@@ -113,7 +113,7 @@ setupIsolinux() {
 	$SUDO mkdir -p "$1"/isolinux
 	$SUDO chmod 1777 "$1"/isolinux
 	# install isolinux programs
-        for i in isolinux.bin vesamenu.c32 hdt.c32 pci.ids poweroff.com chain.c32 memtest; do
+        for i in isolinux.bin vesamenu.c32 hdt.c32 poweroff.com chain.c32; do
             $SUDO cp "$1"/usr/lib/syslinux/$i "$1"/isolinux ;
         done
 
