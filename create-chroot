@@ -121,6 +121,9 @@ setupIsolinux() {
         cp -rfT $OURDIR/splash.jpg "$1"/isolinux/splash.png
         # copy memtest
         cp -rfT $OURDIR/extraconfig/memtest "$1"/isolinux/memtest
+        # copy SuperGrub iso
+        cp -rfT $OURDIR/extraconfig/memdisk "$1"/isolinux/memdisk
+        cp -rfT $OURDIR/extraconfig/sgb.iso "$1"/isolinux/sgb.iso
 
 	# kernel/initrd filenames referenced below are the ISO9660 names.
 	# syslinux doesn't support Rock Ridge.
@@ -133,7 +136,7 @@ MENU BACKGROUND splash.png
 TIMEOUT 50
 MENU WIDTH 78
 MENU MARGIN 4
-MENU ROWS 7
+MENU ROWS 8
 MENU VSHIFT 10
 MENU TIMEOUTROW 14
 MENU TABMSGROW 13
@@ -168,6 +171,11 @@ LABEL vesa
 	LINUX /boot/vmlinuz
 	INITRD /boot/initrd.img
 	APPEND initrd=/boot/initrd.img rootfstype=auto ro rd.live.image xdriver=vesa nomodeset plymouth.enable=0 vga=792 install root=live:/dev/disk/by-label/OpenMandriva
+
+LABEL supergrub
+        MENU LABEL Run super grub2 disk
+        kernel memdisk
+        append initrd=sgb.iso
 
 LABEL memtest
 	MENU LABEL Test memory
