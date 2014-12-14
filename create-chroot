@@ -43,7 +43,7 @@ else
     PRODUCT_ID="OpenMandrivaLx.$VERSION-$RELEASE_ID-$TYPE"
 fi
 
-mount_all() {
+umount_all() {
     umount -f $ROOTNAME/sys || :
     umount -f $ROOTNAME/proc || :
     umount -f $ROOTNAME/dev/pts || :
@@ -285,4 +285,6 @@ if echo $OURDIR |grep -q /home/vagrant; then
     mv $LOGDIR/*.log /home/vagrant/archives/
 fi
 
+# clean chroot
 umount_all
+
