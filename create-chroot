@@ -227,7 +227,7 @@ fi
 
 pushd iso-pkg-lists
 # getPackages "${DIST}-${TYPE}.lst" /tmp/packages
-createChroot "${DIST}-${TYPE}.lst" "$ROOTNAME"
+createChroot "$DIST-$TYPE.lst" "$ROOTNAME"
 setupIsolinux "$ROOTNAME"
 buildIso $OURDIR/$PRODUCT_ID.$EXTARCH.iso "$ROOTNAME"
 popd
