@@ -16,10 +16,10 @@ fi
 if [[ $@ ]]; then
     true
 else
-    echo "Please run script wigh arguments."
+    echo "Please run script with arguments."
     echo "omdv-build-iso.sh ARCH TREE VERSION RELEASE_ID TYPE DISPLAYMANAGER"
     echo "For example:"
-    echo "./omdv-build-iso.sh x86_64 cooker 2015.0 alpha hawaii sddm"
+    echo "./$0 x86_64 cooker 2015.0 alpha hawaii sddm"
     echo "Exiting."
     exit 1
 fi
