@@ -11,7 +11,7 @@ cd /boot
 rm -rf tmp
 mkdir tmp
 cd tmp
-xzcat ../initrd-$KERNEL.img |cpio -iduf
+xzcat ../initrd-$KERNEL.img |cpio -idu
 install -c -m 755 ../dracut-00-live.sh lib/dracut/hooks/mount/00-live.sh
 find . |cpio -R 0:0 -H newc -o --quiet |xz --check=crc32 --lzma2=dict=1MiB >../initrd-$KERNEL.img
 cd -
