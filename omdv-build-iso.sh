@@ -124,7 +124,6 @@ createChroot() {
 	$SUDO rm "$2"/boot/create-initramfs.sh
 	umount_all
 
-	
 }
 
 # Usage: setupIsoLinux /target/dir
@@ -239,7 +238,7 @@ buildIso() {
 	$SUDO mkisofs -o "$1" -b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		-P "OpenMandriva Association" -p "OpenMandriva Association" \
-		-R -J -l -V $LABEL "$2"
+		-R -J -l -V -r -hide-rr-moved -hide-joilet-trans-tbl $LABEL "$2"
 
 	ls -l "$1"
 	$SUDO isohybrid "$1"
