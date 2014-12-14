@@ -112,7 +112,11 @@ setupIsolinux() {
 	cd -
 	$SUDO mkdir -p "$1"/isolinux
 	$SUDO chmod 1777 "$1"/isolinux
-	$SUDO cp "$1"/usr/lib/syslinux/isolinux.bin "$1"/usr/lib/syslinux/vesamenu.c32 "$1"/usr/lib/syslinux/hdt.c32 "$1"/usr/share/pci.ids "$1"/usr/lib/syslinux/poweroff.com "$1"/isolinux
+	# install isolinux programs
+        for i in isolinux.bin vesamenu.c32 hdt.c32 pci.ids poweroff.com chain.c32 memtest; do
+            $SUDO cp "$1"/usr/lib/syslinux/$i "$1"/isolinux ;
+        done
+
 	# kernel/initrd filenames referenced below are the ISO9660 names.
 	# syslinux doesn't support Rock Ridge.
 	cat >"$1"/isolinux/isolinux.cfg <<EOF
@@ -170,7 +174,8 @@ LABEL hardware
 
 LABEL harddisk
 	MENU LABEL Boot from harddisk
-	BOOTFALLBACK -1
+	KERNEL chain.c32
+        APPEND hd0 0
 
 LABEL poweroff
 	MENU LABEL Turn off computer
