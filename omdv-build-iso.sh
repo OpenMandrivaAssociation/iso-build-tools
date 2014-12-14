@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Usage:
-# ./create-chroot EXTARCH TREE VERSION RELEASE_ID TYPE DISPLAYMANAGER
-# ./create-chroot x86_64 cooker 2015.0 alpha hawaii sddm
+# ./omdv-build-iso.sh EXTARCH TREE VERSION RELEASE_ID TYPE DISPLAYMANAGER
+# ./omdv-build-iso.sh x86_64 cooker 2015.0 alpha hawaii sddm
 #
 
 if [ "`id -u`" != "0" ]; then
@@ -17,8 +17,9 @@ if [[ $@ ]]; then
     true
 else
     echo "Please run script wigh arguments."
+    echo "omdv-build-iso.sh ARCH TREE VERSION RELEASE_ID TYPE DISPLAYMANAGER"
     echo "For example:"
-    echo "./create-chroot x86_64 cooker 2015.0 alpha hawaii sddm"
+    echo "./omdv-build-iso.sh x86_64 cooker 2015.0 alpha hawaii sddm"
     echo "Exiting."
     exit 1
 fi
