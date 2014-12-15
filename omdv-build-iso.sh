@@ -167,11 +167,18 @@ createInitrd() {
 		echo "Missing $OURDIR/create-liveramfs.sh . Exiting."
 		error
 	fi
+	
+	# fugly hack to get /dev/disk/by-label working
+	sed -i -e "s@KERNEL!="sr*", IMPORT{builtin}="blkid"@KERNEL@#KERNEL" "$1"/lib/systemd/udev/rules/60-persistent-storage.rules
+	
 	$SUDO install -c -m 755 $OURDIR/create-liveramfs.sh $OURDIR/dracut-00-live.sh "$1"/boot/
 	$SUDO chroot "$1" /boot/create-liveramfs.sh "$LABEL" "$KERNEL_ISO"
 	$SUDO rm "$1"/boot/create-liveramfs.sh
 	$SUDO rm "$1"/boot/dracut-00-live.sh
-
+	# get it back to original
+	# fugly hack to get /dev/disk/by-label working
+	sed -i -e "s@KERNEL!="sr*", IMPORT{builtin}="blkid"@#KERNEL@KERNEL" "$1"/lib/systemd/udev/rules/60-persistent-storage.rules
+	
 	echo "Building initrd-$KERNEL_ISO inside chroot"
 	# remove old initrd
 	$SUDO rm -rf "$1"/boot/initrd-$KERNEL_ISO.img
