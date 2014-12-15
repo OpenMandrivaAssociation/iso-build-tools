@@ -226,7 +226,7 @@ setupIsolinux() {
 UI vesamenu.c32
 DEFAULT boot
 PROMPT 0
-MENU TITLE Welcome to OpenMandriva Lx
+MENU TITLE Welcome to OpenMandriva Lx $VERSION $EXTARCH
 MENU BACKGROUND splash.png
 TIMEOUT 50
 MENU WIDTH 78
@@ -250,22 +250,22 @@ MENU COLOR msg07 37;40 #90ffffff #a0000000 std
 MENU COLOR tabmsg 31;40 #30ffffff #00000000 std
 
 LABEL boot
-	MENU LABEL Boot OpenMandriva Lx $VERSION
+	MENU LABEL Boot OpenMandriva Lx in Live Mode
 	LINUX /isolinux/vmlinuz0
 	INITRD /isolinux/initrd0.img
-	APPEND initrd=/isolinux/initrd0.img rootfstype=auto ro rd.live.image quiet rhgb vga=current splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva locale.lang=en_EN vconsole.keymap=en
+	APPEND initrd=/isolinux/initrd0.img rootfstype=auto ro rd.live.image quiet rhgb vga=788 splash=silent logo.nologo root=live:/dev/disk/by-label/$LABEL locale.lang=en_US vconsole.keymap=us
 
 LABEL install
-	MENU LABEL Install OpenMandriva Lx $VERSION
+	MENU LABEL Install OpenMandriva Lx
 	LINUX /isolinux/vmlinuz0
 	INITRD /isolinux/initrd0.img
-	APPEND initrd=/isolinux/initrd0.img rootfstype=auto ro rd.live.image quiet rhgb vga=current splash=silent logo.nologo root=live:/dev/disk/by-label/OpenMandriva locale.lang=en_EN vconsole.keymap=en install
+	APPEND initrd=/isolinux/initrd0.img rootfstype=auto ro rd.live.image quiet rhgb vga=788 splash=silent logo.nologo root=live:/dev/disk/by-label/$LABEL locale.lang=en_US vconsole.keymap=us install
 
 LABEL vesa
-	MENU LABEL Boot OpenMandriva Lx $VERSION in safe mode
+	MENU LABEL Boot OpenMandriva Lx in safe mode
 	LINUX /isolinux/vmlinuz0
 	INITRD /isolinux/initrd0.img
-	APPEND initrd=/isolinux/initrd0.img rootfstype=auto ro rd.live.image xdriver=vesa nomodeset plymouth.enable=0 vga=792 install root=live:/dev/disk/by-label/OpenMandriva locale.lang=en_EN vconsole.keymap=en
+	APPEND initrd=/isolinux/initrd0.img rootfstype=auto ro rd.live.image xdriver=vesa nomodeset plymouth.enable=0 vga=792 install root=live:/dev/disk/by-label/$LABEL locale.lang=en_EN vconsole.keymap=en
 
 LABEL supergrub
         MENU LABEL Run super grub2 disk
@@ -302,7 +302,6 @@ createSquash() {
         $SUDO mksquashfs "$1" "$2"/LiveOS/squashfs.img -comp xz -no-progress -no-recovery
 
 }
-
 
 # Usage: buildIso filename.iso rootdir
 # Builds an ISO file from the files in rootdir
