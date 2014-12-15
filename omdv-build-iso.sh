@@ -31,7 +31,6 @@ VERSION="`date +%Y.0`"
 RELEASE_ID=alpha
 TYPE=kde4
 DISPLAYMANAGER="kdm"
-REPOPATH="http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/"
 
 SUDO=sudo
 [ "`id -u`" = "0" ] && SUDO=""
@@ -49,6 +48,8 @@ ISOROOTNAME="$ROOTNAME"/ISO
 [ -n "$5" ] && TYPE="$5"
 [ -n "$6" ] && DISPLAYMANAGER="$6"
 [ "$EXTARCH" = "i386" ] && EXTARCH=i586
+
+REPOPATH="http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/"
 
 if [ "$RELEASE_ID" == "final" ]; then
     PRODUCT_ID="OpenMandrivaLx.$VERSION-$TYPE"
