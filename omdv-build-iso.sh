@@ -60,7 +60,9 @@ LABEL="$PRODUCT_ID.$EXTARCH"
 [ `echo $LABEL | wc -m` -gt 32 ] && LABEL="`echo $LABEL |cut -b1-32`"
 
 
-umount_all() {
+umountAll() {
+	echo "Umounting all."
+	unset KERNEL_ISO
     $SUDO umount "$1"/proc || :
     $SUDO umount "$1"/sys || :
     $SUDO umount "$1"/dev/pts || :
@@ -68,7 +70,9 @@ umount_all() {
 }
 
 error() {
-    umount_all
+	echo "Something went wrong. Exiting"
+	unset KERNEL_ISO
+    umountAll "$CHROOTNAME"
     exit 1
 }
 
@@ -123,12 +127,27 @@ createChroot() {
 
 	# start rpm packages installation
 	parsePkgList "$1" | xargs $SUDO urpmi --urpmi-root "$2" --no-verify-rpm --fastunsafe --ignoresize --nolock --auto
+	
+	# build normal initrd
+	if [ ! -d  "$1"/lib/modules ]; then
+		echo "Broken chroot installation. Exiting"
+		error()
+	fi
+	
+	pushd "$1"/lib/modules
+		KERNEL_ISO=`ls -d --sort=time [0-9]* |head -n1 |sed -e 's,/$,,'`
+		export KERNEL_ISO
+	popd
 
-	$SUDO install -c -m 755 $OURDIR/create-initramfs.sh $OURDIR/dracut-00-live.sh "$2"/boot/
-	$SUDO chroot "$2" /boot/create-initramfs.sh "$LABEL"
-	$SUDO rm "$2"/boot/create-initramfs.sh
-	umount_all "$2"
-
+	if [ ! -f "$2"/usr/sbin/dracut ]; then
+		echo "dracut is not insalled inside chroot. Exiting"
+		error()
+	fi
+	$SUDO chroot "2" /usr/sbin/dracut -f /boot/initrd-$KERNEL_ISO.img $KERNEL_ISO
+	
+#	$SUDO install -c -m 755 $OURDIR/create-initramfs.sh $OURDIR/dracut-00-live.sh "$2"/boot/
+#	$SUDO chroot "$2" /boot/create-initramfs.sh "$LABEL"
+#	$SUDO rm "$2"/boot/create-initramfs.sh
 }
 
 # Usage: setupIsoLinux /target/dir
@@ -296,6 +315,7 @@ fi
 pushd iso-pkg-lists
 createChroot "$DIST-$TYPE.lst" "$CHROOTNAME"
 setupIsolinux "$CHROOTNAME" "$ISOROOTNAME"
+
 createSquash "$CHROOTNAME" "$ISOROOTNAME"
 buildIso $OURDIR/$PRODUCT_ID.$EXTARCH.iso "$ISOROOTNAME"
 popd
