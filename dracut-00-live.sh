@@ -4,15 +4,24 @@ type det_fs >/dev/null 2>&1 || . /lib/fs-lib.sh
 
 modprobe iso9660
 
-mkdir "$NEWROOT"/iso
-mkdir "$NEWROOT"/tmpfs
+if [ ! -d mkdir "$NEWROOT"/iso ]; then
+	mkdir "$NEWROOT"/iso
+fi
+
+if [ ! -d mkdir "$NEWROOT"/tmpfs ]; then
+	mkdir "$NEWROOT"/tmpfs
+fi
 if ! [ -e /dev/disk/by-label/@LABEL@ ]; then
 	echo "Failed to find ISO -- dropping to shell for debugging"
 	/bin/sh
 fi
+
 mount /dev/disk/by-label/@LABEL@ "$NEWROOT"/iso
+
 if [ -e "$NEWROOT"/iso/squashfs.img ]; then
-	mkdir "$NEWROOT"/squashfs
+	if [ ! -d "$NEWROOT"/squashfs ]; then
+		mkdir "$NEWROOT"/squashfs
+	fi
 	modprobe loop
 	modprobe squashfs
 	mount -o loop "$NEWROOT"/iso/squashfs.img "$NEWROOT"/squashfs
