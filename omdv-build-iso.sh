@@ -132,7 +132,7 @@ createChroot() {
 	# check CHROOT
 	if [ ! -d  "$2"/lib/modules ]; then
 		echo "Broken chroot installation. Exiting"
-		error()
+		error
 	fi
 	
 	# this will be needed in future
@@ -148,20 +148,20 @@ createInitrd() {
 	# check if dracut is installed
 	if [ ! -f "$1"/usr/sbin/dracut ]; then
 		echo "dracut is not insalled inside chroot. Exiting."
-		error()
+		error
 	fi
 
 	# build initrd for isolinux
 	echo "Building initrd-$KERNEL_ISO for isolinux"
 	if [ ! -f $OURDIR/extraconfig/etc/dracut.conf.d/60-dracut-isobuild.conf ]; then
 		echo "Missing $OURDIR/extraconfig/etc/dracut.conf.d/60-dracut-isobuild.conf . Exiting."
-		error()
+		error
 	fi
 	$SUDO cp -rfT $OURDIR/extraconfig/etc/dracut.conf.d/60-dracut-isobuild.conf "$1"/etc/dracut.conf.d/60-dracut-isobuild.conf
 	
 	if [ ! -f $OURDIR/create-liveramfs.sh ]; then
 		echo "Missing $OURDIR/create-liveramfs.sh . Exiting."
-		error()
+		error
 	fi
 	$SUDO install -c -m 755 $OURDIR/create-liveramfs.sh $OURDIR/dracut-00-live.sh "$1"/boot/
 	$SUDO chroot "$1" /boot/create-liveramfs.sh "$LABEL"
@@ -297,7 +297,7 @@ buildIso() {
 
 	if [ ! -f "$1" ]; then
 		echo "Failed build iso image. Exiting"
-		error()
+		error
 	fi
 	$SUDO isohybrid "$1"
 	echo "ISO build completed."
