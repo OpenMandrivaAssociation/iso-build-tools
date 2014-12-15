@@ -290,6 +290,7 @@ createSquash() {
     if [ -f "$1"/ISO/LiveOS/squashfs.img ]; then
 		$SUDO rm -rf "$2"/LiveOS/squashfs.img
     fi
+		umountAll "$1"
         $SUDO mksquashfs "$1" "$2"/LiveOS/squashfs.img -comp xz -no-progress -no-recovery
 
 }
