@@ -250,11 +250,12 @@ buildIso() {
 
 	LABEL=$PRODUCT_ID.$EXTARCH
 	[ `echo $LABEL | wc -m` -gt 32 ] && LABEL="OpenMandrivaLx_$VERSION"
+	[ `echo $LABEL | wc -m` -gt 32 ] && LABEL="`echo $LABEL |cut -b1-32`"
 
 	$SUDO mkisofs -o "$1" -b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		-P "OpenMandriva Association" -p "OpenMandriva Association" \
-		-R -J -l -r -hide-rr-moved -hide-joilet-trans-tbl -V $LABEL "$2"
+		-R -J -l -r -hide-rr-moved -hide-joilet-trans-tbl -V "$LABEL" "$2"
 
 	ls -l "$1"
 	$SUDO isohybrid "$1"

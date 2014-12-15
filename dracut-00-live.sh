@@ -6,6 +6,10 @@ modprobe iso9660
 
 mkdir "$NEWROOT"/iso
 mkdir "$NEWROOT"/tmpfs
+if ! [ -e /dev/disk/by-label/OpenMandriva ]; then
+	echo "Failed to find ISO -- dropping to shell for debugging"
+	/bin/sh
+fi
 mount /dev/disk/by-label/OpenMandriva "$NEWROOT"/iso
 if [ -e "$NEWROOT"/iso/squashfs.img ]; then
 	mkdir "$NEWROOT"/squashfs
