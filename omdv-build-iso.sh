@@ -306,7 +306,11 @@ buildIso() {
 #Force update of critical packages
 urpmq --list-url
 urpmi.update -ff updates
-urpmi --no-verify-rpm perl-URPM cdrtools syslinux squashfs-tools
+# inside ABF, lxc-container which is used to run this script is based
+# on Rosa2012 which does not have cdrtools
+urpmi --no-verify-rpm perl-URPM cdrkit-genisoimage syslinux squashfs-tools 
+# add some cool check for either we are inside ABF or not
+#urpmi --no-verify-rpm perl-URPM cdrtools syslinux squashfs-tools
 
 ROOTNAME="`mktemp -d /tmp/liverootXXXXXX`"
 [ -z "$ROOTNAME" ] && ROOTNAME=/tmp/liveroot.$$
