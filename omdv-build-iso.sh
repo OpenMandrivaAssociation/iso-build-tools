@@ -185,6 +185,7 @@ setupIsolinux() {
 	$SUDO mkdir -p "$2"/isolinux
 	$SUDO chmod 1777 "$2"/isolinux
 	# install isolinux programs
+	echo "Installing isolinux programs."
         for i in isolinux.bin vesamenu.c32 hdt.c32 poweroff.com chain.c32; do
             $SUDO cp "$1"/usr/lib/syslinux/$i "$2"/isolinux ;
         done
@@ -192,10 +193,12 @@ setupIsolinux() {
 	$SUDO mkdir -p "$2"/LiveOS
 	$SUDO mkdir -p "$2"/isolinux
 	
+	echo "Installing liveramfs inside isolinux"
 	$SUDO cp -a "$1"/boot/vmlinuz-$KERNEL_ISO "$2"/isolinux/vmlinuz0
 	$SUDO cp -a "$1"/boot/liveinitrd.img "$2"/isolinux/initrd0.img
 	$SUDO rm -rf "$1"/boot/liveinitrd.img
-
+	
+	echo "Copy various isolinux settings"
 	# copy boot menu background
         $SUDO cp -rfT $OURDIR/splash.jpg "$2"/isolinux/splash.png
         # copy memtest
@@ -204,6 +207,7 @@ setupIsolinux() {
         $SUDO cp -rfT $OURDIR/extraconfig/memdisk "$2"/isolinux/memdisk
         $SUDO cp -rfT $OURDIR/extraconfig/sgb.iso "$2"/isolinux/sgb.iso
 
+	echo "Create isolinux menu"
 	# kernel/initrd filenames referenced below are the ISO9660 names.
 	# syslinux doesn't support Rock Ridge.
 	$SUDO cat >"$2"/isolinux/isolinux.cfg <<EOF
@@ -274,6 +278,7 @@ LABEL poweroff
 	COMBOOT poweroff.com
 EOF
 	$SUDO chmod 0755 "$2"/isolinux
+	echo "Isolinux setup completed"
 }
 
 createSquash() {
