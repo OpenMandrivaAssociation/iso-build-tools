@@ -115,6 +115,7 @@ getPackages() {
 # Creates a chroot environment with all packages in the packages.lst
 # file and their dependencies in /target/dir
 createChroot() {
+	echo "Creating chroot $2"
 	# Make sure /proc, /sys and friends are mounted so %post scripts can use them
 	$SUDO mkdir -p "$2"/proc "$2"/sys "$2"/dev "$2"/dev/pts
 	$SUDO urpmi.addmedia --urpmi-root "$2" --distrib $REPOPATH
@@ -128,43 +129,58 @@ createChroot() {
 	# start rpm packages installation
 	parsePkgList "$1" | xargs $SUDO urpmi --urpmi-root "$2" --no-verify-rpm --fastunsafe --ignoresize --nolock --auto
 	
-	# build normal initrd
-	if [ ! -d  "$1"/lib/modules ]; then
+	# check CHROOT
+	if [ ! -d  "$2"/lib/modules ]; then
 		echo "Broken chroot installation. Exiting"
 		error()
 	fi
 	
-	pushd "$1"/lib/modules
+	# this will be needed in future
+	pushd "$2"/lib/modules
 		KERNEL_ISO=`ls -d --sort=time [0-9]* |head -n1 |sed -e 's,/$,,'`
 		export KERNEL_ISO
 	popd
 
-	if [ ! -f "$2"/usr/sbin/dracut ]; then
-		echo "dracut is not insalled inside chroot. Exiting"
+}
+
+createInitrd() {
+
+	# check if dracut is installed
+	if [ ! -f "$1"/usr/sbin/dracut ]; then
+		echo "dracut is not insalled inside chroot. Exiting."
 		error()
 	fi
-	$SUDO chroot "2" /usr/sbin/dracut -f /boot/initrd-$KERNEL_ISO.img $KERNEL_ISO
+
+	# build initrd for isolinux
+	echo "Building initrd-$KERNEL_ISO for isolinux"
+	if [ ! -f $OURDIR/extraconfig/etc/dracut.conf.d/60-dracut-isobuild.conf ]; then
+		echo "Missing $OURDIR/extraconfig/etc/dracut.conf.d/60-dracut-isobuild.conf . Exiting."
+		error()
+	fi
+	$SUDO cp -rfT $OURDIR/extraconfig/etc/dracut.conf.d/60-dracut-isobuild.conf "$1"/etc/dracut.conf.d/60-dracut-isobuild.conf
 	
-#	$SUDO install -c -m 755 $OURDIR/create-initramfs.sh $OURDIR/dracut-00-live.sh "$2"/boot/
-#	$SUDO chroot "$2" /boot/create-initramfs.sh "$LABEL"
-#	$SUDO rm "$2"/boot/create-initramfs.sh
+	if [ ! -f $OURDIR/create-liveramfs.sh ]; then
+		echo "Missing $OURDIR/create-liveramfs.sh . Exiting."
+		error()
+	fi
+	$SUDO install -c -m 755 $OURDIR/create-liveramfs.sh $OURDIR/dracut-00-live.sh "$1"/boot/
+	$SUDO chroot "$1" /boot/create-liveramfs.sh "$LABEL"
+	$SUDO rm "$1"/boot/create-liveramfs.sh
+	$SUDO rm "$1"/boot/dracut-00-live.sh
+
+	echo "Building initrd-$KERNEL_ISO inside chroot"
+	# remove old initrd
+	$SUDO rm -rf "1"/boot/initrd-$KERNEL_ISO.img
+	$SUDO rm -rf "1"/boot/initrd0.img
+	$SUDO chroot "1" /usr/sbin/dracut -f /boot/initrd-$KERNEL_ISO.img $KERNEL_ISO
+	$SUDO ln -s "1"/boot/initrd-$KERNEL_ISO.img /boot/initrd0.img
+
 }
 
 # Usage: setupIsoLinux /target/dir
 # Sets up isolinux to boot /target/dir
 setupIsolinux() {
-	pushd "$1"/lib/modules
-	KERNEL=`ls -d --sort=time [0-9]* | head -n1 |sed -e 's,/$,,'`
-	popd
-
-	pushd "$1"/boot
-	pwd
-	ls
-	echo $KERNEL
-	$SUDO cp -f vmlinuz-$KERNEL vmlinuz
-	$SUDO cp -f initrd-$KERNEL.img initrd.img
-	ls -l "$1"/boot/vmlinuz "$1"/boot/initrd.img
-	popd
+	echo "Starting isolinux setup."
 
 	$SUDO mkdir -p "$2"/isolinux
 	$SUDO chmod 1777 "$2"/isolinux
@@ -175,8 +191,10 @@ setupIsolinux() {
 
 	$SUDO mkdir -p "$2"/LiveOS
 	$SUDO mkdir -p "$2"/isolinux
-	$SUDO cp -a "$1"/boot/vmlinuz "$2"/isolinux/vmlinuz0
-	$SUDO cp -a "$1"/boot/initrd.img "$2"/isolinux/initrd0.img
+	
+	$SUDO cp -a "$1"/boot/vmlinuz-$KERNEL_ISO "$2"/isolinux/vmlinuz0
+	$SUDO cp -a "$1"/boot/liveinitrd.img "$2"/isolinux/initrd0.img
+	$SUDO rm -rf "$1"/boot/liveinitrd.img
 
 	# copy boot menu background
         $SUDO cp -rfT $OURDIR/splash.jpg "$2"/isolinux/splash.png
@@ -259,9 +277,9 @@ EOF
 }
 
 createSquash() {
-
+	echo "Starting squashfs image build."
     if [ -f "$1"/ISO/LiveOS/squashfs.img ]; then
-	$SUDO rm -rf "$2"/LiveOS/squashfs.img
+		$SUDO rm -rf "$2"/LiveOS/squashfs.img
     fi
         $SUDO mksquashfs "$1" "$2"/LiveOS/squashfs.img -comp xz -no-progress -no-recovery
 
@@ -271,15 +289,18 @@ createSquash() {
 # Usage: buildIso filename.iso rootdir
 # Builds an ISO file from the files in rootdir
 buildIso() {
+	echo "Starting ISO build."
 	$SUDO mkisofs -o "$1" -b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		-publisher "OpenMandriva Association" -p "OpenMandriva Association" \
 		-R -J -l -r -hide-rr-moved -hide-joliet-trans-tbl -V "$LABEL" "$2"
 
-	ls -l "$1"
+	if [ ! -f "$1" ]; then
+		echo "Failed build iso image. Exiting"
+		error()
+	fi
 	$SUDO isohybrid "$1"
-	ls -l "$1"
-
+	echo "ISO build completed."
 }
 
 #Force update of critical packages
@@ -314,14 +335,14 @@ fi
 # START ISO BUILD
 pushd iso-pkg-lists
 createChroot "$DIST-$TYPE.lst" "$CHROOTNAME"
+createInitrd "$CHROOTNAME"
 setupIsolinux "$CHROOTNAME" "$ISOROOTNAME"
-
 createSquash "$CHROOTNAME" "$ISOROOTNAME"
 buildIso $OURDIR/$PRODUCT_ID.$EXTARCH.iso "$ISOROOTNAME"
 popd
 
 if [ ! -f $OURDIR/$PRODUCT_ID.$EXTARCH.iso ]; then
-    umount_all
+    umountAll
     exit 1
 fi
 
@@ -335,6 +356,6 @@ if echo $OURDIR |grep -q /home/vagrant; then
 fi
 
 # clean chroot
-umount_all "$CHROOTNAME"
+umountAll "$CHROOTNAME"
 rm -rf "$ROOTNAME"
 
