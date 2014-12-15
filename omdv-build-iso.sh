@@ -157,7 +157,7 @@ createInitrd() {
 	fi
 
 	# build initrd for isolinux
-	echo "Building initrd-$KERNEL_ISO for isolinux"
+	echo "Building liveinitrd-$KERNEL_ISO for isolinux"
 	if [ ! -f $OURDIR/extraconfig/etc/dracut.conf.d/60-dracut-isobuild.conf ]; then
 		echo "Missing $OURDIR/extraconfig/etc/dracut.conf.d/60-dracut-isobuild.conf . Exiting."
 		error
@@ -207,7 +207,7 @@ setupIsolinux() {
 	
 	echo "Installing liveramfs inside isolinux"
 	$SUDO cp -a "$1"/boot/vmlinuz-$KERNEL_ISO "$2"/isolinux/vmlinuz0
-	$SUDO cp -a "$1"/boot/liveinitrd.img "$2"/isolinux/initrd0.img
+	$SUDO cp -a "$1"/boot/liveinitrd.img "$2"/isolinux/liveinitrd.img
 	$SUDO rm -rf "$1"/boot/liveinitrd.img
 	
 	echo "Copy various isolinux settings"
@@ -252,20 +252,20 @@ MENU COLOR tabmsg 31;40 #30ffffff #00000000 std
 LABEL boot
 	MENU LABEL Boot OpenMandriva Lx in Live Mode
 	LINUX /isolinux/vmlinuz0
-	INITRD /isolinux/initrd0.img
-	APPEND initrd=/isolinux/initrd0.img rootfstype=auto ro rd.live.image quiet rhgb vga=788 splash=silent logo.nologo root=live:/dev/disk/by-label/$LABEL locale.lang=en_US vconsole.keymap=us
+	INITRD /isolinux/liveinitrd.img
+	APPEND initrd=/isolinux/liveinitrd.img rootfstype=auto ro rd.live.image quiet rhgb vga=788 splash=silent logo.nologo root=live:/dev/disk/by-label/$LABEL locale.lang=en_US vconsole.keymap=us
 
 LABEL install
 	MENU LABEL Install OpenMandriva Lx
 	LINUX /isolinux/vmlinuz0
-	INITRD /isolinux/initrd0.img
-	APPEND initrd=/isolinux/initrd0.img rootfstype=auto ro rd.live.image quiet rhgb vga=788 splash=silent logo.nologo root=live:/dev/disk/by-label/$LABEL locale.lang=en_US vconsole.keymap=us install
+	INITRD /isolinux/liveinitrd.img
+	APPEND initrd=/isolinux/liveinitrd.img rootfstype=auto ro rd.live.image quiet rhgb vga=788 splash=silent logo.nologo root=live:/dev/disk/by-label/$LABEL locale.lang=en_US vconsole.keymap=us install
 
 LABEL vesa
 	MENU LABEL Boot OpenMandriva Lx in safe mode
 	LINUX /isolinux/vmlinuz0
-	INITRD /isolinux/initrd0.img
-	APPEND initrd=/isolinux/initrd0.img rootfstype=auto ro rd.live.image xdriver=vesa nomodeset plymouth.enable=0 vga=792 install root=live:/dev/disk/by-label/$LABEL locale.lang=en_EN vconsole.keymap=en
+	INITRD /isolinux/liveinitrd.img
+	APPEND initrd=/isolinux/liveinitrd.img rootfstype=auto ro rd.live.image xdriver=vesa nomodeset plymouth.enable=0 vga=792 install root=live:/dev/disk/by-label/$LABEL locale.lang=en_EN vconsole.keymap=en
 
 LABEL supergrub
         MENU LABEL Run super grub2 disk
