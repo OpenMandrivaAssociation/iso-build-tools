@@ -350,7 +350,7 @@ buildIso $OURDIR/$PRODUCT_ID.$EXTARCH.iso "$ISOROOTNAME"
 popd
 
 if [ ! -f $OURDIR/$PRODUCT_ID.$EXTARCH.iso ]; then
-    umountAll
+    umountAll "$CHROOTNAME"
     error
 fi
 
