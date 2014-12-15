@@ -170,10 +170,10 @@ createInitrd() {
 
 	echo "Building initrd-$KERNEL_ISO inside chroot"
 	# remove old initrd
-	$SUDO rm -rf "1"/boot/initrd-$KERNEL_ISO.img
-	$SUDO rm -rf "1"/boot/initrd0.img
-	$SUDO chroot "1" /usr/sbin/dracut -f /boot/initrd-$KERNEL_ISO.img $KERNEL_ISO
-	$SUDO ln -s "1"/boot/initrd-$KERNEL_ISO.img /boot/initrd0.img
+	$SUDO rm -rf "$1"/boot/initrd-$KERNEL_ISO.img
+	$SUDO rm -rf "$1"/boot/initrd0.img
+	$SUDO chroot "$1" /usr/sbin/dracut -f /boot/initrd-$KERNEL_ISO.img $KERNEL_ISO
+	$SUDO ln -s "$1"/boot/initrd-$KERNEL_ISO.img /boot/initrd0.img
 
 }
 
