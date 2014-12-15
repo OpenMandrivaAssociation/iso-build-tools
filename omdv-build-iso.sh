@@ -293,6 +293,21 @@ EOF
 	echo "Isolinux setup completed"
 }
 
+setupISOenv() {
+
+	# set up live user
+	$SUDO chroot "$1" /usr/sbin/adduser live
+	$SUDO chroot "$1" /usr/bin/passwd -d live
+	$SUDO chroot "$1" /bin/mkdir -p /home/live
+	$SUDO chroot "$1" /bin/cp -rfT /etc/skel /home/live/
+	$SUDO chroot "$1" /bin/chown -R live:live /home/live
+	$SUDO chroot "$1" /bin/mkdir /home/live/Desktop
+	$SUDO chroot "$1" /bin/chown -R live:live /home/live/Desktop
+	
+	#remove rpm db files to save some space
+	$SUDO chroot "$1" rm -f /var/lib/rpm/__db.*
+}
+
 createSquash() {
 	echo "Starting squashfs image build."
     if [ -f "$1"/ISO/LiveOS/squashfs.img ]; then
@@ -353,6 +368,7 @@ $SUDO mkdir -p "$ROOTNAME"/tmp
 createChroot "$DIST-$TYPE.lst" "$CHROOTNAME"
 createInitrd "$CHROOTNAME"
 setupIsolinux "$CHROOTNAME" "$ISOROOTNAME"
+setupISOenv "$CHROOTNAME"
 createSquash "$CHROOTNAME" "$ISOROOTNAME"
 buildIso $OURDIR/$PRODUCT_ID.$EXTARCH.iso "$ISOROOTNAME"
 popd
