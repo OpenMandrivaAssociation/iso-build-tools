@@ -164,7 +164,7 @@ createInitrd() {
 		error
 	fi
 	$SUDO install -c -m 755 $OURDIR/create-liveramfs.sh $OURDIR/dracut-00-live.sh "$1"/boot/
-	$SUDO chroot "$1" /boot/create-liveramfs.sh "$LABEL"
+	$SUDO chroot "$1" /boot/create-liveramfs.sh "$LABEL" "$KERNEL_ISO"
 	$SUDO rm "$1"/boot/create-liveramfs.sh
 	$SUDO rm "$1"/boot/dracut-00-live.sh
 
