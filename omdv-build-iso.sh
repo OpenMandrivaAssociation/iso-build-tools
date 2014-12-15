@@ -316,6 +316,14 @@ createSquash() {
 		umountAll "$1"
         $SUDO mksquashfs "$1" "$2"/LiveOS/squashfs.img -comp xz -no-progress -no-recovery
 
+		if [ ! -f  "$2"/LiveOS/squashfs.img ]; then
+			echo "Failed to create squashfs. Exiting."
+			error
+		fi
+
+		$SUDO /sbin/e2fsck -f -y "$2"/LiveOS/squashfs.img
+		$SUDO /sbin/resize2fs -M "$2"/LiveOS/squashfs.img
+
 }
 
 # Usage: buildIso filename.iso rootdir
