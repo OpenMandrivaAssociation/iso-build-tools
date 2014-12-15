@@ -321,8 +321,8 @@ createSquash() {
 			error
 		fi
 
-		$SUDO /sbin/e2fsck -f -y "$2"/LiveOS/squashfs.img
-		$SUDO /sbin/resize2fs -M "$2"/LiveOS/squashfs.img
+	#	$SUDO /sbin/e2fsck -f -y "$2"/LiveOS/squashfs.img
+	#	$SUDO /sbin/resize2fs -M "$2"/LiveOS/squashfs.img
 
 }
 
