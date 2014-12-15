@@ -34,10 +34,13 @@ DISPLAYMANAGER="kdm"
 REPOPATH="http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/"
 
 SUDO=sudo
+[ "`id -u`" = "0" ] && SUDO=""
 OURDIR=$(realpath $(dirname $0))
 LOGDIR="."
-[ "`id -u`" = "0" ] && SUDO=""
-[ "$EXTARCH" = "i386" ] && EXTARCH=i586
+ROOTNAME="`mktemp -d /tmp/liverootXXXXXX`"
+[ -z "$ROOTNAME" ] && ROOTNAME=/tmp/liveroot.$$
+CHROOTNAME="$ROOTNAME"/BASE
+ISOROOTNAME="$ROOTNAME"/ISO
 
 [ -n "$1" ] && EXTARCH="$1"
 [ -n "$2" ] && TREE="$2"
@@ -45,6 +48,7 @@ LOGDIR="."
 [ -n "$4" ] && RELEASE_ID="$4"
 [ -n "$5" ] && TYPE="$5"
 [ -n "$6" ] && DISPLAYMANAGER="$6"
+[ "$EXTARCH" = "i386" ] && EXTARCH=i586
 
 if [ "$RELEASE_ID" == "final" ]; then
     PRODUCT_ID="OpenMandrivaLx.$VERSION-$TYPE"
@@ -59,7 +63,6 @@ LABEL="$PRODUCT_ID.$EXTARCH"
 [ `echo $LABEL | wc -m` -gt 32 ] && LABEL="OpenMandrivaLx_$VERSION"
 [ `echo $LABEL | wc -m` -gt 32 ] && LABEL="`echo $LABEL |cut -b1-32`"
 
-
 umountAll() {
 	echo "Umounting all."
 	unset KERNEL_ISO
@@ -73,6 +76,7 @@ error() {
 	echo "Something went wrong. Exiting"
 	unset KERNEL_ISO
     umountAll "$CHROOTNAME"
+	$SUDO rm -rf "$ROOTNAME"
     exit 1
 }
 
@@ -317,12 +321,6 @@ urpmi --no-verify-rpm perl-URPM cdrkit-genisoimage syslinux squashfs-tools
 # add some cool check for either we are inside ABF or not
 #urpmi --no-verify-rpm perl-URPM cdrtools syslinux squashfs-tools
 
-ROOTNAME="`mktemp -d /tmp/liverootXXXXXX`"
-[ -z "$ROOTNAME" ] && ROOTNAME=/tmp/liveroot.$$
-$SUDO mkdir -p "$ROOTNAME"/tmp
-CHROOTNAME="$ROOTNAME"/BASE
-ISOROOTNAME="$ROOTNAME"/ISO
-
 if [ -d $OURDIR/iso-pkg-lists ]; then
     rm -rf $OURDIR/iso-pkg-lists
 fi
@@ -343,6 +341,7 @@ fi
 
 # START ISO BUILD
 pushd iso-pkg-lists
+$SUDO mkdir -p "$ROOTNAME"/tmp
 createChroot "$DIST-$TYPE.lst" "$CHROOTNAME"
 createInitrd "$CHROOTNAME"
 setupIsolinux "$CHROOTNAME" "$ISOROOTNAME"
@@ -352,7 +351,7 @@ popd
 
 if [ ! -f $OURDIR/$PRODUCT_ID.$EXTARCH.iso ]; then
     umountAll
-    exit 1
+    error
 fi
 
 md5sum  $OURDIR/$PRODUCT_ID.$EXTARCH.iso > $OURDIR/$PRODUCT_ID.$EXTARCH.iso.md5sum
@@ -366,5 +365,3 @@ fi
 
 # clean chroot
 umountAll "$CHROOTNAME"
-rm -rf "$ROOTNAME"
-
