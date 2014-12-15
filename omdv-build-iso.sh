@@ -177,7 +177,7 @@ createInitrd() {
 	$SUDO rm "$1"/boot/dracut-00-live.sh
 	# get it back to original
 	# fugly hack to get /dev/disk/by-label working
-	$SUDO sed -i -e "s@KERNEL!="sr*", IMPORT{builtin}="blkid"@#KERNEL@KERNEL" "$1"/lib/udev/rules.d/60-persistent-storage.rules
+	$SUDO sed -i -e "s@#KERNEL!="sr*", IMPORT{builtin}="blkid"@#KERNEL@KERNEL" "$1"/lib/udev/rules.d/60-persistent-storage.rules
 	
 	echo "Building initrd-$KERNEL_ISO inside chroot"
 	# remove old initrd
