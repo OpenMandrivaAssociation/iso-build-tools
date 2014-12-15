@@ -55,6 +55,11 @@ else
     PRODUCT_ID="OpenMandrivaLx.$VERSION-$RELEASE_ID-$TYPE"
 fi
 
+LABEL="$PRODUCT_ID.$EXTARCH"
+[ `echo $LABEL | wc -m` -gt 32 ] && LABEL="OpenMandrivaLx_$VERSION"
+[ `echo $LABEL | wc -m` -gt 32 ] && LABEL="`echo $LABEL |cut -b1-32`"
+
+
 umount_all() {
     $SUDO umount "$1"/proc || :
     $SUDO umount "$1"/sys || :
@@ -120,7 +125,7 @@ createChroot() {
 	parsePkgList "$1" | xargs $SUDO urpmi --urpmi-root "$2" --no-verify-rpm --fastunsafe --ignoresize --nolock --auto
 
 	$SUDO install -c -m 755 $OURDIR/create-initramfs.sh $OURDIR/dracut-00-live.sh "$2"/boot/
-	$SUDO chroot "$2" /boot/create-initramfs.sh
+	$SUDO chroot "$2" /boot/create-initramfs.sh "$LABEL"
 	$SUDO rm "$2"/boot/create-initramfs.sh
 	umount_all "$2"
 
@@ -247,11 +252,6 @@ createSquash() {
 # Usage: buildIso filename.iso rootdir
 # Builds an ISO file from the files in rootdir
 buildIso() {
-
-	LABEL=$PRODUCT_ID.$EXTARCH
-	[ `echo $LABEL | wc -m` -gt 32 ] && LABEL="OpenMandrivaLx_$VERSION"
-	[ `echo $LABEL | wc -m` -gt 32 ] && LABEL="`echo $LABEL |cut -b1-32`"
-
 	$SUDO mkisofs -o "$1" -b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		-P "OpenMandriva Association" -p "OpenMandriva Association" \
