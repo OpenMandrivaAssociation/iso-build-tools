@@ -187,7 +187,7 @@ createInitrd() {
 	# remove config for liveinitrd
 	$SUDO rm -rf "$1"/etc/dracut.conf.d/60-dracut-isobuild.conf
 	$SUDO chroot "$1" /usr/sbin/dracut -f /boot/initrd-$KERNEL_ISO.img $KERNEL_ISO
-	$SUDO ln -s "$1"/boot/initrd-$KERNEL_ISO.img /boot/initrd0.img
+	$SUDO ln -s "$1"/boot/initrd-$KERNEL_ISO.img "$1"/boot/initrd0.img
 
 }
 
