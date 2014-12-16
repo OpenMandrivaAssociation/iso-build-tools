@@ -8,8 +8,8 @@ modprobe squashfs
 
 mkdir -m 0755 -p /run/iso /run/live-ro /run/live-rw
 mount /dev/disk/by-label/@LABEL@ /run/iso
-mount -o loop /run/iso/LiveOS/squashfs.img /run/iso/live-ro
-mount -n -t tmpfs tmpfs /run/iso/live-rw
+mount -o loop /run/iso/LiveOS/squashfs.img /run/live-ro
+mount -n -t tmpfs tmpfs /run/live-rw
 
-mount -t aufs -o br=/run/iso/live-ro:/run/iso/live-rw "$NEWROOT"
+mount -t aufs -o br=/run/live-ro:/run/live-rw "$NEWROOT"
 
