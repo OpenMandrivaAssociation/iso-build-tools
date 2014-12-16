@@ -168,7 +168,6 @@ createInitrd() {
 		echo "Missing $OURDIR/create-liveramfs.sh . Exiting."
 		error
 	fi
-	
 	# fugly hack to get /dev/disk/by-label working
 	$SUDO sed -i -e "s@KERNEL!="sr*", IMPORT{builtin}="blkid"@KERNEL@#KERNEL" "$1"/lib/udev/rules.d/60-persistent-storage.rules
 	
@@ -218,6 +217,17 @@ setupIsolinux() {
         # copy SuperGrub iso
         $SUDO cp -rfT $OURDIR/extraconfig/memdisk "$2"/isolinux/memdisk
         $SUDO cp -rfT $OURDIR/extraconfig/sgb.iso "$2"/isolinux/sgb.iso
+		
+	# EFI support
+	if [ -f "$1"/boot/efi/EFI/openmandriva/grub.efi ]; then
+		$SUDO mkdir -m 0755 -p "$2"/EFI/BOOT "$2"/EFI/BOOT/fonts/
+		$SUDO cp -f "$1"/boot/efi/EFI/openmandriva/grub.efi "$2"/EFI/BOOT/grub.efi
+		$SUDO cp -f "$1"/boot/efi/EFI/openmandriva/grub.efi "$2"/EFI/BOOT/BOOT.cfg
+		$SUDO cp -f "$1"/boot/grub2/splash.xpm.gz "$2"/EFI/BOOT/splash.xpm.gz
+		for i in dejavu_sans_bold_14.pf2 dejavu_sans_mono_11.pf2 terminal_font_11.pf2 unicode.pf2; do
+			$SUDO cp -f "$1"/boot/grub2/fonts/$i "$2"/EFI/BOOT/fonts/$i
+		done
+	fi
 
 	echo "Create isolinux menu"
 	# kernel/initrd filenames referenced below are the ISO9660 names.
