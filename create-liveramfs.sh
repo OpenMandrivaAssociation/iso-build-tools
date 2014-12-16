@@ -6,7 +6,7 @@ KERNEL_ISO="$2"
 [ -z "$LABEL" ] && LABEL="OpenMandriva"
 
 # build liveramfs
-dracut -f /boot/liveinitrd.img --confdir /etc/draklive-install.d/isobuild/ $KERNEL_ISO
+dracut -f --no-early-microcode --nofscks --noprelink --mount "tmpfs /var/tmp tmpfs defaults 0 0" /boot/liveinitrd.img --confdir /etc/draklive-install.d/isobuild/ $KERNEL_ISO
 
 # Add a mount script for the Live system -- we want an AUFS union
 # of squashfs and tmpfs...
