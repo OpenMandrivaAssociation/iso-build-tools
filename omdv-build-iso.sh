@@ -65,8 +65,8 @@ LABEL="$PRODUCT_ID.$EXTARCH"
 [ `echo $LABEL | wc -m` -gt 32 ] && LABEL="`echo $LABEL |cut -b1-32`"
 
 umountAll() {
-	echo "Umounting all."
-	unset KERNEL_ISO
+    echo "Umounting all."
+    unset KERNEL_ISO
     $SUDO umount "$1"/proc || :
     $SUDO umount "$1"/sys || :
     $SUDO umount "$1"/dev/pts || :
@@ -74,10 +74,10 @@ umountAll() {
 }
 
 error() {
-	echo "Something went wrong. Exiting"
-	unset KERNEL_ISO
+    echo "Something went wrong. Exiting"
+    unset KERNEL_ISO
     umountAll "$CHROOTNAME"
-	$SUDO rm -rf "$ROOTNAME"
+    $SUDO rm -rf "$ROOTNAME"
     exit 1
 }
 
@@ -133,16 +133,16 @@ createChroot() {
 
 	# start rpm packages installation
 	parsePkgList "$1" | xargs $SUDO urpmi --urpmi-root "$2" --no-verify-rpm --fastunsafe --ignoresize --nolock --auto
-	
+
 	# check CHROOT
 	if [ ! -d  "$2"/lib/modules ]; then
 		echo "Broken chroot installation. Exiting"
 		error
 	fi
-	
+
 	# this will be needed in future
 	pushd "$2"/lib/modules
-		KERNEL_ISO=`ls -d --sort=time [0-9]* |head -n1 |sed -e 's,/$,,'`
+		KERNEL_ISO=`ls -d --sort=time [0-9]* |head -n1 | sed -e 's,/$,,'`
 		export KERNEL_ISO
 	popd
 
@@ -163,14 +163,14 @@ createInitrd() {
 		error
 	fi
 	$SUDO cp -rfT $OURDIR/extraconfig/etc/dracut.conf.d/60-dracut-isobuild.conf "$1"/etc/dracut.conf.d/60-dracut-isobuild.conf
-	
+
 	if [ ! -f $OURDIR/create-liveramfs.sh ]; then
 		echo "Missing $OURDIR/create-liveramfs.sh . Exiting."
 		error
 	fi
 	# fugly hack to get /dev/disk/by-label working
 	$SUDO sed -i -e "s@KERNEL!="sr*", IMPORT{builtin}="blkid"@KERNEL@#KERNEL" "$1"/lib/udev/rules.d/60-persistent-storage.rules
-	
+
 	$SUDO install -c -m 755 $OURDIR/create-liveramfs.sh $OURDIR/squash-00-live.sh "$1"/boot/
 	$SUDO chroot "$1" /boot/create-liveramfs.sh "$LABEL" "$KERNEL_ISO"
 	$SUDO rm "$1"/boot/create-liveramfs.sh
@@ -178,7 +178,7 @@ createInitrd() {
 	# get it back to original
 	# fugly hack to get /dev/disk/by-label working
 	$SUDO sed -i -e "s@#KERNEL!="sr*", IMPORT{builtin}="blkid"@#KERNEL@KERNEL" "$1"/lib/udev/rules.d/60-persistent-storage.rules
-	
+
 	echo "Building initrd-$KERNEL_ISO inside chroot"
 	# remove old initrd
 	$SUDO rm -rf "$1"/boot/initrd-$KERNEL_ISO.img
@@ -203,12 +203,12 @@ setupIsolinux() {
 
 	$SUDO mkdir -p "$2"/LiveOS
 	$SUDO mkdir -p "$2"/isolinux
-	
+
 	echo "Installing liveramfs inside isolinux"
 	$SUDO cp -a "$1"/boot/vmlinuz-$KERNEL_ISO "$2"/isolinux/vmlinuz0
 	$SUDO cp -a "$1"/boot/liveinitrd.img "$2"/isolinux/liveinitrd.img
 	$SUDO rm -rf "$1"/boot/liveinitrd.img
-	
+
 	echo "Copy various isolinux settings"
 	# copy boot menu background
         $SUDO cp -rfT $OURDIR/splash.jpg "$2"/isolinux/splash.png
@@ -217,7 +217,7 @@ setupIsolinux() {
         # copy SuperGrub iso
         $SUDO cp -rfT $OURDIR/extraconfig/memdisk "$2"/isolinux/memdisk
         $SUDO cp -rfT $OURDIR/extraconfig/sgb.iso "$2"/isolinux/sgb.iso
-		
+
 	# EFI support
 	if [ -f "$1"/boot/efi/EFI/openmandriva/grub.efi ]; then
 		$SUDO mkdir -m 0755 -p "$2"/EFI/BOOT "$2"/EFI/BOOT/fonts/
@@ -313,7 +313,7 @@ setupISOenv() {
 	$SUDO chroot "$1" /bin/chown -R live:live /home/live
 	$SUDO chroot "$1" /bin/mkdir /home/live/Desktop
 	$SUDO chroot "$1" /bin/chown -R live:live /home/live/Desktop
-	
+
 	#remove rpm db files to save some space
 	$SUDO chroot "$1" rm -f /var/lib/rpm/__db.*
 }
@@ -323,16 +323,14 @@ createSquash() {
     if [ -f "$1"/ISO/LiveOS/squashfs.img ]; then
 		$SUDO rm -rf "$2"/LiveOS/squashfs.img
     fi
-		umountAll "$1"
-        $SUDO mksquashfs "$1" "$2"/LiveOS/squashfs.img -comp xz -no-progress -no-recovery
+    # unmout all stuff inside CHROOT to build squashfs image
+    umountAll "$1"
+    $SUDO mksquashfs "$1" "$2"/LiveOS/squashfs.img -comp xz -no-progress -no-recovery
 
-		if [ ! -f  "$2"/LiveOS/squashfs.img ]; then
-			echo "Failed to create squashfs. Exiting."
-			error
-		fi
-
-	#	$SUDO /sbin/e2fsck -f -y "$2"/LiveOS/squashfs.img
-	#	$SUDO /sbin/resize2fs -M "$2"/LiveOS/squashfs.img
+    if [ ! -f  "$2"/LiveOS/squashfs.img ]; then
+	echo "Failed to create squashfs. Exiting."
+	error
+    fi
 
 }
 
@@ -346,9 +344,10 @@ buildIso() {
 		-R -J -l -r -hide-rr-moved -hide-joliet-trans-tbl -V "$LABEL" "$2"
 
 	if [ ! -f "$1" ]; then
-		echo "Failed build iso image. Exiting"
-		error
+	    echo "Failed build iso image. Exiting"
+	    error
 	fi
+
 	$SUDO isohybrid "$1"
 	echo "ISO build completed."
 }
