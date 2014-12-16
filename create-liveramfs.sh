@@ -16,7 +16,7 @@ mkdir tmp
 cd tmp
 xzcat ../liveinitrd.img |cpio -idu
 mkdir -p lib/dracut/hooks/mount
-sed -e "s,@LABEL@,$LABEL,g" ../dracut-00-live.sh >lib/dracut/hooks/mount/00-live.sh
+sed -e "s,@LABEL@,$LABEL,g" ../squash-00-live.sh >lib/dracut/hooks/mount/00-live.sh
 chmod 0755 lib/dracut/hooks/mount/00-live.sh
 find . |cpio -R 0:0 -H newc -o --quiet |xz --check=crc32 --lzma2=dict=1MiB >../liveinitrd.img 
 rm -rf tmp
