@@ -10,7 +10,7 @@ if [ -e /dev/disk/by-label/@LABEL@ ]; then
     # try to mount the iso inide liveramfs
     # /run is mounted as tmpfs already
     mkdir -m 0755 -p /run/initramfs/live /run/live-ro /run/live-rw
-    mount -n -t auto -o ro /dev/disk/by-label/@LABEL@  /run/initramfs/live
+    mount -n -t iso9660 -o ro /dev/disk/by-label/@LABEL@  /run/initramfs/live
     # mount squashfs image
     mount -n -t squashfs /run/initramfs/live/LiveOS/squashfs.img /run/live-ro
     # mount tmpfs space as rw
