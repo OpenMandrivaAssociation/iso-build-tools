@@ -324,8 +324,8 @@ setupISOenv() {
 createSquash() {
     echo "Starting squashfs image build."
 
-    if [ -f "$1"/ISO/LiveOS/squashfs.img ]; then
-		$SUDO rm -rf "$2"/LiveOS/squashfs.img
+    if [ -f "$2"/ISO/LiveOS/squashfs.img ]; then
+	$SUDO rm -rf "$2"/LiveOS/squashfs.img
     fi
 
     # unmout all stuff inside CHROOT to build squashfs image
