@@ -183,6 +183,9 @@ createInitrd() {
 	# remove old initrd
 	$SUDO rm -rf "$1"/boot/initrd-$KERNEL_ISO.img
 	$SUDO rm -rf "$1"/boot/initrd0.img
+
+	# remove config for liveinitrd
+	$SUDO rm -rf "$1"/etc/dracut.conf.d/60-dracut-isobuild.conf
 	$SUDO chroot "$1" /usr/sbin/dracut -f /boot/initrd-$KERNEL_ISO.img $KERNEL_ISO
 	$SUDO ln -s "$1"/boot/initrd-$KERNEL_ISO.img /boot/initrd0.img
 
@@ -319,10 +322,12 @@ setupISOenv() {
 }
 
 createSquash() {
-	echo "Starting squashfs image build."
+    echo "Starting squashfs image build."
+
     if [ -f "$1"/ISO/LiveOS/squashfs.img ]; then
 		$SUDO rm -rf "$2"/LiveOS/squashfs.img
     fi
+
     # unmout all stuff inside CHROOT to build squashfs image
     umountAll "$1"
     $SUDO mksquashfs "$1" "$2"/LiveOS/squashfs.img -comp xz -no-progress -no-recovery
