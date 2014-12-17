@@ -188,7 +188,7 @@ createInitrd() {
 	$SUDO sed -i -e '/#KERNEL!="sr\*\", IMPORT{builtin}="blkid"/s/#KERNEL/KERNEL/g' -e '/#TEST=="whole_disk", GOTO="persistent_storage_end"/s/#TEST/TEST/g' "$1"/lib/udev/rules.d/60-persistent-storage.rules
 	
 	# remove AuFS from /etc/fstab before build initrd
-	$SUDO sed -i -e 's/^aufs.*//g'"$1"/etc/fstab
+	$SUDO sed -i -e 's/^aufs.*//g' "$1"/etc/fstab
 
 	echo "Building initrd-$KERNEL_ISO inside chroot"
 	# remove old initrd
