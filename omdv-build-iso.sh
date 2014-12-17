@@ -373,9 +373,11 @@ fi
 ### possible fix for timed out GIT pulls
 if [ ! -d $OURDIR/iso-pkg-lists ]; then
     if [ $TREE = "cooker" ]; then
-	BRANCH=master
+		BRANCH=master
+	else
+		BRANCH="$TREE"
     fi
-
+	
     PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-$BRANCH.tar.gz"
     wget --tries=10 -O iso-pkg-lists-$BRANCH.tar.gz --content-disposition $PKGLIST
     tar -xf iso-pkg-lists-$BRANCH.tar.gz
