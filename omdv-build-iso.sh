@@ -168,27 +168,11 @@ createInitrd() {
 		echo "Missing $OURDIR/create-liveramfs.sh . Exiting."
 		error
 	fi
-	# fugly hack to get /dev/disk/by-label working
-	$SUDO sed -i -e '/KERNEL!="sr\*\", IMPORT{builtin}="blkid"/s/KERNEL/#KERNEL/g' -e '/TEST=="whole_disk", GOTO="persistent_storage_end"/s/TEST/#TEST/g' "$1"/lib/udev/rules.d/60-persistent-storage.rules
-	
-	#add AuFS entry intro /etc/fstab, so /sysroot can be mounted
-	if [ ! -f "$1"/etc/fstab ]; then
-		echo ""$1"/etc/fstab does not exist. Exiting."
-		error
-	fi
-	
-	echo aufs /sysroot aufs defaults 0 0 >> "$1"/etc/fstab
-	
+
 	$SUDO install -c -m 755 $OURDIR/create-liveramfs.sh $OURDIR/squash-00-live.sh "$1"/boot/
 	$SUDO chroot "$1" /boot/create-liveramfs.sh "$LABEL" "$KERNEL_ISO"
 	$SUDO rm "$1"/boot/create-liveramfs.sh
 	$SUDO rm "$1"/boot/squash-00-live.sh
-	# get it back to original
-	# fugly hack to get /dev/disk/by-label working
-	$SUDO sed -i -e '/#KERNEL!="sr\*\", IMPORT{builtin}="blkid"/s/#KERNEL/KERNEL/g' -e '/#TEST=="whole_disk", GOTO="persistent_storage_end"/s/#TEST/TEST/g' "$1"/lib/udev/rules.d/60-persistent-storage.rules
-	
-	# remove AuFS from /etc/fstab before build initrd
-	$SUDO sed -i -e 's/^aufs.*//g' "$1"/etc/fstab
 
 	echo "Building initrd-$KERNEL_ISO inside chroot"
 	# remove old initrd
