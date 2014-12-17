@@ -16,7 +16,7 @@ if [ -e /dev/disk/by-label/@LABEL@ ]; then
     # mount tmpfs space as rw
     mount -n -t tmpfs tmpfs /run/live-rw
     # mount aufs as new root
-    mount -t aufs -o br=/run/live-ro:/run/live-rw "$NEWROOT"
+    mount -t aufs -o br=/run/live-rw:/run/live-ro "$NEWROOT"
 else
     echo "/dev/disk/by-label/@LABEL@ does not exists. Exiting."
 fi
