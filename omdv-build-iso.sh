@@ -138,16 +138,6 @@ parsePkgList() {
 	done
 }
 
-# Usage: getPackages packages.lst /target/dir
-# Downloads all packages in the packages.lst file and their
-# dependencies.
-# Packages go to /target/dir/rpms
-getPackages() {
-	$SUDO urpmi.addmedia --urpmi-root "$2" --distrib $REPOPATH
-	$SUDO urpmi.update --urpmi-root "$2" -a -c -ff --wget
-	parsePkgList "$1" | xargs $SUDO urpmi --urpmi-root "$ROOTNAME" --no-install --download-all --no-verify-rpm --fastunsafe --ignoresize "$2" --auto
-}
-
 # Usage: createChroot packages.lst /target/dir
 # Creates a chroot environment with all packages in the packages.lst
 # file and their dependencies in /target/dir
