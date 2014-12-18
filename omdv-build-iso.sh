@@ -400,7 +400,7 @@ fi
 md5sum  $OURDIR/$PRODUCT_ID.$EXTARCH.iso > $OURDIR/$PRODUCT_ID.$EXTARCH.iso.md5sum
 sha1sum $OURDIR/$PRODUCT_ID.$EXTARCH.iso > $OURDIR/$PRODUCT_ID.$EXTARCH.iso.sha1sum
 
-if echo $OURDIR |grep -q /home/vagrant; then
+if echo $OURDIR | grep -q /home/vagrant; then
     # We're running in ABF -- adjust to its directory structure
     mkdir -p /home/vagrant/results /home/vagrant/archives
     mv $OURDIR/*.iso* /home/vagrant/results/
