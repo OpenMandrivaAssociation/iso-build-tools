@@ -150,6 +150,8 @@ getPkgList() {
 	    BRANCH="$TREE"
     fi
 
+    echo $(pwd)
+
     PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-$BRANCH.tar.gz"
     wget --tries=10 -O iso-pkg-lists-$BRANCH.tar.gz --content-disposition $PKGLIST
     tar -xf iso-pkg-lists-$BRANCH.tar.gz
@@ -159,7 +161,7 @@ getPkgList() {
     fi
 
     if [ ! -d $OURDIR/iso-pkg-lists ]; then
-	echo "Could not find $OURDIR-iso-pkg-lists. Exiting."
+	echo "Could not find $OURDIR/iso-pkg-lists. Exiting."
 	error
     fi
 
