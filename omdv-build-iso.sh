@@ -85,10 +85,12 @@ error() {
 trap error ERR
 
 showInfo() {
-	echo "Building ISO with arguments:\nDistribution=$DIST\n"
-	echo "Architecture=$EXTARCH\nTree=$TREE\nVersion=$Version\n"
-	echo "Release ID=$RELEASE_ID\nType=$TYPE\nDisplay Manager=$DISPLAYMANAGER\n"
-	echo "ISO label=$LABEL"
+	echo $'###\n'
+	echo $'Building ISO with arguments:\nDistribution=$DIST\n'
+	echo $'Architecture=$EXTARCH\nTree=$TREE\nVersion=$Version\n'
+	echo $'Release ID=$RELEASE_ID\nType=$TYPE\nDisplay Manager=$DISPLAYMANAGER\n'
+	echo $'ISO label=$LABEL\n'
+	echo $'###\n'
 }
 
 # Usage: parsePkgList xyz.lst
