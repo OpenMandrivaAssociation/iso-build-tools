@@ -76,6 +76,7 @@ umountAll() {
 error() {
     echo "Something went wrong. Exiting"
     unset KERNEL_ISO
+	unset UEFI
     umountAll "$CHROOTNAME"
     $SUDO rm -rf "$ROOTNAME"
     exit 1
@@ -225,8 +226,9 @@ setupIsolinux() {
         $SUDO cp -rfT $OURDIR/extraconfig/memdisk "$2"/isolinux/memdisk
         $SUDO cp -rfT $OURDIR/extraconfig/sgb.iso "$2"/isolinux/sgb.iso
 
-	# EFI support
+	# UEFI support
 	if [ -f "$1"/boot/efi/EFI/openmandriva/grub.efi ] && [ "$EXTARCH" = "x86_64" ]; then
+		export UEFI=1
 		$SUDO mkdir -m 0755 -p "$2"/EFI/BOOT "$2"/EFI/BOOT/fonts/
 		$SUDO cp -f "$1"/boot/efi/EFI/openmandriva/grub.efi "$2"/EFI/BOOT/grub.efi
 		$SUDO cp -f "$1"/boot/efi/EFI/openmandriva/grub.efi "$2"/EFI/BOOT/BOOT.cfg
