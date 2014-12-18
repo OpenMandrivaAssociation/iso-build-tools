@@ -165,7 +165,8 @@ getPkgList() {
 	error
     fi
 
-    FILELISTS=$OURDIR/iso-pkg-lists/"$DIST-$TYPE.lst"
+    FILELISTS="$OURDIR/iso-pkg-lists/$DIST-$TYPE.lst"
+
 }
 
 showInfo() {
@@ -192,12 +193,13 @@ parsePkgList() {
 		SANITIZED="`echo $r | sed -e 's,	, ,g;s,  *, ,g;s,^ ,,;s, $,,;s,#.*,,'`"
 		[ -z "$SANITIZED" ] && continue
 		if [ "`echo $SANITIZED | cut -b1-9`" = "%include " ]; then
-			INC="`echo $SANITIZED | cut -b10-`"
+			INC="$(dirname "$1")/`echo $SANITIZED | cut -b10- | sed -e 's/^\..*\///g'`"
 			if ! [ -e "$INC" ]; then
 				echo "ERROR: Package list doesn't exist: $INC (included from $1 line $LINE)" >&2
-				exit 1
+				error
 			fi
-			parsePkgList "`echo $SANITIZED | cut -b10-`"
+
+			parsePkgList $(dirname "$1")/"`echo $SANITIZED | cut -b10- | sed -e 's/^\..*\///g'`"
 			continue
 		fi
 		echo $SANITIZED
@@ -230,8 +232,8 @@ createChroot() {
 
 	# this will be needed in future
 	pushd "$2"/lib/modules
-		KERNEL_ISO=`ls -d --sort=time [0-9]* |head -n1 | sed -e 's,/$,,'`
-		export KERNEL_ISO
+	    KERNEL_ISO=`ls -d --sort=time [0-9]* |head -n1 | sed -e 's,/$,,'`
+	    export KERNEL_ISO
 	popd
 
 }
@@ -547,6 +549,7 @@ postBuild() {
 
 
 # START ISO BUILD
+
 showInfo
 updateSystem
 getPkgList
