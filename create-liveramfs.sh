@@ -18,7 +18,7 @@ xzcat ../liveinitrd.img |cpio -idu
 mkdir -p lib/dracut/hooks/mount
 sed -e "s,@LABEL@,$LABEL,g" ../squash-00-live.sh >lib/dracut/hooks/mount/00-live.sh
 # fugly hack to get /dev/disk/by-label
-sed -i -e '/KERNEL!="sr\*\", IMPORT{builtin}="blkid"/s/KERNEL/#KERNEL/g' -e '/TEST=="whole_disk", GOTO="persistent_storage_end"/s/TEST/#TEST/g' /lib/udev/rules.d/60-persistent-storage.rules
+sed -i -e '/KERNEL!="sr\*\", IMPORT{builtin}="blkid"/s/KERNEL/#KERNEL/g' -e '/TEST=="whole_disk", GOTO="persistent_storage_end"/s/TEST/#TEST/g' lib/udev/rules.d/60-persistent-storage.rules
 chmod 0755 lib/dracut/hooks/mount/00-live.sh
 find . |cpio -R 0:0 -H newc -o --quiet |xz --check=crc32 --lzma2=dict=1MiB >../liveinitrd.img 
 rm -rf tmp
