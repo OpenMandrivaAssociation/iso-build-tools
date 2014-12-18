@@ -369,6 +369,8 @@ EOF
 	$SUDO popd
 
 	#enable network
+	$SUDO chroot "$1" systemctl enable resolvconf
+	$SUDO chroot "$1" systemctl start resolvconf
 	$SUDO chroot "$1" systemctl enable NetworkManager.service
 	
 	# copy resolv.conf from a working system
