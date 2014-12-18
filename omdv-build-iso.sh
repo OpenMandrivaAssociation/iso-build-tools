@@ -314,6 +314,24 @@ EOF
 
 setupISOenv() {
 
+	# set up displaymanager
+	if [ ! "$TYPE" = "minimal" ]; then
+		$SUDO chroot "$1" systemctl enable $DISPLAYMANAGER.service 2> /dev/null || :
+
+		# Set reasonable defaults
+		if ! [ -e "$1"/etc/sysconfig/desktop ]; then
+		cat >"$1"/etc/sysconfig/desktop <<'EOF'
+DISPLAYMANAGER="$DISPLAYMANAGER"
+DESKTOP="$TYPE"
+EOF
+fi
+
+	fi
+
+	# copy some extra config files
+	$SUDO cp -rfT $OURDIR/extraconfig/etc "$1"/etc/
+	$SUDO cp -rfT $OURDIR/extraconfig/usr "$1"/usr/
+	
 	# set up live user
 	$SUDO chroot "$1" /usr/sbin/adduser live
 	$SUDO chroot "$1" /usr/bin/passwd -d live
@@ -322,6 +340,21 @@ setupISOenv() {
 	$SUDO chroot "$1" /bin/chown -R live:live /home/live
 	$SUDO chroot "$1" /bin/mkdir /home/live/Desktop
 	$SUDO chroot "$1" /bin/chown -R live:live /home/live/Desktop
+	$SUDO cp -rfT $OURDIR/extraconfig/etc/skel "$1"/home/live/
+	$SUDO chroot "$1" chown -R 500:500 /home/live/
+	$SUDO chroot "$1" chmod -R 0777 /home/live/.local
+	$SUDO mkdir -p "$1"/home/live/.cache
+	$SUDO chroot "41" chown 500:500 /home/live/.cache
+
+	# KDE4 related settings
+	if [ "$TYPE" = "kde4" ]; then
+		$SUDO mkdir -p "$1"/home/live/.kde4/env
+		echo "export KDEVARTMP=/tmp" > "$1"/home/live/.kde4/env/00-live.sh
+		echo "export KDETMP=/tmp" >> "$1"/home/live/.kde4/env/00-live.sh
+		$SUDO chroot "$1" chmod -R 0777 /home/live/.kde4
+	fi
+	# ldetect stuff
+	$SUDO chroot "$1" /usr/sbin/update-ldetect-lst
 
 	#remove rpm db files to save some space
 	$SUDO chroot "$1" rm -f /var/lib/rpm/__db.*
