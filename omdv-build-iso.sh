@@ -1,5 +1,26 @@
 #!/bin/bash
 
+# OpenMandriva Association 2012
+# Original author: Bernhard Rosenkraenzer <bero@lindev.ch>
+# Modified on 2014 by: Tomasz Paweł Gajc <tpgxyz@gmail.com>
+
+# This tool is licensed under GPL license
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+
+# This tools is specified to build OpenMandriva Lx distribution ISO
 # Usage:
 # ./omdv-build-iso.sh EXTARCH TREE VERSION RELEASE_ID TYPE DISPLAYMANAGER
 # ./omdv-build-iso.sh x86_64 cooker 2015.0 alpha hawaii sddm
