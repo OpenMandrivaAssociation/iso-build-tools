@@ -77,6 +77,7 @@ error() {
     echo "Something went wrong. Exiting"
     unset KERNEL_ISO
 	unset UEFI
+	unset MIRRORLIST
     umountAll "$CHROOTNAME"
     $SUDO rm -rf "$ROOTNAME"
     exit 1
@@ -362,15 +363,22 @@ fi
 	echo "Removing old urpmi repositories."
 	$SUDO chroot "$1" /usr/sbin/urpmi.removemedia -a
 	echo "Adding new urpmi repositories."
+	
+	if [ "$TREE" = "cooker" ]; then
+		MIRRORLIST="http://downloads.openmandriva.org/mirrors/cooker.$EXTARCH.list"
+	else
+		MIRRORLIST="http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.$EXTARCH.list"
+	fi
+
 	$SUDO chroot "$1" /usr/sbin/urpmi.addmedia --wget --no-md5sum --distrib --mirrorlist '$MIRRORLIST'
 
 	if [ "EXTARCH" = "x86_64" ]; then
 		echo "Adding 32-bit media repository."
-		$SUDO chroot "$1" /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.2014.0.i586.list' 'Main32' 'media/main/release'
-		$SUDO chroot "$1" /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.2014.0.i586.list' 'Main32Updates' 'media/main/updates'
+		$SUDO chroot "$1" /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list' 'Main32' 'media/main/release'
+		$SUDO chroot "$1" /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list' 'Main32Updates' 'media/main/updates'
 		
 		if [[ $? != 0 ]]; then
-			echo "Adding 32-bit media FAILED. Exiting";
+			echo "Adding urpmi 32-bit media FAILED. Exiting";
 			error
 		fi
 
