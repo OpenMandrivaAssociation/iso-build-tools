@@ -45,6 +45,7 @@ else
     exit 1
 fi
 
+# default definitions
 DIST=omdv
 EXTARCH=`uname -m`
 TREE=cooker
@@ -85,6 +86,8 @@ LABEL="$PRODUCT_ID.$EXTARCH"
 [ `echo $LABEL | wc -m` -gt 32 ] && LABEL="OpenMandrivaLx_$VERSION"
 [ `echo $LABEL | wc -m` -gt 32 ] && LABEL="`echo $LABEL |cut -b1-32`"
 
+# start functions
+
 umountAll() {
     echo "Umounting all."
     unset KERNEL_ISO
@@ -97,8 +100,8 @@ umountAll() {
 error() {
     echo "Something went wrong. Exiting"
     unset KERNEL_ISO
-	unset UEFI
-	unset MIRRORLIST
+    unset UEFI
+    unset MIRRORLIST
     umountAll "$CHROOTNAME"
     $SUDO rm -rf "$ROOTNAME"
     exit 1
@@ -106,6 +109,48 @@ error() {
 
 # Don't leave potentially dangerous stuff if we had to error out...
 trap error ERR
+
+updateSystem() {
+    #Force update of critical packages
+    urpmq --list-url
+    urpmi.update -ff updates
+
+    # inside ABF, lxc-container which is used to run this script is based
+    # on Rosa2012 which does not have cdrtools
+    urpmi --no-verify-rpm perl-URPM cdrkit-genisoimage syslinux squashfs-tools 
+
+    # add some cool check for either we are inside ABF or not
+    #urpmi --no-verify-rpm perl-URPM cdrtools syslinux squashfs-tools
+}
+
+getPkgList() {
+
+    if [ -d $OURDIR/iso-pkg-lists ]; then
+	rm -rf $OURDIR/iso-pkg-lists
+    fi
+
+    ### possible fix for timed out GIT pulls
+    if [ ! -d $OURDIR/iso-pkg-lists ]; then
+	if [ $TREE = "cooker" ]; then
+	    BRANCH=master
+	else
+	    BRANCH="$TREE"
+    fi
+
+    PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-$BRANCH.tar.gz"
+    wget --tries=10 -O iso-pkg-lists-$BRANCH.tar.gz --content-disposition $PKGLIST
+    tar -xf iso-pkg-lists-$BRANCH.tar.gz
+    mv -f iso-pkg-lists-$BRANCH iso-pkg-lists
+    rm -f iso-pkg-lists-$BRANCH.tar.gz
+
+    fi
+
+    if [ ! -d $OURDIR/iso-pkg-lists ]; then
+	"Could not find iso-pkg-lists. Exiting."
+	error
+    fi
+
+}
 
 showInfo() {
 	echo $'###\n'
@@ -328,7 +373,7 @@ setupISOenv() {
 
 	# set up default timezone
 	$SUDO chroot "$1" ln -s /usr/share/zoneinfo/Universal /etc/localtime
-	
+
 	# set up displaymanager
 	if [ ! "$TYPE" = "minimal" ]; then
 		$SUDO chroot "$1" systemctl enable $DISPLAYMANAGER.service
@@ -346,7 +391,7 @@ fi
 	# copy some extra config files
 	$SUDO cp -rfT $OURDIR/extraconfig/etc "$1"/etc/
 	$SUDO cp -rfT $OURDIR/extraconfig/usr "$1"/usr/
-	
+
 	# set up live user
 	$SUDO chroot "$1" /usr/sbin/adduser live
 	$SUDO chroot "$1" /usr/bin/passwd -d live
@@ -368,7 +413,7 @@ fi
 		echo "export KDETMP=/tmp" >> "$1"/home/live/.kde4/env/00-live.sh
 		$SUDO chroot "$1" chmod -R 0777 /home/live/.kde4
 	fi
-	
+
 	$SUDO pushd "$1"/etc/sysconfig/network-scripts
 	for iface in eth0 wlan0; do
 	cat > ifcfg-$iface << EOF
@@ -382,11 +427,11 @@ EOF
 	#enable network
 	$SUDO chroot "$1" systemctl enable resolvconf
 	$SUDO chroot "$1" systemctl enable NetworkManager.service
-	
+
 	# add urpmi medias inside chroot
 	echo "Removing old urpmi repositories."
 	$SUDO urpmi.removemedia -a --urpmi-root "$1"
-	
+
 	echo "Adding new urpmi repositories."
 	if [ "$TREE" = "cooker" ]; then
 		MIRRORLIST="http://downloads.openmandriva.org/mirrors/cooker.$EXTARCH.list"
@@ -394,13 +439,13 @@ EOF
 		MIRRORLIST="http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.$EXTARCH.list"
 	fi
 
-	$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist '$MIRRORLIST' 
+	$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist $MIRRORLIST
 
 	if [ "EXTARCH" = "x86_64" ]; then
 		echo "Adding 32-bit media repository."
 		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list' 'Main32' 'media/main/release'
 		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list' 'Main32Updates' 'media/main/updates'
-		
+
 		if [[ $? != 0 ]]; then
 			echo "Adding urpmi 32-bit media FAILED. Exiting";
 			error
@@ -460,60 +505,35 @@ buildIso() {
 	echo "ISO build completed."
 }
 
-#Force update of critical packages
-urpmq --list-url
-urpmi.update -ff updates
-# inside ABF, lxc-container which is used to run this script is based
-# on Rosa2012 which does not have cdrtools
-urpmi --no-verify-rpm perl-URPM cdrkit-genisoimage syslinux squashfs-tools 
-# add some cool check for either we are inside ABF or not
-#urpmi --no-verify-rpm perl-URPM cdrtools syslinux squashfs-tools
-
-if [ -d $OURDIR/iso-pkg-lists ]; then
-    rm -rf $OURDIR/iso-pkg-lists
-fi
-
-### possible fix for timed out GIT pulls
-if [ ! -d $OURDIR/iso-pkg-lists ]; then
-    if [ $TREE = "cooker" ]; then
-		BRANCH=master
-	else
-		BRANCH="$TREE"
+postBuild() {
+    if [ ! -f $OURDIR/$PRODUCT_ID.$EXTARCH.iso ]; then
+	umountAll "$CHROOTNAME"
+	error
     fi
-	
-    PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-$BRANCH.tar.gz"
-    wget --tries=10 -O iso-pkg-lists-$BRANCH.tar.gz --content-disposition $PKGLIST
-    tar -xf iso-pkg-lists-$BRANCH.tar.gz
-    mv -f iso-pkg-lists-$BRANCH iso-pkg-lists
-    rm -f iso-pkg-lists-$BRANCH.tar.gz
-fi
-###
+
+    md5sum  $OURDIR/$PRODUCT_ID.$EXTARCH.iso > $OURDIR/$PRODUCT_ID.$EXTARCH.iso.md5sum
+    sha1sum $OURDIR/$PRODUCT_ID.$EXTARCH.iso > $OURDIR/$PRODUCT_ID.$EXTARCH.iso.sha1sum
+
+    if echo $OURDIR | grep -q /home/vagrant; then
+	# We're running in ABF -- adjust to its directory structure
+	mkdir -p /home/vagrant/results /home/vagrant/archives
+	mv $OURDIR/*.iso* /home/vagrant/results/
+    fi
+
+    # clean chroot
+    umountAll "$CHROOTNAME"
+}
+
 
 # START ISO BUILD
-pushd iso-pkg-lists
-$SUDO mkdir -p "$ROOTNAME"/tmp
 showInfo
+updateSystem
+getPkgList
 createChroot "$DIST-$TYPE.lst" "$CHROOTNAME"
 createInitrd "$CHROOTNAME"
 setupIsolinux "$CHROOTNAME" "$ISOROOTNAME"
 setupISOenv "$CHROOTNAME"
 createSquash "$CHROOTNAME" "$ISOROOTNAME"
 buildIso $OURDIR/$PRODUCT_ID.$EXTARCH.iso "$ISOROOTNAME"
-popd
+postBuild
 
-if [ ! -f $OURDIR/$PRODUCT_ID.$EXTARCH.iso ]; then
-    umountAll "$CHROOTNAME"
-    error
-fi
-
-md5sum  $OURDIR/$PRODUCT_ID.$EXTARCH.iso > $OURDIR/$PRODUCT_ID.$EXTARCH.iso.md5sum
-sha1sum $OURDIR/$PRODUCT_ID.$EXTARCH.iso > $OURDIR/$PRODUCT_ID.$EXTARCH.iso.sha1sum
-
-if echo $OURDIR | grep -q /home/vagrant; then
-    # We're running in ABF -- adjust to its directory structure
-    mkdir -p /home/vagrant/results /home/vagrant/archives
-    mv $OURDIR/*.iso* /home/vagrant/results/
-fi
-
-# clean chroot
-umountAll "$CHROOTNAME"
