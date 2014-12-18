@@ -370,38 +370,25 @@ EOF
 
 	#enable network
 	$SUDO chroot "$1" systemctl enable resolvconf
-	$SUDO chroot "$1" systemctl start resolvconf
 	$SUDO chroot "$1" systemctl enable NetworkManager.service
-	
-	# copy resolv.conf from a working system
-	if [ -e /etc/resolv.conf ] ; then
-		$SUDO cp -rfT /etc/resolv.conf "$1"/etc/resolv.conf
-	fi
-	
-	echo "what is inside $1/etc/resolv.conf?"
-	$SUDO cat "$1"/etc/resolv.conf
-	
-	$SUDO ping -c 5 www.google.com
-	
-	$SUDO chroot "$1" ping -c 5 www.abf.io
 	
 	# add urpmi medias inside chroot
 	echo "Removing old urpmi repositories."
-	$SUDO chroot "$1" /usr/sbin/urpmi.removemedia -a
-	echo "Adding new urpmi repositories."
+	$SUDO urpmi.removemedia -a --urpmi-root "$1"
 	
+	echo "Adding new urpmi repositories."
 	if [ "$TREE" = "cooker" ]; then
 		MIRRORLIST="http://downloads.openmandriva.org/mirrors/cooker.$EXTARCH.list"
 	else
 		MIRRORLIST="http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.$EXTARCH.list"
 	fi
 
-	$SUDO chroot "$1" /usr/sbin/urpmi.addmedia --wget --no-md5sum --distrib --mirrorlist '$MIRRORLIST'
+	$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist '$MIRRORLIST' 
 
 	if [ "EXTARCH" = "x86_64" ]; then
 		echo "Adding 32-bit media repository."
-		$SUDO chroot "$1" /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list' 'Main32' 'media/main/release'
-		$SUDO chroot "$1" /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list' 'Main32Updates' 'media/main/updates'
+		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list' 'Main32' 'media/main/release'
+		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list' 'Main32Updates' 'media/main/updates'
 		
 		if [[ $? != 0 ]]; then
 			echo "Adding urpmi 32-bit media FAILED. Exiting";
@@ -415,7 +402,7 @@ EOF
 
 	#update urpmi medias
 	echo "Updating urpmi repositories"
-	$SUDO chroot "$1" /usr/sbin/urpmi.update -a -ff --wget --force-key
+	$SUDO urpmi.update --urpmi-root "$1" -a -ff --wget --force-key
 
 	echo > "$1"/etc/resolv.conf
 
