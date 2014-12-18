@@ -154,7 +154,7 @@ getPkgList() {
     fi
 
     if [ ! -d $OURDIR/iso-pkg-lists ]; then
-	echo "Could not find iso-pkg-lists. Exiting."
+	echo "Could not find $OURDIR-iso-pkg-lists. Exiting."
 	error
     fi
 
@@ -179,7 +179,7 @@ showInfo() {
 # mentioned by other package list files being %include-d)
 parsePkgList() {
 	LINE=0
-	cat "$1" |while read r; do
+	cat "$1" | while read r; do
 		LINE=$((LINE+1))
 		SANITIZED="`echo $r | sed -e 's,	, ,g;s,  *, ,g;s,^ ,,;s, $,,;s,#.*,,'`"
 		[ -z "$SANITIZED" ] && continue
@@ -542,7 +542,7 @@ postBuild() {
 showInfo
 updateSystem
 getPkgList
-createChroot "$DIST-$TYPE.lst" "$CHROOTNAME"
+createChroot $OURDIR/"$DIST-$TYPE.lst" "$CHROOTNAME"
 createInitrd "$CHROOTNAME"
 setupIsolinux "$CHROOTNAME" "$ISOROOTNAME"
 setupISOenv "$CHROOTNAME"
