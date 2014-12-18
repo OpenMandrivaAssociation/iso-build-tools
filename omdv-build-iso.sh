@@ -186,14 +186,14 @@ createInitrd() {
 	fi
 	$SUDO cp -rfT $OURDIR/extraconfig/etc/dracut.conf.d/60-dracut-isobuild.conf "$1"/etc/dracut.conf.d/60-dracut-isobuild.conf
 
-	if [ ! -f $OURDIR/create-liveramfs.sh ]; then
-		echo "Missing $OURDIR/create-liveramfs.sh . Exiting."
+	if [ ! -f $OURDIR/create-liveinitrd.sh ]; then
+		echo "Missing $OURDIR/create-liveinitrd.sh . Exiting."
 		error
 	fi
 
-	$SUDO install -c -m 755 $OURDIR/create-liveramfs.sh $OURDIR/squash-00-live.sh "$1"/boot/
-	$SUDO chroot "$1" /boot/create-liveramfs.sh "$LABEL" "$KERNEL_ISO"
-	$SUDO rm "$1"/boot/create-liveramfs.sh
+	$SUDO install -c -m 755 $OURDIR/create-liveinitrd.sh $OURDIR/squash-00-live.sh "$1"/boot/
+	$SUDO chroot "$1" /boot/create-liveinitrd.sh "$LABEL" "$KERNEL_ISO"
+	$SUDO rm "$1"/boot/create-liveinitrd.sh
 	$SUDO rm "$1"/boot/squash-00-live.sh
 
 	echo "Building initrd-$KERNEL_ISO inside chroot"
@@ -224,7 +224,7 @@ setupIsolinux() {
 	$SUDO mkdir -p "$2"/LiveOS
 	$SUDO mkdir -p "$2"/isolinux
 
-	echo "Installing liveramfs inside isolinux"
+	echo "Installing liveinitrd inside isolinux"
 	$SUDO cp -a "$1"/boot/vmlinuz-$KERNEL_ISO "$2"/isolinux/vmlinuz0
 	$SUDO cp -a "$1"/boot/liveinitrd.img "$2"/isolinux/liveinitrd.img
 	$SUDO rm -rf "$1"/boot/liveinitrd.img
