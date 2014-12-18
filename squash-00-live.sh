@@ -15,7 +15,7 @@ else
 fi
 # try to mount the iso inide liveramfs
 # /run is mounted as tmpfs already
-if [ -f /run/initramfs/live/LiveOS/squashfs.img ]; then
+if [ ! -f /run/initramfs/live/LiveOS/squashfs.img ]; then
 	mkdir -m 0755 -p /run/initramfs/live
 	mount -n -t iso9660 -o ro $LIVEDEV  /run/initramfs/live
 fi
@@ -26,5 +26,5 @@ mount -n -t squashfs /run/initramfs/live/LiveOS/squashfs.img /run/live-ro
 # mount tmpfs space as rw
 mount -n -t tmpfs tmpfs /run/live-rw
 # mount aufs as new root
-echo "aufs /sysroot aufs defaults 0 0" >> /etc/fstab
+echo "aufs $NEWROOT aufs defaults 0 0" >> /etc/fstab
 mount -t aufs -o br=/run/live-rw:/run/live-ro "$NEWROOT"
