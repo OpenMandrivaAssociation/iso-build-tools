@@ -317,7 +317,7 @@ setupISOenv() {
 
 	# set up displaymanager
 	if [ ! "$TYPE" = "minimal" ]; then
-		$SUDO chroot "$1" systemctl enable $DISPLAYMANAGER.service 2> /dev/null || :
+		$SUDO chroot "$1" systemctl enable $DISPLAYMANAGER.service
 
 		# Set reasonable defaults
 		if ! [ -f "$1"/etc/sysconfig/desktop ]; then
@@ -354,10 +354,26 @@ fi
 		echo "export KDETMP=/tmp" >> "$1"/home/live/.kde4/env/00-live.sh
 		$SUDO chroot "$1" chmod -R 0777 /home/live/.kde4
 	fi
+	
+	$SUDO pushd "$1"/etc/sysconfig/network-scripts
+	for iface in eth0 wlan0; do
+	cat > ifcfg-$iface << EOF
+DEVICE=$iface
+ONBOOT=yes
+NM_CONTROLLED=yes
+EOF
+	done
+	$SUDO popd
+
+	#enable network
+	$SUDO chroot "$1" systemctl enable NetworkManager.service
+	
 	# copy resolv.conf from a working system
 	if [ -e /etc/resolv.conf ] ; then
 		cp -rfT /etc/resolv.conf "$1"/etc/resolv.conf
 	fi
+	
+	ping -c 5 www.google.com
 	
 	# add urpmi medias inside chroot
 	echo "Removing old urpmi repositories."
