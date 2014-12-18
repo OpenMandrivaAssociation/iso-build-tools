@@ -84,6 +84,13 @@ error() {
 # Don't leave potentially dangerous stuff if we had to error out...
 trap error ERR
 
+showInfo() {
+	echo "Building ISO with arguments:\nDistribution=$DIST\n"
+	echo "Architecture=$EXTARCH\nTree=$TREE\nVersion=$Version\n"
+	echo "Release ID=$RELEASE_ID\nType=$TYPE\nDisplay Manager=$DISPLAYMANAGER\n"
+	echo "ISO label=$LABEL"
+}
+
 # Usage: parsePkgList xyz.lst
 # Shows the list of packages in the package list file (including any packages
 # mentioned by other package list files being %include-d)
@@ -384,6 +391,7 @@ fi
 # START ISO BUILD
 pushd iso-pkg-lists
 $SUDO mkdir -p "$ROOTNAME"/tmp
+showInfo
 createChroot "$DIST-$TYPE.lst" "$CHROOTNAME"
 createInitrd "$CHROOTNAME"
 setupIsolinux "$CHROOTNAME" "$ISOROOTNAME"
