@@ -315,6 +315,9 @@ EOF
 
 setupISOenv() {
 
+	# set up default timezone
+	$SUDO chroot "$1" ln -s /usr/share/zoneinfo/Universal /etc/localtime
+	
 	# set up displaymanager
 	if [ ! "$TYPE" = "minimal" ]; then
 		$SUDO chroot "$1" systemctl enable $DISPLAYMANAGER.service
