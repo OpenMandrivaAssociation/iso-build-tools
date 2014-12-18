@@ -127,7 +127,12 @@ updateSystem() {
         urpmi --no-verify-rpm perl-URPM cdrkit-genisoimage syslinux squashfs-tools 
     else
 	echo "Building in user custom environment"
-	urpmi --no-verify-rpm perl-URPM cdrtools syslinux squashfs-tools
+
+	if [ `cat /etc/release | grep -o 2014.0` \< "2015.0" ]; then
+	    urpmi --no-verify-rpm perl-URPM cdrkit-genisoimage syslinux squashfs-tools
+	else
+	    urpmi --no-verify-rpm perl-URPM cdrtools syslinux squashfs-tools
+	fi
     fi
 }
 
