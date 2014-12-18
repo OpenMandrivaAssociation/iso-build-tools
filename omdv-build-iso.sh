@@ -134,7 +134,7 @@ updateSystem() {
 getPkgList() {
 
     if [ -d $OURDIR/iso-pkg-lists ]; then
-	rm -rf $OURDIR/iso-pkg-lists
+	$SUDO rm -rf $OURDIR/iso-pkg-lists
     fi
 
     ### possible fix for timed out GIT pulls
@@ -154,7 +154,7 @@ getPkgList() {
     fi
 
     if [ ! -d $OURDIR/iso-pkg-lists ]; then
-	"Could not find iso-pkg-lists. Exiting."
+	echo "Could not find iso-pkg-lists. Exiting."
 	error
     fi
 
