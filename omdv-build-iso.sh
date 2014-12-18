@@ -163,6 +163,7 @@ getPkgList() {
 	error
     fi
 
+    FILELISTS=$OURDIR/iso-pkg-lists/"$DIST-$TYPE.lst"
 }
 
 showInfo() {
@@ -547,7 +548,7 @@ postBuild() {
 showInfo
 updateSystem
 getPkgList
-createChroot $OURDIR/"$DIST-$TYPE.lst" "$CHROOTNAME"
+createChroot "$FILELISTS" "$CHROOTNAME"
 createInitrd "$CHROOTNAME"
 setupIsolinux "$CHROOTNAME" "$ISOROOTNAME"
 setupISOenv "$CHROOTNAME"
