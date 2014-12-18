@@ -344,7 +344,7 @@ fi
 	$SUDO chroot "$1" chown -R 500:500 /home/live/
 	$SUDO chroot "$1" chmod -R 0777 /home/live/.local
 	$SUDO mkdir -p "$1"/home/live/.cache
-	$SUDO chroot "41" chown 500:500 /home/live/.cache
+	$SUDO chroot "$1" chown 500:500 /home/live/.cache
 
 	# KDE4 related settings
 	if [ "$TYPE" = "kde4" ]; then
