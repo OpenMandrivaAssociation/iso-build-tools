@@ -96,10 +96,10 @@ LABEL="$PRODUCT_ID.$EXTARCH"
 umountAll() {
     echo "Umounting all."
     unset KERNEL_ISO
-    $SUDO umount "$1"/proc || :
-    $SUDO umount "$1"/sys || :
-    $SUDO umount "$1"/dev/pts || :
-    $SUDO umount "$1"/dev || :
+    $SUDO umount -l "$1"/proc || :
+    $SUDO umount -l "$1"/sys || :
+    $SUDO umount -l "$1"/dev/pts || :
+    $SUDO umount -l "$1"/dev || :
 }
 
 error() {
