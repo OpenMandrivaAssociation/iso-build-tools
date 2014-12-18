@@ -319,7 +319,7 @@ setupISOenv() {
 		$SUDO chroot "$1" systemctl enable $DISPLAYMANAGER.service 2> /dev/null || :
 
 		# Set reasonable defaults
-		if ! [ -e "$1"/etc/sysconfig/desktop ]; then
+		if ! [ -f "$1"/etc/sysconfig/desktop ]; then
 		cat >"$1"/etc/sysconfig/desktop <<'EOF'
 DISPLAYMANAGER="$DISPLAYMANAGER"
 DESKTOP="$TYPE"
@@ -353,6 +353,38 @@ fi
 		echo "export KDETMP=/tmp" >> "$1"/home/live/.kde4/env/00-live.sh
 		$SUDO chroot "$1" chmod -R 0777 /home/live/.kde4
 	fi
+	# copy resolv.conf from a working system
+	if [ -e /etc/resolv.conf ] ; then
+		cp -rfT /etc/resolv.conf "$1"/etc/resolv.conf
+	fi
+	
+	# add urpmi medias inside chroot
+	echo "Removing old urpmi repositories."
+	$SUDO chroot "$1" /usr/sbin/urpmi.removemedia -a
+	echo "Adding new urpmi repositories."
+	$SUDO chroot "$1" /usr/sbin/urpmi.addmedia --distrib --mirrorlist --wget --no-md5sum
+
+	if [ "EXTARCH" = "x86_64" ]; then
+		echo "Adding 32-bit media repository."
+		$SUDO chroot "$1" /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.2014.0.i586.list' 'Main32' 'media/main/release'
+		$SUDO chroot "$1" /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.2014.0.i586.list' 'Main32Updates' 'media/main/updates'
+		
+		if [[ $? != 0 ]]; then
+			echo "Adding 32-bit media FAILED. Exiting";
+			error
+		fi
+
+	else
+		echo "urpmi 32-bit media repository not needed"
+
+	fi
+
+	#update urpmi medias
+	echo "Updating urpmi repositories"
+	$SUDO chroot "$1" /usr/sbin/urpmi.update -a -ff --wget --force-key
+
+	echo > "$1"/etc/resolv.conf
+
 	# ldetect stuff
 	$SUDO chroot "$1" /usr/sbin/update-ldetect-lst
 
