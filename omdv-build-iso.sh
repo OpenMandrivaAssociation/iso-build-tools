@@ -138,20 +138,27 @@ updateSystem() {
 
 getPkgList() {
 
-    if [ -d $OURDIR/iso-pkg-lists ]; then
-	$SUDO rm -rf $OURDIR/iso-pkg-lists
+    # fix for ABF
+    if [ "$ABF" = "1" ]; then
+	LISTDIR=$(pwd)
+    else
+	LISTDIR=$OURDIR
+    fi
+
+    # remove if exists
+    if [ -d $LISTDIR/iso-pkg-lists ]; then
+	$SUDO rm -rf $LISTDIR/iso-pkg-lists
     fi
 
     ### possible fix for timed out GIT pulls
-    if [ ! -d $OURDIR/iso-pkg-lists ]; then
+    if [ ! -d $LISTDIR/iso-pkg-lists ]; then
 	if [ $TREE = "cooker" ]; then
 	    BRANCH=master
 	else
 	    BRANCH="$TREE"
     fi
 
-    echo $(pwd)
-
+    # download iso packages lists from www.abf.io
     PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-$BRANCH.tar.gz"
     wget --tries=10 -O iso-pkg-lists-$BRANCH.tar.gz --content-disposition $PKGLIST
     tar -xf iso-pkg-lists-$BRANCH.tar.gz
@@ -160,12 +167,14 @@ getPkgList() {
 
     fi
 
-    if [ ! -d $OURDIR/iso-pkg-lists ]; then
+    # bail out if download was unsuccesfull
+    if [ ! -d $LISTDIR/iso-pkg-lists ]; then
 	echo "Could not find $OURDIR/iso-pkg-lists. Exiting."
 	error
     fi
 
-    FILELISTS="$OURDIR/iso-pkg-lists/$DIST-$TYPE.lst"
+    # export file list
+    FILELISTS="$LISTDIR/iso-pkg-lists/$DIST-$TYPE.lst"
 
 }
 
