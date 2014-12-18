@@ -373,7 +373,9 @@ EOF
 		cp -rfT /etc/resolv.conf "$1"/etc/resolv.conf
 	fi
 	
-	ping -c 5 www.google.com
+	$SUDO ping -c 5 www.google.com
+	
+	$SUDO chroot "$1" ping -c 5 www.abf.io
 	
 	# add urpmi medias inside chroot
 	echo "Removing old urpmi repositories."
