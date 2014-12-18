@@ -373,8 +373,11 @@ EOF
 	
 	# copy resolv.conf from a working system
 	if [ -e /etc/resolv.conf ] ; then
-		cp -rfT /etc/resolv.conf "$1"/etc/resolv.conf
+		$SUDO cp -rfT /etc/resolv.conf "$1"/etc/resolv.conf
 	fi
+	
+	echo "what is inside $1/etc/resolv.conf?"
+	$SUDO cat "$1"/etc/resolv.conf
 	
 	$SUDO ping -c 5 www.google.com
 	
