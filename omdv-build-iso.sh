@@ -362,7 +362,7 @@ fi
 	echo "Removing old urpmi repositories."
 	$SUDO chroot "$1" /usr/sbin/urpmi.removemedia -a
 	echo "Adding new urpmi repositories."
-	$SUDO chroot "$1" /usr/sbin/urpmi.addmedia --distrib --mirrorlist --wget --no-md5sum
+	$SUDO chroot "$1" /usr/sbin/urpmi.addmedia --wget --no-md5sum --distrib --mirrorlist '$MIRRORLIST'
 
 	if [ "EXTARCH" = "x86_64" ]; then
 		echo "Adding 32-bit media repository."
