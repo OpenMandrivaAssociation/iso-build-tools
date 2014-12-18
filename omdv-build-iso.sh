@@ -162,10 +162,15 @@ getPkgList() {
 
 showInfo() {
 	echo $'###\n'
-	echo $'Building ISO with arguments:\nDistribution=$DIST\n'
-	echo $'Architecture=$EXTARCH\nTree=$TREE\nVersion=$Version\n'
-	echo $'Release ID=$RELEASE_ID\nType=$TYPE\nDisplay Manager=$DISPLAYMANAGER\n'
-	echo $'ISO label=$LABEL\n'
+	echo "Building ISO with arguments:"
+	echo "Distribution=$DIST"
+	echo "Architecture=$EXTARCH"
+	echo "Tree=$TREE"
+	echo "Version=$Version"
+	echo "Release ID=$RELEASE_ID"
+	echo "Type=$TYPE"
+	echo "Display Manager=$DISPLAYMANAGER"
+	echo "ISO label=$LABEL"
 	echo $'###\n'
 }
 
