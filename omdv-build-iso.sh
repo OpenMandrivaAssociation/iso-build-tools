@@ -46,7 +46,7 @@ else
 fi
 
 # check whether script is executed inside ABF (www.abf.io)
-if echo $OURDIR | grep -q /home/vagrant; then
+if echo $(realpath $(dirname $0)) | grep -q /home/vagrant; then
     ABF=1
 fi
 
