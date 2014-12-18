@@ -45,6 +45,11 @@ else
     exit 1
 fi
 
+# check whether script is executed inside ABF (www.abf.io)
+if echo $OURDIR | grep -q /home/vagrant; then
+    ABF=1
+fi
+
 # default definitions
 DIST=omdv
 EXTARCH=`uname -m`
@@ -112,15 +117,18 @@ trap error ERR
 
 updateSystem() {
     #Force update of critical packages
-    urpmq --list-url
-    urpmi.update -ff updates
+    if [ "$ABF" = "1" ]; then
+	echo "We are inside ABF (www.abf.io)"
+        urpmq --list-url
+	urpmi.update -ff updates
 
     # inside ABF, lxc-container which is used to run this script is based
     # on Rosa2012 which does not have cdrtools
-    urpmi --no-verify-rpm perl-URPM cdrkit-genisoimage syslinux squashfs-tools 
-
-    # add some cool check for either we are inside ABF or not
-    #urpmi --no-verify-rpm perl-URPM cdrtools syslinux squashfs-tools
+        urpmi --no-verify-rpm perl-URPM cdrkit-genisoimage syslinux squashfs-tools 
+    else
+	echo "Building in user custom environment"
+	urpmi --no-verify-rpm perl-URPM cdrtools syslinux squashfs-tools
+    fi
 }
 
 getPkgList() {
@@ -514,7 +522,7 @@ postBuild() {
     md5sum  $OURDIR/$PRODUCT_ID.$EXTARCH.iso > $OURDIR/$PRODUCT_ID.$EXTARCH.iso.md5sum
     sha1sum $OURDIR/$PRODUCT_ID.$EXTARCH.iso > $OURDIR/$PRODUCT_ID.$EXTARCH.iso.sha1sum
 
-    if echo $OURDIR | grep -q /home/vagrant; then
+    if [ "$ABF" = "1" ]; then
 	# We're running in ABF -- adjust to its directory structure
 	mkdir -p /home/vagrant/results /home/vagrant/archives
 	mv $OURDIR/*.iso* /home/vagrant/results/
@@ -537,3 +545,4 @@ createSquash "$CHROOTNAME" "$ISOROOTNAME"
 buildIso $OURDIR/$PRODUCT_ID.$EXTARCH.iso "$ISOROOTNAME"
 postBuild
 
+#END
