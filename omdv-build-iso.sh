@@ -220,7 +220,7 @@ setupIsolinux() {
 
 	echo "Copy various isolinux settings"
 	# copy boot menu background
-        $SUDO cp -rfT $OURDIR/splash.jpg "$2"/isolinux/splash.png
+        $SUDO cp -rfT $OURDIR/extraconfig/syslinux/background.jpg "$2"/isolinux/background.png
         # copy memtest
         $SUDO cp -rfT $OURDIR/extraconfig/memtest "$2"/isolinux/memtest
         # copy SuperGrub iso
@@ -247,7 +247,7 @@ UI vesamenu.c32
 DEFAULT boot
 PROMPT 0
 MENU TITLE Welcome to OpenMandriva Lx $VERSION $EXTARCH
-MENU BACKGROUND splash.png
+MENU BACKGROUND background.png
 TIMEOUT 100
 MENU WIDTH 78
 MENU MARGIN 4
