@@ -308,7 +308,7 @@ setupIsolinux() {
 
 	echo "Copy various isolinux settings"
 	# copy boot menu background
-        $SUDO cp -rfT $OURDIR/extraconfig/syslinux/background.jpg "$2"/isolinux/background.png
+        $SUDO cp -rfT $OURDIR/extraconfig/syslinux/background.png "$2"/isolinux/background.png
         # copy memtest
         $SUDO cp -rfT $OURDIR/extraconfig/memtest "$2"/isolinux/memtest
         # copy SuperGrub iso
