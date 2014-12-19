@@ -58,6 +58,8 @@ VERSION="`date +%Y.0`"
 RELEASE_ID=alpha
 TYPE=kde4
 DISPLAYMANAGER="kdm"
+# always build free ISO
+FREE=1
 
 SUDO=sudo
 [ "`id -u`" = "0" ] && SUDO=""
@@ -222,9 +224,29 @@ createChroot() {
 	echo "Creating chroot $2"
 	# Make sure /proc, /sys and friends are mounted so %post scripts can use them
 	$SUDO mkdir -p "$2"/proc "$2"/sys "$2"/dev "$2"/dev/pts
-	$SUDO urpmi.addmedia --urpmi-root "$2" --distrib $REPOPATH
+
+	if [ "$FREE" = "0" ]: then
+		$SUDO urpmi.addmedia --urpmi-root "$2" --distrib $REPOPATH
+	else
+		$SUDO urpmi.addmedia --urpmi-root "$2" "Main" $REPOPATH/main/release
+		$SUDO urpmi.addmedia --urpmi-root "$2" "Contrib" $REPOPATH/contrib/release
+		# this one is needed to grab firmwares
+		$SUDO urpmi.addmedia --urpmi-root "$2" "Non-free" $REPOPATH/non-free/release
+		
+		if [ ${TREE,,} != "cooker" ]; then
+			$SUDO urpmi.addmedia --urpmi-root "$2" "MainUpdates" $REPOPATH/main/updates
+			$SUDO urpmi.addmedia --urpmi-root "$2" "ContribUpdates" $REPOPATH/contrib/updates
+			# this one is needed to grab firmwares
+			$SUDO urpmi.addmedia --urpmi-root "$2" "Non-freeUpdates" $REPOPATH/non-free/updates
+		fi
+	fi
+	
+	# update medias
 	$SUDO urpmi.update -a -c -ff --wget --urpmi-root "$2" main
-	$SUDO urpmi.update -a -c -ff --wget --urpmi-root "$2" updates
+	if [ ${TREE,,} != "cooker" ]; then
+		$SUDO urpmi.update -a -c -ff --wget --urpmi-root "$2" updates
+	fi
+
 	$SUDO mount --bind /proc "$2"/proc
 	$SUDO mount --bind /sys "$2"/sys
 	$SUDO mount --bind /dev "$2"/dev
