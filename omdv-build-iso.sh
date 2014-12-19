@@ -225,7 +225,7 @@ createChroot() {
 	# Make sure /proc, /sys and friends are mounted so %post scripts can use them
 	$SUDO mkdir -p "$2"/proc "$2"/sys "$2"/dev "$2"/dev/pts
 
-	if [ "$FREE" = "0" ]: then
+	if [ "$FREE" = "0" ]; then
 		$SUDO urpmi.addmedia --urpmi-root "$2" --distrib $REPOPATH
 	else
 		$SUDO urpmi.addmedia --urpmi-root "$2" "Main" $REPOPATH/main/release
