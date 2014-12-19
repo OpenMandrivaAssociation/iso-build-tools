@@ -429,8 +429,8 @@ setupISOenv() {
 	$SUDO chroot "$1" ln -s /usr/share/zoneinfo/Universal /etc/localtime
 
 	# set up displaymanager
-	if [ ! "$TYPE" = "minimal" ]; then
-		$SUDO chroot "$1" systemctl enable $DISPLAYMANAGER.service
+	if [ "$TYPE" != "minimal" ]; then
+		$SUDO chroot "$1" systemctl enable $DISPLAYMANAGER.service 2> /dev/null || :
 
 		# Set reasonable defaults
 		if ! [ -f "$1"/etc/sysconfig/desktop ]; then
@@ -479,8 +479,8 @@ EOF
 	$SUDO popd
 
 	#enable network
-	$SUDO chroot "$1" systemctl enable resolvconf
-	$SUDO chroot "$1" systemctl enable NetworkManager.service
+	$SUDO chroot "$1" systemctl enable resolvconf 2> /dev/null || :
+	$SUDO chroot "$1" systemctl enable NetworkManager.service 2> /dev/null || :
 
 	# add urpmi medias inside chroot
 	echo "Removing old urpmi repositories."
