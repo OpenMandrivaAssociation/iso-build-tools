@@ -499,7 +499,7 @@ EOF
 
 	$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist $MIRRORLIST
 
-	if [ "EXTARCH" = "x86_64" ]; then
+	if [ "$EXTARCH" = "x86_64" ]; then
 		echo "Adding 32-bit media repository."
 		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list' 'Main32' 'media/main/release'
 		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list' 'Main32Updates' 'media/main/updates'
