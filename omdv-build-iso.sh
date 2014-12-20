@@ -425,6 +425,9 @@ EOF
 
 setupISOenv() {
 
+	# clear root password
+	$SUDO chroot "$1" /usr/bin/passwd -f -d root
+
 	# set up default timezone
 	$SUDO chroot "$1" ln -s /usr/share/zoneinfo/Universal /etc/localtime
 
