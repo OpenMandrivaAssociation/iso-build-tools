@@ -16,7 +16,16 @@ mkdir tmp
 cd tmp
 xzcat ../liveinitrd.img |cpio -idu
 mkdir -p lib/dracut/hooks/mount
+sleep 1
+
 sed -e "s,@LABEL@,$LABEL,g" ../squash-00-live.sh >lib/dracut/hooks/mount/00-live.sh
+# be sure lib/dracut/hooks/mount/00-live.sh is there
+if [ -f lib/dracut/hooks/mount/00-live.sh ]; then
+    cp -f ../squash-00-live.sh lib/dracut/hooks/mount/00-live.sh
+    sed -e "s,@LABEL@,$LABEL,g" lib/dracut/hooks/mount/00-live.sh
+fi
+
+sleep 1
 # fugly hack to get /dev/disk/by-label
 sed -i -e '/KERNEL!="sr\*\", IMPORT{builtin}="blkid"/s/KERNEL/#KERNEL/g' -e '/TEST=="whole_disk", GOTO="persistent_storage_end"/s/TEST/#TEST/g' lib/udev/rules.d/60-persistent-storage.rules
 chmod 0755 lib/dracut/hooks/mount/00-live.sh

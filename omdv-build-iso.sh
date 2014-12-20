@@ -291,6 +291,7 @@ createInitrd() {
 	fi
 
 	$SUDO install -c -m 755 $OURDIR/create-liveinitrd.sh $OURDIR/squash-00-live.sh "$1"/boot/
+	sleep 1
 	$SUDO chroot "$1" /boot/create-liveinitrd.sh "$LABEL" "$KERNEL_ISO"
 	$SUDO rm "$1"/boot/create-liveinitrd.sh
 	$SUDO rm "$1"/boot/squash-00-live.sh
