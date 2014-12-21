@@ -327,7 +327,13 @@ setupIsolinux() {
 	echo "Installing liveinitrd inside isolinux"
 	$SUDO cp -a "$1"/boot/vmlinuz-$KERNEL_ISO "$2"/isolinux/vmlinuz0
 	$SUDO cp -a "$1"/boot/liveinitrd.img "$2"/isolinux/liveinitrd.img
-	$SUDO rm -rf "$1"/boot/liveinitrd.img
+
+	if [ -f "$2"/isolinux/liveinitrd.img ]; then
+	    echo "Missing /isolinux/liveinitrd.img. Exiting."
+	    error
+	else
+	    $SUDO rm -rf "$1"/boot/liveinitrd.img
+	fi
 
 	echo "Copy various isolinux settings"
 	# copy boot menu background
@@ -499,10 +505,11 @@ EOF
 
 	$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist $MIRRORLIST
 
+	# add 32-bit medias only for x86_64 arch
 	if [ "$EXTARCH" = "x86_64" ]; then
 		echo "Adding 32-bit media repository."
-		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list' 'Main32' 'media/main/release'
-		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list' 'Main32Updates' 'media/main/updates'
+		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list' 'Main32' 'media/main/release'
+		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list' 'Main32Updates' 'media/main/updates'
 
 		if [[ $? != 0 ]]; then
 			echo "Adding urpmi 32-bit media FAILED. Exiting";
