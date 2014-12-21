@@ -183,14 +183,14 @@ getPkgList() {
 showInfo() {
 	echo $'###\n'
 	echo "Building ISO with arguments:"
-	echo "Distribution=$DIST"
-	echo "Architecture=$EXTARCH"
-	echo "Tree=$TREE"
-	echo "Version=$Version"
-	echo "Release ID=$RELEASE_ID"
-	echo "Type=$TYPE"
-	echo "Display Manager=$DISPLAYMANAGER"
-	echo "ISO label=$LABEL"
+	echo "Distribution is $DIST"
+	echo "Architecture is $EXTARCH"
+	echo "Tree is $TREE"
+	echo "Version is $VERSION"
+	echo "Release ID is $RELEASE_ID"
+	echo "Type is $TYPE"
+	echo "Display Manager is $DISPLAYMANAGER"
+	echo "ISO label is $LABEL"
 	echo $'###\n'
 }
 
@@ -502,7 +502,7 @@ EOF
 	$SUDO urpmi.removemedia -a --urpmi-root "$1"
 
 	echo "Adding new urpmi repositories."
-	if [ "$TREE" = "cooker" ]; then
+	if [ "${TREE,,}" = "cooker" ]; then
 		MIRRORLIST="http://downloads.openmandriva.org/mirrors/cooker.$EXTARCH.list"
 	else
 		MIRRORLIST="http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.$EXTARCH.list"
@@ -513,8 +513,8 @@ EOF
 	# add 32-bit medias only for x86_64 arch
 	if [ "$EXTARCH" = "x86_64" ]; then
 		echo "Adding 32-bit media repository."
-		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list' 'Main32' 'media/main/release'
-		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list' 'Main32Updates' 'media/main/updates'
+		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list" 'Main32' 'media/main/release'
+		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list" 'Main32Updates' 'media/main/updates'
 
 		if [[ $? != 0 ]]; then
 			echo "Adding urpmi 32-bit media FAILED. Exiting";
