@@ -109,6 +109,7 @@ error() {
     unset KERNEL_ISO
     unset UEFI
     unset MIRRORLIST
+    $SUDO rm -rf $(dirname "$FILELISTS")
     umountAll "$CHROOTNAME"
     $SUDO rm -rf "$ROOTNAME"
     exit 1
