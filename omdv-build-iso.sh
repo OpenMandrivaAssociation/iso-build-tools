@@ -296,6 +296,11 @@ createInitrd() {
 	$SUDO rm "$1"/boot/create-liveinitrd.sh
 	$SUDO rm "$1"/boot/squash-00-live.sh
 
+	if [ ! -f "$1"/boot/liveinitrd.img ]; then
+	    echo "File "$1"/boot/liveinitrd.img does not exist. Exiting."
+	    error
+	fi
+
 	echo "Building initrd-$KERNEL_ISO inside chroot"
 	# remove old initrd
 	$SUDO rm -rf "$1"/boot/initrd-$KERNEL_ISO.img
@@ -328,7 +333,7 @@ setupIsolinux() {
 	$SUDO cp -a "$1"/boot/vmlinuz-$KERNEL_ISO "$2"/isolinux/vmlinuz0
 	$SUDO cp -a "$1"/boot/liveinitrd.img "$2"/isolinux/liveinitrd.img
 
-	if [ -f "$2"/isolinux/liveinitrd.img ]; then
+	if [ ! -f "$2"/isolinux/liveinitrd.img ]; then
 	    echo "Missing /isolinux/liveinitrd.img. Exiting."
 	    error
 	else
