@@ -513,8 +513,11 @@ EOF
 	# add 32-bit medias only for x86_64 arch
 	if [ "$EXTARCH" = "x86_64" ]; then
 		echo "Adding 32-bit media repository."
-		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list" 'Main32' 'media/main/release'
-		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.i586.list" 'Main32Updates' 'media/main/updates'
+
+		# use previous MIRRORLIST declaration but with i586 arch in link name
+		MIRRORLIST="`echo $MIRRORLIST | sed -e "s/x86_64/i586/g"`"
+		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Main32' 'media/main/release'
+		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Main32Updates' 'media/main/updates'
 
 		if [[ $? != 0 ]]; then
 			echo "Adding urpmi 32-bit media FAILED. Exiting";
