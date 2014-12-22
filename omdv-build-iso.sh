@@ -482,7 +482,9 @@ fi
 		echo "export KDEVARTMP=/tmp" > "$1"/home/live/.kde4/env/00-live.sh
 		echo "export KDETMP=/tmp" >> "$1"/home/live/.kde4/env/00-live.sh
 		$SUDO chroot "$1" chmod -R 0777 /home/live/.kde4
-	fi
+	else
+    	$SUDO rm -rf "$1"/home/live/.kde4
+    fi
 
 	$SUDO pushd "$1"/etc/sysconfig/network-scripts
 	for iface in eth0 wlan0; do
