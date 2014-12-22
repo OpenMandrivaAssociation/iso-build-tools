@@ -31,7 +31,7 @@ if [ ! -f /run/live-ro/etc/os-release ]; then
 fi
 
 # mount tmpfs space as rw
-mount -n -t tmpfs tmpfs /run/live-rw
+mount -n -t tmpfs tmpfs -o mode=755 /run/live-rw
 # mount aufs as new root
 echo "aufs $NEWROOT aufs defaults 0 0" >> /etc/fstab
 mount -t aufs -o br=/run/live-rw:/run/live-ro "$NEWROOT"
