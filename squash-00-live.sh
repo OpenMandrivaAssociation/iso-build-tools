@@ -10,8 +10,8 @@ modprobe aufs
 if [ -e /dev/disk/by-label/@LABEL@ ]; then
 	LIVEDEV="/dev/disk/by-label/@LABEL@"
 else
-	echo "/dev/disk/by-label/@LABEL@ does not exists. Trying hardcoded /dev/sr0"
-	LIVEDEV="/dev/sr0"
+	echo "Failed to find /dev/disk/by-label/@LABEL@ -- dropping to shell for debugging"
+	/bin/sh
 fi
 # try to mount the iso inide liveramfs
 # /run is mounted as tmpfs already
