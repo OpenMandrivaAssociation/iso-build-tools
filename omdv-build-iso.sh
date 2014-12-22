@@ -255,7 +255,12 @@ createChroot() {
 
 	# start rpm packages installation
 	parsePkgList "$1" | xargs $SUDO urpmi --urpmi-root "$2" --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto 
-
+	
+	if [ ! -e "$2"/usr/lib/syslinux/isolinux.bin ]; then
+		echo "Syslinux is missing in chroot. Installing it."
+		$SUDO urpmi --urpmi-root "$2" --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto syslinux
+	fi
+	
 	# check CHROOT
 	if [ ! -d  "$2"/lib/modules ]; then
 		echo "Broken chroot installation. Exiting"
@@ -324,6 +329,10 @@ setupSyslinux() {
 	# install syslinux programs
 	echo "Installing syslinux programs."
         for i in isolinux.bin vesamenu.c32 hdt.c32 poweroff.com chain.c32; do
+			if [ ! -f "$1"/usr/lib/syslinux/$i ]; then
+				echo "$i does not exists. Exiting."
+				error
+			fi
             $SUDO cp "$1"/usr/lib/syslinux/$i "$2"/isolinux ;
         done
 
