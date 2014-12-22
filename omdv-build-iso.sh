@@ -278,8 +278,8 @@ createInitrd() {
 		error
 	fi
 
-	# build initrd for isolinux
-	echo "Building liveinitrd-$KERNEL_ISO for isolinux"
+	# build initrd for syslinux
+	echo "Building liveinitrd-$KERNEL_ISO for syslinux"
 	if [ ! -f $OURDIR/extraconfig/etc/dracut.conf.d/60-dracut-isobuild.conf ]; then
 		echo "Missing $OURDIR/extraconfig/etc/dracut.conf.d/60-dracut-isobuild.conf . Exiting."
 		error
@@ -314,15 +314,15 @@ createInitrd() {
 
 }
 
-# Usage: setupIsoLinux /target/dir
-# Sets up isolinux to boot /target/dir
-setupIsolinux() {
-	echo "Starting isolinux setup."
+# Usage: setupSysLinux /target/dir
+# Sets up syslinux to boot /target/dir
+setupSyslinux() {
+	echo "Starting syslinux setup."
 
 	$SUDO mkdir -p "$2"/isolinux
 	$SUDO chmod 1777 "$2"/isolinux
-	# install isolinux programs
-	echo "Installing isolinux programs."
+	# install syslinux programs
+	echo "Installing syslinux programs."
         for i in isolinux.bin vesamenu.c32 hdt.c32 poweroff.com chain.c32; do
             $SUDO cp "$1"/usr/lib/syslinux/$i "$2"/isolinux ;
         done
@@ -330,7 +330,7 @@ setupIsolinux() {
 	$SUDO mkdir -p "$2"/LiveOS
 	$SUDO mkdir -p "$2"/isolinux
 
-	echo "Installing liveinitrd inside isolinux"
+	echo "Installing liveinitrd inside syslinux"
 	$SUDO cp -a "$1"/boot/vmlinuz-$KERNEL_ISO "$2"/isolinux/vmlinuz0
 	$SUDO cp -a "$1"/boot/liveinitrd.img "$2"/isolinux/liveinitrd.img
 
@@ -341,7 +341,7 @@ setupIsolinux() {
 	    $SUDO rm -rf "$1"/boot/liveinitrd.img
 	fi
 
-	echo "Copy various isolinux settings"
+	echo "Copy various syslinux settings"
 	# copy boot menu background
         $SUDO cp -rfT $OURDIR/extraconfig/syslinux/background.png "$2"/isolinux/background.png
         # copy memtest
@@ -362,7 +362,7 @@ setupIsolinux() {
 		done
 	fi
 
-	echo "Create isolinux menu"
+	echo "Create syslinux menu"
 	# kernel/initrd filenames referenced below are the ISO9660 names.
 	# syslinux doesn't support Rock Ridge.
 	$SUDO cat >"$2"/isolinux/isolinux.cfg <<EOF
@@ -433,7 +433,7 @@ LABEL poweroff
 	COMBOOT poweroff.com
 EOF
 	$SUDO chmod 0755 "$2"/isolinux
-	echo "Isolinux setup completed"
+	echo "syslinux setup completed"
 }
 
 setupISOenv() {
@@ -608,7 +608,7 @@ updateSystem
 getPkgList
 createChroot "$FILELISTS" "$CHROOTNAME"
 createInitrd "$CHROOTNAME"
-setupIsolinux "$CHROOTNAME" "$ISOROOTNAME"
+setupSyslinux "$CHROOTNAME" "$ISOROOTNAME"
 setupISOenv "$CHROOTNAME"
 createSquash "$CHROOTNAME" "$ISOROOTNAME"
 buildIso $OURDIR/$PRODUCT_ID.$EXTARCH.iso "$ISOROOTNAME"
