@@ -22,8 +22,8 @@
 
 # This tools is specified to build OpenMandriva Lx distribution ISO
 # Usage:
-# ./omdv-build-iso.sh EXTARCH TREE VERSION RELEASE_ID TYPE DISPLAYMANAGER
-# ./omdv-build-iso.sh x86_64 cooker 2015.0 alpha hawaii sddm
+# omdv-build-iso.sh EXTARCH TREE VERSION RELEASE_ID TYPE DISPLAYMANAGER
+# omdv-build-iso.sh x86_64 cooker 2015.0 alpha hawaii sddm
 #
 
 if [ "`id -u`" != "0" ]; then
@@ -254,13 +254,13 @@ createChroot() {
 	$SUDO mount --bind /dev/pts "$2"/dev/pts
 
 	# start rpm packages installation
-	parsePkgList "$1" | xargs $SUDO urpmi --urpmi-root "$2" --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto 
-	
+	parsePkgList "$1" | xargs $SUDO urpmi --urpmi-root "$2" --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto
+
 	if [ ! -e "$2"/usr/lib/syslinux/isolinux.bin ]; then
 		echo "Syslinux is missing in chroot. Installing it."
 		$SUDO urpmi --urpmi-root "$2" --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto syslinux
 	fi
-	
+
 	# check CHROOT
 	if [ ! -d  "$2"/lib/modules ]; then
 		echo "Broken chroot installation. Exiting"
@@ -296,11 +296,22 @@ createInitrd() {
 		error
 	fi
 
-	$SUDO install -c -m 755 $OURDIR/create-liveinitrd.sh $OURDIR/squash-00-live.sh "$1"/boot/
-	sleep 1
-	$SUDO chroot "$1" /boot/create-liveinitrd.sh "$LABEL" "$KERNEL_ISO"
-	$SUDO rm "$1"/boot/create-liveinitrd.sh
-	$SUDO rm "$1"/boot/squash-00-live.sh
+	if [ ! -d "$1"/usr/lib/dracut/modules.d/90liveiso ]; then
+	    echo "Dracut is missing 90liveiso module. Installing it."
+
+	    $SUDO cp -a -f $OURDIR/90liveiso "$1"/usr/lib/dracut/modules.d/
+	    $SUDO chmod 0755 "$1"/usr/lib/dracut/modules.d/90liveiso
+	    $SUDO chmod 0755 "$1"/usr/lib/dracut/modules.d/90liveiso/*.sh
+	fi
+
+	# fugly hack to get /dev/disk/by-label
+	$SUDO sed -i -e '/KERNEL!="sr\*\", IMPORT{builtin}="blkid"/s/sr/none/g' -e '/TEST=="whole_disk", GOTO="persistent_storage_end"/s/TEST/# TEST/g' "$1"/lib/udev/rules.d/60-persistent-storage.rules
+
+	if [ -f "$1"/boot/liveinitrd.img ]; then
+	    $SUDO rm -rf "$1"/boot/liveinitrd.img
+	fi
+
+	$SUDO chroot "$1" /usr/sbin/dracut -N -f --no-early-microcode --nofscks --noprelink  /boot/liveinitrd.img --conf /etc/dracut.conf.d/60-dracut-isobuild.conf $KERNEL_ISO
 
 	if [ ! -f "$1"/boot/liveinitrd.img ]; then
 	    echo "File "$1"/boot/liveinitrd.img does not exist. Exiting."
@@ -314,7 +325,7 @@ createInitrd() {
 
 	# remove config for liveinitrd
 	$SUDO rm -rf "$1"/etc/dracut.conf.d/60-dracut-isobuild.conf
-	$SUDO chroot "$1" /usr/sbin/dracut -f /boot/initrd-$KERNEL_ISO.img $KERNEL_ISO
+	$SUDO chroot "$1" /usr/sbin/dracut -N -f /boot/initrd-$KERNEL_ISO.img $KERNEL_ISO
 	$SUDO ln -s /boot/initrd-$KERNEL_ISO.img "$1"/boot/initrd0.img
 
 }
@@ -405,19 +416,19 @@ LABEL boot
 	MENU LABEL Boot OpenMandriva Lx in Live Mode
 	LINUX /isolinux/vmlinuz0
 	INITRD /isolinux/liveinitrd.img
-	APPEND initrd=/isolinux/liveinitrd.img rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image quiet rhgb vga=788 splash=silent logo.nologo root=live:LABEL=$LABEL locale.lang=en_US vconsole.keymap=us
+	APPEND rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image quiet rhgb vga=788 splash=silent logo.nologo root=live:LABEL=$LABEL locale.lang=en_US vconsole.keymap=us
 
 LABEL install
 	MENU LABEL Install OpenMandriva Lx
 	LINUX /isolinux/vmlinuz0
 	INITRD /isolinux/liveinitrd.img
-	APPEND initrd=/isolinux/liveinitrd.img rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image quiet rhgb vga=788 splash=silent logo.nologo root=live:LABEL=$LABEL locale.lang=en_US vconsole.keymap=us install
+	APPEND rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image quiet rhgb vga=788 splash=silent logo.nologo root=live:LABEL=$LABEL locale.lang=en_US vconsole.keymap=us install
 
 LABEL vesa
 	MENU LABEL Boot OpenMandriva Lx in safe mode
 	LINUX /isolinux/vmlinuz0
 	INITRD /isolinux/liveinitrd.img
-	APPEND initrd=/isolinux/liveinitrd.img rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image xdriver=vesa nomodeset plymouth.enable=0 vga=792 install root=live:LABEL=$LABEL locale.lang=en_EN vconsole.keymap=en
+	APPEND rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image xdriver=vesa nomodeset plymouth.enable=0 vga=792 install root=live:LABEL=$LABEL locale.lang=en_EN vconsole.keymap=en
 
 LABEL supergrub
         MENU LABEL Run super grub2 disk
@@ -563,7 +574,8 @@ createSquash() {
 
     # unmout all stuff inside CHROOT to build squashfs image
     umountAll "$1"
-    $SUDO mksquashfs "$1" "$2"/LiveOS/squashfs.img -comp xz -no-progress -no-recovery -b 512k
+
+    $SUDO mksquashfs "$1" "$2"/LiveOS/squashfs.img -comp xz -no-progress -no-recovery -b 4096
 
     if [ ! -f  "$2"/LiveOS/squashfs.img ]; then
 	echo "Failed to create squashfs. Exiting."
