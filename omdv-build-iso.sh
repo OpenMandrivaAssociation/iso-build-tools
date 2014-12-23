@@ -291,15 +291,15 @@ createInitrd() {
 	fi
 	$SUDO cp -rfT $OURDIR/extraconfig/etc/dracut.conf.d/60-dracut-isobuild.conf "$1"/etc/dracut.conf.d/60-dracut-isobuild.conf
 
-	if [ ! -f $OURDIR/create-liveinitrd.sh ]; then
-		echo "Missing $OURDIR/create-liveinitrd.sh . Exiting."
-		error
-	fi
-
 	if [ ! -d "$1"/usr/lib/dracut/modules.d/90liveiso ]; then
 	    echo "Dracut is missing 90liveiso module. Installing it."
 
-	    $SUDO cp -a -f $OURDIR/90liveiso "$1"/usr/lib/dracut/modules.d/
+	    if [ ! -d $OURDIR/dracut/90liveiso ]; then
+		echo "Cant find 90liveiso dracut module in $OURDIR/dracut. Exiting."
+		error
+	    fi
+
+	    $SUDO cp -a -f $OURDIR/dracut/90liveiso "$1"/usr/lib/dracut/modules.d/
 	    $SUDO chmod 0755 "$1"/usr/lib/dracut/modules.d/90liveiso
 	    $SUDO chmod 0755 "$1"/usr/lib/dracut/modules.d/90liveiso/*.sh
 	fi
@@ -325,6 +325,8 @@ createInitrd() {
 
 	# remove config for liveinitrd
 	$SUDO rm -rf "$1"/etc/dracut.conf.d/60-dracut-isobuild.conf
+	$SUDO rm -rf "$1"/usr/lib/dracut/modules.d/90liveiso
+
 	$SUDO chroot "$1" /usr/sbin/dracut -N -f /boot/initrd-$KERNEL_ISO.img $KERNEL_ISO
 	$SUDO ln -s /boot/initrd-$KERNEL_ISO.img "$1"/boot/initrd0.img
 
