@@ -553,11 +553,16 @@ EOF
 	echo "Adding new urpmi repositories."
 	if [ "${TREE,,}" = "cooker" ]; then
 		MIRRORLIST="http://downloads.openmandriva.org/mirrors/cooker.$EXTARCH.list"
+
+		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Main' 'media/main/release'
+		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Contrib' 'media/contrib/release'
+		# this one is needed to grab firmwares
+		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Non-free' 'media/non-free/release'
 	else
 		MIRRORLIST="http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.$EXTARCH.list"
+		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist $MIRRORLIST
 	fi
 
-	$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist $MIRRORLIST
 
 	# add 32-bit medias only for x86_64 arch
 	if [ "$EXTARCH" = "x86_64" ]; then
