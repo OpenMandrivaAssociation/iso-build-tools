@@ -470,7 +470,8 @@ setupISOenv() {
 	$SUDO ln -s /usr/share/zoneinfo/Universal "$1"/etc/localtime
 
 	# try harder with systemd-nspawn
-	if [ -x /usr/bin/systemd-nspawn ]; then
+	# version 215 and never has then --share-system option
+	if (( `rpm -qa systemd --queryformat '%{VERSION} \n'` >= "215" )); then
 	    $SUDO systemd-nspawn --share-system -D "$1" /usr/bin/timedatectl set-timezone UTC
 	    # set default locale
 	    echo "Setting default localization"
