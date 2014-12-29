@@ -467,6 +467,7 @@ setupISOenv() {
 
 	# set up default timezone
 	$SUDO chroot "$1" ln -s /usr/share/zoneinfo/Universal /etc/localtime
+	$SUDO chroot "$1" /usr/bin/timedatectl set-timezone UTC
 
 	# create /etc/minsysreqs
 	if [ "$TYPE" = "minimal" ]; then
