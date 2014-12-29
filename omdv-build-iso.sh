@@ -69,6 +69,7 @@ ROOTNAME="`mktemp -d /tmp/liverootXXXXXX`"
 [ -z "$ROOTNAME" ] && ROOTNAME=/tmp/liveroot.$$
 CHROOTNAME="$ROOTNAME"/BASE
 ISOROOTNAME="$ROOTNAME"/ISO
+ISO_DATE="`echo $(date -u +%Y-%m-%d-%H-%M-%S-00) | sed -e s/-//g`"
 
 [ -n "$1" ] && EXTARCH="$1"
 [ -n "$2" ] && TREE="$2"
@@ -127,14 +128,14 @@ updateSystem() {
 
     # inside ABF, lxc-container which is used to run this script is based
     # on Rosa2012 which does not have cdrtools
-        urpmi --no-verify-rpm perl-URPM cdrkit-genisoimage syslinux squashfs-tools 
+        urpmi --no-verify-rpm perl-URPM xorriso syslinux squashfs-tools 
     else
 	echo "Building in user custom environment"
-
+	# TODO prolly need to be removed
 	if [ `cat /etc/release | grep -o 2014.0` \< "2015.0" ]; then
-	    urpmi --no-verify-rpm perl-URPM cdrkit-genisoimage syslinux squashfs-tools
+	    urpmi --no-verify-rpm perl-URPM xorriso syslinux squashfs-tools
 	else
-	    urpmi --no-verify-rpm perl-URPM cdrtools syslinux squashfs-tools
+	    urpmi --no-verify-rpm perl-URPM xorriso syslinux squashfs-tools
 	fi
     fi
 }
@@ -631,17 +632,20 @@ createSquash() {
 # Builds an ISO file from the files in rootdir
 buildIso() {
 	echo "Starting ISO build."
-	$SUDO mkisofs -o "$1" -b isolinux/isolinux.bin -c isolinux/boot.cat \
+
+	$SUDO xorriso -as mkisofs -joliet -rock --modification-date=${ISO_DATE} \
+		-omit-version-number -disable-deep-relocation \
+		-b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
-		-publisher "OpenMandriva Association" -p "OpenMandriva Association" \
-		-R -J -l -r -hide-rr-moved -hide-joliet-trans-tbl -V "$LABEL" "$2"
+		-eltorito-alt-boot -e EFI/BOOT/grub.efi -no-emul-boot \
+		-publisher "OpenMandriva Association" \
+		-volid "$LABEL" -o "$1" "$2"
 
 	if [ ! -f "$1" ]; then
 	    echo "Failed build iso image. Exiting"
 	    error
 	fi
 
-	$SUDO isohybrid "$1"
 	echo "ISO build completed."
 }
 
