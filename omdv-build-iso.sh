@@ -466,6 +466,7 @@ setupISOenv() {
 	$SUDO chroot "$1" /usr/bin/passwd -f -d root
 
 	# set up default timezone
+	echo "Setting default timezone and localization."
 	$SUDO ln -s "$1"/usr/share/zoneinfo/Universal "$1"/etc/localtime
 	$SUDO chroot "$1" /usr/bin/timedatectl set-timezone UTC
 
@@ -473,6 +474,8 @@ setupISOenv() {
 	$SUDO chroot "$1" /usr/bin/localectl set-locale LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8:en_US:en
 
 	# create /etc/minsysreqs
+	echo "Creating /etc/minsysreqs"
+
 	if [ "$TYPE" = "minimal" ]; then
 	    echo "ram = 512" >> "$1"/etc/minsysreqs
 	    echo "hdd = 5" >> "$1"/etc/minsysreqs
@@ -563,11 +566,14 @@ EOF
 		# use previous MIRRORLIST declaration but with i586 arch in link name
 		MIRRORLIST="`echo $MIRRORLIST | sed -e "s/x86_64/i586/g"`"
 		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Main32' 'media/main/release'
-		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Main32Updates' 'media/main/updates'
 
-		if [[ $? != 0 ]]; then
+		if [ "${TREE,,}" != "cooker" ]; then
+		    $SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Main32Updates' 'media/main/updates'
+
+		    if [[ $? != 0 ]]; then
 			echo "Adding urpmi 32-bit media FAILED. Exiting";
 			error
+		    fi
 		fi
 
 	else
