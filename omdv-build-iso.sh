@@ -471,10 +471,10 @@ setupISOenv() {
 
 	# try harder with systemd-nspawn
 	if [ -x /usr/bin/systemd-nspawn ]; then
-	    $SUDO systemd-nspawn -D "$1" /usr/bin/timedatectl set-timezone UTC
+	    $SUDO systemd-nspawn --share-system -D "$1" /usr/bin/timedatectl set-timezone UTC
 	    # set default locale
 	    echo "Setting default localization"
-	    $SUDO systemd-nspawn -D "$1" /usr/bin/localectl set-locale LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8:en_US:en
+	    $SUDO systemd-nspawn --share-system -D "$1" /usr/bin/localectl set-locale LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8:en_US:en
 	else
 	    echo "systemd-nspawn does not exists."
 	fi
