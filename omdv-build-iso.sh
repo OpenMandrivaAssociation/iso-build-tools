@@ -472,12 +472,11 @@ setupISOenv() {
 	if [ "$TYPE" = "minimal" ]; then
 	    echo "ram = 512" >> "$1"/etc/minsysreqs
 	    echo "hdd = 5" >> "$1"/etc/minsysreqs
-	else
-	    if[ "$EXTARCH" = "x86_64" ]; then
+	elif [ "$EXTARCH" = "x86_64" ]; then
 		echo "ram = 1536" >> "$1"/etc/minsysreqs
-	    else
-		echo "ram = 1024" >> "$1"/etc/minsysreqs
-	    fi
+		echo "hdd = 10" >> "$1"/etc/minsysreqs
+	else
+	    echo "ram = 1024" >> "$1"/etc/minsysreqs
 	    echo "hdd = 10" >> "$1"/etc/minsysreqs
 	fi
 
