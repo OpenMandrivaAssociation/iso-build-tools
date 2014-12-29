@@ -395,6 +395,7 @@ DEFAULT boot
 PROMPT 0
 MENU TITLE Welcome to OpenMandriva Lx $VERSION $EXTARCH
 MENU BACKGROUND background.png
+MENU AUTOBOOT Starting OpenMandriva Lx $VERSION in # second{,s}. Press any key to interrupt.
 TIMEOUT 300
 MENU WIDTH 78
 MENU MARGIN 4
