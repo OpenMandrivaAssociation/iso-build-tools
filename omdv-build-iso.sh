@@ -590,7 +590,8 @@ EOF
 	echo "Updating urpmi repositories"
 	$SUDO urpmi.update --urpmi-root "$1" -a -ff --wget --force-key
 
-	echo > "$1"/etc/resolv.conf
+	$SUDO rm -f "$1"/etc/resolv.conf
+	$SUDO ln -s "$1"/run/systemd/resolve/resolv.conf "$1"/etc/resolv.conf
 
 	# ldetect stuff
 	$SUDO chroot "$1" /usr/sbin/update-ldetect-lst
