@@ -466,12 +466,18 @@ setupISOenv() {
 	$SUDO chroot "$1" /usr/bin/passwd -f -d root
 
 	# set up default timezone
-	echo "Setting default timezone and localization."
-	$SUDO ln -s "$1"/usr/share/zoneinfo/Universal "$1"/etc/localtime
-	$SUDO chroot "$1" /usr/bin/timedatectl set-timezone UTC
+	echo "Setting default timezone"
+	$SUDO ln -s /usr/share/zoneinfo/Universal "$1"/etc/localtime
 
-	# set default locale
-	$SUDO chroot "$1" /usr/bin/localectl set-locale LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8:en_US:en
+	# try harder with systemd-nspawn
+	if [ -x /usr/bin/systemd-nspawn ]; then
+	    $SUDO systemd-nspawn -D "$1" /usr/bin/timedatectl set-timezone UTC
+	    # set default locale
+	    echo "Setting default localization"
+	    $SUDO systemd-nspawn -D "$1" /usr/bin/localectl set-locale LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8:en_US:en
+	else
+	    echo "systemd-nspawn does not exists."
+	fi
 
 	# create /etc/minsysreqs
 	echo "Creating /etc/minsysreqs"
@@ -591,7 +597,7 @@ EOF
 	$SUDO urpmi.update --urpmi-root "$1" -a -ff --wget --force-key
 
 	$SUDO rm -f "$1"/etc/resolv.conf
-	$SUDO ln -s "$1"/run/systemd/resolve/resolv.conf "$1"/etc/resolv.conf
+	$SUDO ln -s /run/systemd/resolve/resolv.conf "$1"/etc/resolv.conf
 
 	# ldetect stuff
 	$SUDO chroot "$1" /usr/sbin/update-ldetect-lst
