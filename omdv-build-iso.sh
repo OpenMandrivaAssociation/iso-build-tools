@@ -466,8 +466,11 @@ setupISOenv() {
 	$SUDO chroot "$1" /usr/bin/passwd -f -d root
 
 	# set up default timezone
-	$SUDO chroot "$1" ln -s /usr/share/zoneinfo/Universal /etc/localtime
+	$SUDO ln -s "$1"/usr/share/zoneinfo/Universal "$1"/etc/localtime
 	$SUDO chroot "$1" /usr/bin/timedatectl set-timezone UTC
+
+	# set default locale
+	$SUDO chroot "$1" /usr/bin/localectl set-locale LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8:en_US:en
 
 	# create /etc/minsysreqs
 	if [ "$TYPE" = "minimal" ]; then
