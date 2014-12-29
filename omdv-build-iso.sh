@@ -349,7 +349,7 @@ setupSyslinux() {
             $SUDO cp -f "$1"/usr/lib/syslinux/$i "$2"/isolinux ;
         done
 	# install pci.ids
-	$SUDO cp -f  $"1"/usr/share/pci.ids "$2"/isolinux/pci.ids
+	$SUDO cp -f  "$1"/usr/share/pci.ids "$2"/isolinux/pci.ids
 	
 	$SUDO mkdir -p "$2"/LiveOS
 	$SUDO mkdir -p "$2"/isolinux
