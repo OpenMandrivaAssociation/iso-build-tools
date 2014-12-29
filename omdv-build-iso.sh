@@ -350,7 +350,7 @@ setupSyslinux() {
         done
 	# install pci.ids
 	$SUDO cp -f  "$1"/usr/share/pci.ids "$2"/isolinux/pci.ids
-	
+
 	$SUDO mkdir -p "$2"/LiveOS
 	$SUDO mkdir -p "$2"/isolinux
 
@@ -467,6 +467,22 @@ setupISOenv() {
 
 	# set up default timezone
 	$SUDO chroot "$1" ln -s /usr/share/zoneinfo/Universal /etc/localtime
+
+	# create /etc/minsysreqs
+	if [ "$TYPE" = "minimal" ]; then
+	    echo "ram = 512" >> "$1"/etc/minsysreqs
+	    echo "hdd = 5" >> "$1"/etc/minsysreqs
+	else
+	    if[ "$EXTARCH" = "x86_64" ]; then
+		echo "ram = 1536" >> "$1"/etc/minsysreqs
+	    else
+		echo "ram = 1024" >> "$1"/etc/minsysreqs
+	    fi
+	    echo "hdd = 10" >> "$1"/etc/minsysreqs
+	fi
+
+	# count imagesize and put in in /etc/minsysreqs
+	$SUDO echo "imagesize = $(du -a -x -b -P "$1" | tail -1 | awk '{print $1}')" >> "$1"/etc/minsysreqs
 
 	# set up displaymanager
 	if [ "$TYPE" != "minimal" ]; then
