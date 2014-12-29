@@ -254,7 +254,7 @@ createChroot() {
 	$SUDO mount --bind /dev/pts "$2"/dev/pts
 
 	# start rpm packages installation
-	parsePkgList "$1" | xargs $SUDO urpmi --urpmi-root "$2" --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto
+	parsePkgList "$1" | xargs $SUDO urpmi --urpmi-root "$2" --download-all --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto
 
 	if [ ! -e "$2"/usr/lib/syslinux/isolinux.bin ]; then
 		echo "Syslinux is missing in chroot. Installing it."
