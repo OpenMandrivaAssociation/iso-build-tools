@@ -234,7 +234,7 @@ createChroot() {
 		# this one is needed to grab firmwares
 		$SUDO urpmi.addmedia --urpmi-root "$2" "Non-free" $REPOPATH/non-free/release
 
-		if [ ${TREE,,} != "cooker" ]; then
+		if [ "${TREE,,}" != "cooker" ]; then
 			$SUDO urpmi.addmedia --urpmi-root "$2" "MainUpdates" $REPOPATH/main/updates
 			$SUDO urpmi.addmedia --urpmi-root "$2" "ContribUpdates" $REPOPATH/contrib/updates
 			# this one is needed to grab firmwares
@@ -244,7 +244,7 @@ createChroot() {
 
 	# update medias
 	$SUDO urpmi.update -a -c -ff --wget --urpmi-root "$2" main
-	if [ ${TREE,,} != "cooker" ]; then
+	if [ "${TREE,,}" != "cooker" ]; then
 		$SUDO urpmi.update -a -c -ff --wget --urpmi-root "$2" updates
 	fi
 
