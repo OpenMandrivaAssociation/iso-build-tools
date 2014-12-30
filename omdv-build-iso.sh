@@ -664,8 +664,12 @@ postBuild() {
 	error
     fi
 
-    md5sum  $OURDIR/$PRODUCT_ID.$EXTARCH.iso > $OURDIR/$PRODUCT_ID.$EXTARCH.iso.md5sum
-    sha1sum $OURDIR/$PRODUCT_ID.$EXTARCH.iso > $OURDIR/$PRODUCT_ID.$EXTARCH.iso.sha1sum
+	# count checksums
+	echo "Genrating ISO checksums."
+	pushd $OURDIR
+		md5sum  $PRODUCT_ID.$EXTARCH.iso > $PRODUCT_ID.$EXTARCH.iso.md5sum
+		sha1sum $PRODUCT_ID.$EXTARCH.iso > $PRODUCT_ID.$EXTARCH.iso.sha1sum
+	popd
 
     if [ "$ABF" = "1" ]; then
 	# We're running in ABF -- adjust to its directory structure
