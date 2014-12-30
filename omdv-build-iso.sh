@@ -342,7 +342,7 @@ setupSyslinux() {
 	$SUDO chmod 1777 "$2"/isolinux
 	# install syslinux programs
 	echo "Installing syslinux programs."
-        for i in isolinux.bin vesamenu.c32 hdt.c32 poweroff.com chain.c32; do
+        for i in isolinux.bin vesamenu.c32 hdt.c32 poweroff.com chain.c32 isohdpfx.bin; do
 			if [ ! -f "$1"/usr/lib/syslinux/$i ]; then
 				echo "$i does not exists. Exiting."
 				error
@@ -639,6 +639,7 @@ buildIso() {
 		$SUDO xorriso -as mkisofs -joliet -rock --modification-date=${ISO_DATE} \
 		-omit-version-number -disable-deep-relocation \
 		-b isolinux/isolinux.bin -c isolinux/boot.cat \
+		-isohybrid-mbr isolinux/isohdpfx.bin -partition_offset 16 \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		-eltorito-alt-boot -e EFI/BOOT/grub.efi -no-emul-boot \
 		-append_partition 2 0x01 "$1"/EFI/BOOT/grub.efi \
@@ -648,6 +649,7 @@ buildIso() {
 	else
 		$SUDO xorriso -as mkisofs -joliet -rock --modification-date=${ISO_DATE} \
 		-omit-version-number -disable-deep-relocation \
+		-isohybrid-mbr isolinux/isohdpfx.bin -partition_offset 16 \
 		-b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		-no-emul-boot -publisher "OpenMandriva Association" \
