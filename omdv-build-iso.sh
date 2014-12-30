@@ -632,14 +632,23 @@ createSquash() {
 # Builds an ISO file from the files in rootdir
 buildIso() {
 	echo "Starting ISO build."
-
-	$SUDO xorriso -as mkisofs -joliet -rock --modification-date=${ISO_DATE} \
+	
+	if [ "$UEFI" = "1" ]; then
+		$SUDO xorriso -as mkisofs -joliet -rock --modification-date=${ISO_DATE} \
 		-omit-version-number -disable-deep-relocation \
 		-b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		-eltorito-alt-boot -e EFI/BOOT/grub.efi -no-emul-boot \
 		-publisher "OpenMandriva Association" \
 		-volid "$LABEL" -o "$1" "$2"
+	else
+		$SUDO xorriso -as mkisofs -joliet -rock --modification-date=${ISO_DATE} \
+		-omit-version-number -disable-deep-relocation \
+		-b isolinux/isolinux.bin -c isolinux/boot.cat \
+		-no-emul-boot -boot-load-size 4 -boot-info-table \
+		-no-emul-boot -publisher "OpenMandriva Association" \
+		-volid "$LABEL" -o "$1" "$2"
+	fi
 
 	if [ ! -f "$1" ]; then
 	    echo "Failed build iso image. Exiting"
