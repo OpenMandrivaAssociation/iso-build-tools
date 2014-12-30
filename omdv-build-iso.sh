@@ -640,10 +640,10 @@ buildIso() {
 		--modification-date=${ISO_DATE} \
 		-omit-version-number -disable-deep-relocation \
 		-b isolinux/isolinux.bin -c isolinux/boot.cat \
-		-isohybrid-mbr isolinux/isohdpfx.bin -partition_offset 16 \
+		-isohybrid-mbr "$2"/isolinux/isohdpfx.bin -partition_offset 16 \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		-eltorito-alt-boot -e EFI/BOOT/grub.efi -no-emul-boot \
-		-append_partition 2 0x01 "$1"/EFI/BOOT/grub.efi \
+		-append_partition 2 0x01 "$2"/EFI/BOOT/grub.efi \
 		-publisher "OpenMandriva Association" \
 		-preparer "OpenMandriva Association" \
 		-volid "$LABEL" -o "$1" "$2"
@@ -651,7 +651,7 @@ buildIso() {
 		$SUDO xorriso -as mkisofs -R -r -J -joliet-long -l -cache-inodes \
 		--modification-date=${ISO_DATE} \
 		-omit-version-number -disable-deep-relocation \
-		-isohybrid-mbr isolinux/isohdpfx.bin -partition_offset 16 \
+		-isohybrid-mbr "$2"/isolinux/isohdpfx.bin -partition_offset 16 \
 		-b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		-no-emul-boot -publisher "OpenMandriva Association" \
