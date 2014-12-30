@@ -378,10 +378,12 @@ setupSyslinux() {
 	# UEFI support
 	if [ -f "$1"/boot/efi/EFI/openmandriva/grub.efi ] && [ "$EXTARCH" = "x86_64" ]; then
 		export UEFI=1
-		$SUDO mkdir -m 0755 -p "$2"/EFI/BOOT "$2"/EFI/BOOT/fonts/
+		$SUDO mkdir -m 0755 -p "$2"/EFI/BOOT "$2"/EFI/BOOT/fonts "$2"/EFI/BOOT/themes "$2"/EFI/BOOT/locale
 		$SUDO cp -f "$1"/boot/efi/EFI/openmandriva/grub.efi "$2"/EFI/BOOT/grub.efi
-		$SUDO cp -f "$1"/boot/efi/EFI/openmandriva/grub.efi "$2"/EFI/BOOT/BOOT.cfg
+		$SUDO cp -f "$1"/boot/efi/EFI/openmandriva/grub.cfg "$2"/EFI/BOOT/BOOT.cfg
 		$SUDO cp -f "$1"/boot/grub2/splash.xpm.gz "$2"/EFI/BOOT/splash.xpm.gz
+		$SUDO cp -a -f "$1"/boot/grub2/themes "$2"/EFI/BOOT/themes
+		$SUDO cp -a -f "$1"/boot/grub2/locale "$2"/EFI/BOOT/locale
 		for i in dejavu_sans_bold_14.pf2 dejavu_sans_mono_11.pf2 terminal_font_11.pf2 unicode.pf2; do
 			$SUDO cp -f "$1"/boot/grub2/fonts/$i "$2"/EFI/BOOT/fonts/$i
 		done
