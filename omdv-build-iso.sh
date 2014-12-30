@@ -641,6 +641,7 @@ buildIso() {
 		-b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		-eltorito-alt-boot -e EFI/BOOT/grub.efi -no-emul-boot \
+		-append_partition 2 0x01 "$1"/EFI/BOOT/grub.efi \
 		-publisher "OpenMandriva Association" \
 		-preparer "OpenMandriva Association" \
 		-volid "$LABEL" -o "$1" "$2"
