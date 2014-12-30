@@ -636,7 +636,8 @@ buildIso() {
 	echo "Starting ISO build."
 
 	if [ "$UEFI" = "1" ]; then
-		$SUDO xorriso -as mkisofs -joliet -rock --modification-date=${ISO_DATE} \
+		$SUDO xorriso -as mkisofs -R -r -J -joliet-long -l -cache-inodes \
+		--modification-date=${ISO_DATE} \
 		-omit-version-number -disable-deep-relocation \
 		-b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-isohybrid-mbr isolinux/isohdpfx.bin -partition_offset 16 \
@@ -647,7 +648,8 @@ buildIso() {
 		-preparer "OpenMandriva Association" \
 		-volid "$LABEL" -o "$1" "$2"
 	else
-		$SUDO xorriso -as mkisofs -joliet -rock --modification-date=${ISO_DATE} \
+		$SUDO xorriso -as mkisofs -R -r -J -joliet-long -l -cache-inodes \
+		--modification-date=${ISO_DATE} \
 		-omit-version-number -disable-deep-relocation \
 		-isohybrid-mbr isolinux/isohdpfx.bin -partition_offset 16 \
 		-b isolinux/isolinux.bin -c isolinux/boot.cat \
