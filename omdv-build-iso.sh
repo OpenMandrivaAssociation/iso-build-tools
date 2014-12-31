@@ -380,7 +380,8 @@ setupSyslinux() {
 		export UEFI=1
 		$SUDO mkdir -m 0755 -p "$2"/EFI/BOOT "$2"/EFI/BOOT/fonts "$2"/EFI/BOOT/themes "$2"/EFI/BOOT/locale
 		$SUDO cp -f "$1"/boot/efi/EFI/openmandriva/grub.efi "$2"/EFI/BOOT/grub.efi
-		$SUDO cp -f "$1"/boot/efi/EFI/openmandriva/grub.cfg "$2"/EFI/BOOT/BOOT.cfg
+		$SUDO cp -f $OURDIR/EFI/grub.cfg "$2"/EFI/BOOT/BOOTX64.cfg
+		$SUDO cp -f $OURDIR/EFI/grub.cfg "$2"/EFI/BOOT/grub.cfg
 		$SUDO cp -f "$1"/boot/grub2/splash.xpm.gz "$2"/EFI/BOOT/splash.xpm.gz
 		$SUDO cp -a -f "$1"/boot/grub2/themes "$2"/EFI/BOOT/themes
 		$SUDO cp -a -f "$1"/boot/grub2/locale "$2"/EFI/BOOT/locale
