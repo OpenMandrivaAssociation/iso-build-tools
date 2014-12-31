@@ -644,6 +644,7 @@ buildIso() {
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		-eltorito-alt-boot -e EFI/BOOT/grub.efi -no-emul-boot \
 		-append_partition 2 0x01 "$2"/EFI/BOOT/grub.efi \
+		-system_id "LINUX" \
 		-publisher "OpenMandriva Association" \
 		-preparer "OpenMandriva Association" \
 		-volid "$LABEL" -o "$1" "$2"
@@ -654,7 +655,7 @@ buildIso() {
 		-isohybrid-mbr "$2"/isolinux/isohdpfx.bin -partition_offset 16 \
 		-b isolinux/isolinux.bin -c isolinux/boot.cat \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
-		-no-emul-boot -publisher "OpenMandriva Association" \
+		-system_id "LINUX" -publisher "OpenMandriva Association" \
 		-preparer "OpenMandriva Association" \
 		-volid "$LABEL" -o "$1" "$2"
 	fi
