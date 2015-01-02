@@ -580,7 +580,7 @@ EOF
 		fi
 
 	    else
-		echo "Wrong service match."
+		echo "Wrong service match." ;
 	done
 
 	for i in "${SERVICES_DISABLE[@]}"; do
@@ -601,7 +601,7 @@ EOF
 		fi
 
 	    else
-		echo "Wrong service match."
+		echo "Wrong service match." ;
 	done
 
 	# add urpmi medias inside chroot
