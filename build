@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#set -x
+set -x
 echo "## Welcome inside build scipt. ##"
 
 modprobe loop
@@ -13,14 +13,24 @@ losetup -d /dev/loop*
 [ -z "$RELEASE_ID" ] && RELEASE_ID="$4"
 [ -z "$DESKTOP" ] && DESKTOP="$5"
 [ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER="$6"
+[ -z "$BUILDTYPE" ] && BUILDTYPE="$7"
+[ -z "$EXTRA_REPO" ] && EXTRA_REPO="$8
+[ -z "$EXTRA_REPOPATH" ] && EXTRA_REPOPATH="$9
+
 
 if [ "$RELEASE_ID" == "final" ]; then
     product_id="OpenMandrivaLx.${VERSION}-$DESKTOP"
-else
-    if [[ "$RELEASE_ID" == "alpha" ]]; then
-    	RELEASE_ID="$RELEASE_ID.`date +%Y%m%d`"
-    fi
+
+elif [[ "$RELEASE_ID" == "alpha" ]]; then
+    RELEASE_ID="$RELEASE_ID.`date +%Y%m%d`"
     product_id="OpenMandrivaLx.${VERSION}-${RELEASE_ID}-$DESKTOP"
+elif [[ "$RELEASE_ID" == "beta" ]]; then
+    RELEASE_ID="$RELEASE_ID.`date +%Y%m%d`"
+    product_id="OpenMandrivaLx.${VERSION}-${RELEASE_ID}-$DESKTOP"
+else
+    BUILDTYPE=$RELEASE_ID
+    PKGLISTFILE=$BUILDTYPE
+    product_id="OpenMandrivaLx.${VERSION}-${BUILDTYPE}-$DESKTOP"
 fi
 
 echo "## Current product build is $ARCHS $TREE $VERSION $RELEASE_ID $DESKTOP##"
@@ -30,7 +40,11 @@ TZ="Universal"
 SVCEN="sshd,cups,chronyd,acpid,alsa,atd,avahi-daemon,irqbalance,netfs,resolvconf,rpcbind,sound,udev-post,mandrake_everytime,crond,accounts-daemon"
 SVCDIS="pptp,pppoe,ntpd,iptables,ip6tables,shorewall,nfs-server,mysqld,abrtd,mysql,postfix"
 
-PKGLISTFILE=iso-pkg-lists/omdv-$DESKTOP.lst
+if  [ -z  $PKGLISTFILE; then
+    PKGLISTFILE=iso-pkg-lists/omdv-$DESKTOP.lst
+else
+    PKGLISTFILE=/iso-pkg-lists/omdv-$BUILDTYPE.lst
+fi
 
 DIRNAME=$(dirname $0)
 cd $DIRNAME
@@ -67,9 +81,12 @@ for arch in $ARCHS; do
 	LABEL=${product_id}.$arch
 	[ `echo $LABEL |wc -m` -gt 32 ] && LABEL="OpenMandrivaLx_${VERSION}"
 
+#urpmi.addmedia $EXTRA_REPO $EXTRA_REPOPATH
+#urpmi --auto-update
+
 	echo "## Starting livecd-creator tool. ##"
 
-	livecd-creator -d -v --config=${ks} --fslabel=$LABEL --title="OpenMandrivaLx_${VERSION}" --debug
+	livecd-creator -d -v --config=${ks} --fslabel=$LABEL --title="OpenMandrivaLx_${VERSION}" --debug -l
 
 	echo "## End of livecd-creator procedure##"
 

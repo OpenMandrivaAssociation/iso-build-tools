@@ -9,20 +9,28 @@ services --enabled=#SVCEN#
 services --disabled=#SVCDIS#
 
 repo --name=Main --baseurl=#REPOURL#/main/release
+repo --name=MainUpdates --baseurl=#REPOURL#/main/updates
+#repo --name=MainTesting --baseurl=#REPOURL#/main/testing
 repo --name=Contrib --baseurl=#REPOURL#/contrib/release
+repo --name=ContribUpdates --baseurl=#REPOURL#/contrib/updates
 # (tpg) we support FREE world here !
 # Unfortunately non-free is currently needed to grab firmware files.
 # May want to move them to yet another repository
 repo --name=Non-Free --baseurl=#REPOURL#/non-free/release
+repo --name=Non-FreeUpdates --baseurl=#REPOURL#/non-free/updates
 #repo --name=Restricted --baseurl=#REPOURL#/restricted/release
-#repo --name=MainTesting --baseurl=#REPOURL#/main/testing
 
-#updates are not for COOKER
-#repo --name=MainUpdates --baseurl=#REPOURL#/main/updates
-#repo --name=ContribUpdates --baseurl=#REPOURL#/contrib/updates
-#repo --name=Non-FreeUpdates --baseurl=#REPOURL#/non-free/updates
-
-repo --name=GLIBC --baseurl=http://abf-downloads.rosalinux.ru/cooker/container/2332589/i586/main/release/
+#add efi specific packages from itchka
+repo --name=grub2 --baseurl=http://abf-downloads.rosalinux.ru/itchka_personal/container/2332695/x86_64/main/release/
+repo --name=grub2-efi --baseurl=http://abf-downloads.rosalinux.ru/itchka_personal/container/2332695/x86_64/main/release/
+repo --name=osprober --baseurl=http://abf-downloads.rosalinux.ru/itchka_personal/container/2325135/x86_64/main/release/
+repo --name=unifont --baseurl=http://abf-downloads.rosalinux.ru/itchka_personal/container/2325131/x86_64/main/release/
+repo --name=unifont-fonts --baseurl=http://abf-downloads.rosalinux.ru/itchka_personal/container/2325131/x86_64/main/release/
+repo --name=efivar --baseurl=http://abf-downloads.rosalinux.ru/itchka_personal/container/2325175/x86_64/main/release/
+repo --name=efibootmgr --baseurl=http://abf-downloads.rosalinux.ru/itchka_personal/container/2325177/x86_64/main/release/
+repo --name=livecd-tools --baseurl=http://abf-downloads.rosalinux.ru/itchka_personal/container/2329146/x86_64/main/release/
+repo --name=python-imgcreate --baseurl=http://abf-downloads.rosalinux.ru/itchka_personal/container/2329146/x86_64/main/release/
+repo --name=xorriso --baseurl=http://abf-downloads.rosalinux.ru/itchka_personal/container/2329362/x86_64/main/release/
 
 %packages
 %include .///#PKGLISTFILE#
@@ -54,6 +62,7 @@ fi
 
 # Allow urpmi to work
 /usr/sbin/urpmi.addmedia --distrib http://abf-downloads.abf.io/#TREE#/repository/#ARCH#
+#/usr/sbin/urpmi.addmedia #EXTRA_REPO# #EXTRA_REPOPATH#
 
 # ldetect stuff
 /usr/sbin/update-ldetect-lst
@@ -86,21 +95,17 @@ systemctl enable #DISPLAYMANAGER#.service 2> /dev/null || :
 systemctl --no-reload disable atd.service 2> /dev/null || :
 systemctl stop atd.service 2> /dev/null || :
 
-# turn off crond
+# turn of crond
 systemctl --no-reload disable crond.service 2> /dev/null || :
 systemctl stop crond.service 2> /dev/null || :
 
-# turn off ldconfig
-systemctl --no-reload disable ldconfig.service 2> /dev/null || :
-systemctl stop ldconfig.service 2> /dev/null || :
-
-# turn off lm_sensors
+# turn of lm_sensors
 systemctl --no-reload disable lm_sensors.service 2> /dev/null || :
 systemctl --no-reload disable sensord.service 2> /dev/null || :
 systemctl stop lm_sensors.service 2> /dev/null || :
 systemctl stop sensord.service 2> /dev/null || :
 
-# turn off microcode_ctl
+# turn of microcode_ctl
 systemctl --no-reload disable microcode_ctl.service 2> /dev/null || :
 systemctl stop microcode_ctl.service 2> /dev/null || :
 
@@ -234,12 +239,12 @@ echo "## Installing default urpmi repositories for end user ##"
 
 cp -rfT /etc/resolv.conf $INSTALL_ROOT/etc/resolv.conf
 /usr/sbin/urpmi.removemedia -a
-#/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib --mirrorlist --wget --no-md5sum
-/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib http://abf-downloads.abf.io/#TREE#/repository/#ARCH#
+/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib --mirrorlist --wget --no-md5sum
+#/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --distrib http://abf-downloads.abf.io/#TREE#/repository/#ARCH#
 if [ "#ARCH#" = "x86_64" ]; then
 echo "## Adding 32-bit media repository ##"
-#/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/#TREE#.i586.list' 'Main32' 'media/main/release'
-#/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/#TREE#.i586.list' 'Main32Updates' 'media/main/updates'
+/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.2014.0.i586.list' 'Main32' 'media/main/release'
+/usr/sbin/chroot $INSTALL_ROOT /usr/sbin/urpmi.addmedia --wget --no-md5sum --mirrorlist 'http://downloads.openmandriva.org/mirrors/openmandriva.2014.0.i586.list' 'Main32Updates' 'media/main/updates'
 
 if [[ $? != 0 ]]; then
 echo "## Adding 32-bit media FAILED ##";

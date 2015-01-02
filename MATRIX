@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 OURDIR=$(realpath $(dirname $0))
 if echo $OURDIR |grep -q /home/vagrant; then
 	# We're in ABF -- things are a little odd
@@ -41,11 +41,18 @@ CHROOTNAME="buildchroot-$EXTARCH"
 [ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER="$6"
 [ -z "$DISPLAYMANAGER" ] && DISPLAYMANAGER="kdm"
 
+[ -z "$EXTRA_REPO" ] && EXTRA_REPO="$7"
+[ -z "$EXTRA_REPO" ] && EXTRA_REPO=""
+
+[ -z "$EXTRA_REPONAME" ] && EXTRA_REPONAME="$8"
+[ -z "$EXTRA_REPONAME" ] && EXTRA_REPONAME=""
+
 REPOPATH="http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/"
+EXTRA_REPOPATH="http://abf-downloads.abf.io/$EXTRA_REPONAME/$TREE/repository/$EXTARCH/main/release"
 SRCPATH="https://abf.io/openmandriva/$BLDNAME.git"
 PKGLIST="https://abf.io/openmandriva/iso-pkg-lists.git"
 LOGDIR="."
-BRANCH="master"
+BRANCH="efitest"
 CHROOTOPTS="$CHROOTNAME /bin/su root -c"
 
 umount_all() {
@@ -86,20 +93,54 @@ urpmi --no-verify-rpm perl-URPM
 echo $CHROOTNAME
 echo $REPOPATH
 echo $EXTARCH
+RESOLV=/etc/resolv.conf
+
 if [ -d "$CHROOTNAME" ]; then
 	echo "## Chroot $CHROOTNAME exists. Using existing chroot. ##"
-	urpmi.update -a --wget --urpmi-root $CHROOTNAME main
+#    if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
+#	echo "We are chrooted!"
+#	urpmi.update -a --wget --urpmi-root $CHROOTNAME main
+#	urpmi.update -a --wget --urpmi-root $CHROOTNAME cc_repo
+#	umount_all
+#    else
+#    urpmi.addmedia --update --wget --urpmi-root $CHROOTNAME $EXTRA_REPO $EXTRA_REPOPATH >$LOGDIR/addrepo_xtra.log 2>&1
+#The file gets deleted from the chroot during the build so copy unconditionally here
+	cp -f sgb.iso $CHROOTNAME/iso-build-tools/extraconfig/sgb.iso
+
+	echo "Chrooting"
+	mount --bind /dev/	$CHROOTNAME/dev
+	mount --bind /dev/pts	$CHROOTNAME/dev/pts
+	mount --bind /proc	$CHROOTNAME/proc
+	mount --bind /sys	$CHROOTNAME/sys
+		if [ -s "$RESOLV"  ];then
+		:    
+		else
+		cp /etc/resolv.conf	$CHROOTNAME/etc/
+		fi
+#	fi    	    
+	chroot $CHROOTOPTS "sh -x /$BLDNAME/build $EXTARCH $TREE $VERSION $RELEASE_ID $DESKTOP $DISPLAYMANAGER $EXTRA_REPO $EXTRA_REPOPATH" 2>&1 |tee $LOGDIR/build.log
 	umount_all
+	exit
+
+#	urpmi.update -a --wget --urpmi-root $CHROOTNAME main
+#	umount_all
 else
 	echo "## Chroot $CHROOTNAME is missing. Creating chroot. ##"
 	mkdir $CHROOTNAME
 	echo "## Adding repositories inside chroot. ##"
 	urpmi.addmedia --wget --urpmi-root $CHROOTNAME --distrib $REPOPATH > $LOGDIR/addrepo.log 2>&1
+#	if [-z "$EXTRA_REPO" ];then
+	urpmi.addmedia --raw --update --wget --urpmi-root $CHROOTNAME $EXTRA_REPO $BUILDTYPE $EXTRA_REPOPATH >$LOGDIR/addrepo_xtra.log 2>&1
+#	fi 
+
 	echo "## Updating repositories inside chroot. ##"
 	urpmi.update -a -c -ff --wget --urpmi-root $CHROOTNAME main
 	urpmi.update -a -c -ff --wget --urpmi-root $CHROOTNAME updates
+
 	echo "## Installing packages in chroot. ##"
-	urpmi --no-suggests --no-verify-rpm --fastunsafe --ignoresize --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi perl-URPM rpm locales-en rpm-build livecd-tools syslinux yum lorax grub-efi grub-efi-efi git --prefer /distro-kde4-config-OpenMandriva/ --prefer /distro-theme-OpenMandriva/ --auto
+	urpmi --no-suggests --no-verify-rpm --fastunsafe --ignoresize --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi perl-URPM rpm locales-en rpm-build  syslinux yum lorax grub2 grub2-efi  git --prefer /distro-kde4-config-OpenMandriva/ --prefer /distro-theme-OpenMandriva/ --auto
+	urpmi --no-suggests --no-verify-rpm --fastunsafe --ignoresize --urpmi-root $CHROOTNAME --root $CHROOTNAME /home/colin/Development/iso-build-tools/livecd-tools-18.8-60-omv2014.0.x86_64.rpm /home/colin/Development/iso-build-tools/python-imgcreate-18.8-60-omv2014.0.x86_64.rpm
+#	urpmi --urpmi-root $CHROOTNAME --auto-update
 	mkdir -p $CHROOTNAME/dev
 	mkdir -p $CHROOTNAME/dev/pts
 	mkdir -p $CHROOTNAME/proc
@@ -113,6 +154,7 @@ mount --bind /proc	$CHROOTNAME/proc
 mount --bind /sys	$CHROOTNAME/sys
 cp /etc/resolv.conf	$CHROOTNAME/etc/
 
+
 #(tpg) workaround for ISO build
 #check if there is actually /proc/mounts on build host
 cat /proc/mounts
@@ -123,7 +165,7 @@ echo "## Making sure we have the latest from $BLDNAME. ##"
 # For now, unconditionally overwrite the $BLDNAME instance inside the chroot
 # so any local changes are sure to get in
 # May want to remove the rm -rf line below once things have stabilized.
-rm -rf "$CHROOTNAME/$BLDNAME"
+#rm -rf "$CHROOTNAME/$BLDNAME"
 if [ ! -d "$CHROOTNAME/$BLDNAME" ]; then
 	if [ -d "`dirname $0`" ]; then
 	# copy the running instance to save some network traffic
@@ -148,7 +190,8 @@ echo "## Beginning ISO creation. ##"
 #
 # ISO build starts here !
 #
-chroot $CHROOTOPTS "sh -x /$BLDNAME/build $EXTARCH $TREE $VERSION $RELEASE_ID $DESKTOP $DISPLAYMANAGER" 2>&1 |tee $LOGDIR/build.log
+
+chroot $CHROOTOPTS "sh -x /$BLDNAME/build $EXTARCH $TREE $VERSION $RELEASE_ID $DESKTOP $DISPLAYMANAGER $BUILDTYPE $EXTRA_REPO $EXTRA_REPOPATH" 2>&1 |tee $LOGDIR/build.log
 
 mv $CHROOTNAME/$BLDNAME/*/*.iso* $LOGDIR/
 ls -l $LOGDIR/*.iso*
