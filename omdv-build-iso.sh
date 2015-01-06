@@ -560,9 +560,55 @@ EOF
 	done
 	$SUDO popd
 
-	#enable network
-	$SUDO chroot "$1" systemctl enable resolvconf 2> /dev/null || :
-	$SUDO chroot "$1" systemctl enable NetworkManager.service 2> /dev/null || :
+	echo "Starting services setup."
+	#enable services
+	SERVICES_ENABLE=(NetworkManager sshd.socket cups chronyd acpid alsa atd avahi-daemon irqbalance netfs resolvconf rpcbind sound udev-post mandrake_everytime crond accounts-daemon)
+	# disable services
+	SERVICES_DISABLE=(pptp pppoe ntpd iptables ip6tables shorewall nfs-server mysqld abrtd mysql postfix)
+
+	for i in "${SERVICES_ENABLE[@]}"; do
+	    if [[ $i  =~ ^.*socket$|^.*path$|^.*target$|^.*timer$ ]]; then
+		if [ -e "$1"/lib/systemd/system/$i ]; then
+		    echo "Enabling $i"
+		    chroot "$1" systemctl enable $i
+		    #2> /dev/null || :
+		else
+		    echo "Special service $i does not exist. Skipping."
+		fi
+	    elif [[ ! $i  =~ ^.*socket$|^.*path$|^.*target$|^.*timer$ ]]; then
+		if [ -e "$1"/lib/systemd/system/$i.service ]; then
+		    echo "Enabling $i.service"
+		    chroot "$1" systemctl enable $i.service 2> /dev/null || :
+		else
+		    echo "Service $i does not exist. Skipping."
+		fi
+
+	    else
+		echo "Wrong service match."
+	    fi
+	done
+
+	for i in "${SERVICES_DISABLE[@]}"; do
+	    if [[ $i  =~ ^.*socket$|^.*path$|^.*target$|^.*timer$ ]]; then
+		if [ -e "$1"/lib/systemd/system/$i ]; then
+		    echo "Disabling $i"
+		    chroot "$1" systemctl disable $i
+		    #2> /dev/null || :
+		else
+		    echo "Special service $i does not exist. Skipping."
+		fi
+	    elif [[ ! $i  =~ ^.*socket$|^.*path$|^.*target$|^.*timer$ ]]; then
+		if [ -e "$1"/lib/systemd/system/$i.service ]; then
+		    echo "Disabling $i.service"
+		    chroot "$1" systemctl disable $i.service 2> /dev/null || :
+		else
+		    echo "Service $i does not exist. Skipping."
+		fi
+
+	    else
+		echo "Wrong service match."
+	    fi
+	done
 
 	# add urpmi medias inside chroot
 	echo "Removing old urpmi repositories."
