@@ -4,3 +4,5 @@ This is a TODO list.
 2. Create specific $TYPE settings as external sh script
 3. Add feature to build ISO based on currently used OMV system -> omdv-iso.build.sh myiso name.iso ?
 4. What else ?
+5. Add the ability to retain downloaded rpms so that mods and rebuilds can be done quickly when 
+   bandwidth is limited or debugging is required.

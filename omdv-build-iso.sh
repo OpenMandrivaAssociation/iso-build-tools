@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 # OpenMandriva Association 2012
 # Original author: Bernhard Rosenkraenzer <bero@lindev.ch>
 # Modified on 2014 by: Tomasz Paweł Gajc <tpgxyz@gmail.com>
@@ -79,7 +79,11 @@ ISO_DATE="`echo $(date -u +%Y-%m-%d-%H-%M-%S-00) | sed -e s/-//g`"
 [ -n "$6" ] && DISPLAYMANAGER="$6"
 [ "$EXTARCH" = "i386" ] && EXTARCH=i586
 
-REPOPATH="http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/"
+if [ "$TREE" == "cooker" ]; then
+    REPOPATH="http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/"
+else
+    REPOPATH="http://abf-downloads.abf.io/$TREE$VERSION/repository/$EXTARCH/"
+fi
 
 if [ "$RELEASE_ID" == "final" ]; then
     PRODUCT_ID="OpenMandrivaLx.$VERSION-$TYPE"
@@ -159,7 +163,7 @@ getPkgList() {
 	if [ $TREE = "cooker" ]; then
 	    BRANCH=master
 	else
-	    BRANCH="$TREE"
+	    BRANCH="$TREE$VERSION"
     fi
 
     # download iso packages lists from www.abf.io
@@ -261,7 +265,7 @@ createChroot() {
 		echo "Syslinux is missing in chroot. Installing it."
 		$SUDO urpmi --urpmi-root "$2" --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto syslinux
 	fi
-
+#	$SUDO urpmi --urpmi-root "$2" --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto dracut
 	# check CHROOT
 	if [ ! -d  "$2"/lib/modules ]; then
 		echo "Broken chroot installation. Exiting"
@@ -573,7 +577,7 @@ EOF
 		# this one is needed to grab firmwares
 		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Non-free' 'media/non-free/release'
 	else
-		MIRRORLIST="http://downloads.openmandriva.org/mirrors/openmandriva.$VERSION.$EXTARCH.list"
+		MIRRORLIST="http://downloads.openmandriva.org/mirrors/$TREE.$VERSION.$EXTARCH.list"
 		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist $MIRRORLIST
 	fi
 
