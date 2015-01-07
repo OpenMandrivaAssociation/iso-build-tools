@@ -79,16 +79,16 @@ ISO_DATE="`echo $(date -u +%Y-%m-%d-%H-%M-%S-00) | sed -e s/-//g`"
 [ -n "$6" ] && DISPLAYMANAGER="$6"
 [ "$EXTARCH" = "i386" ] && EXTARCH=i586
 
-if [ "$TREE" == "cooker" ]; then
+if [ "${TREE,,}" == "cooker" ]; then
     REPOPATH="http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/"
 else
     REPOPATH="http://abf-downloads.abf.io/$TREE$VERSION/repository/$EXTARCH/"
 fi
 
-if [ "$RELEASE_ID" == "final" ]; then
+if [ "${RELEASE_ID,,}" == "final" ]; then
     PRODUCT_ID="OpenMandrivaLx.$VERSION-$TYPE"
 else
-    if [[ "$RELEASE_ID" == "alpha" ]]; then
+    if [[ "${RELEASE_ID,,}" == "alpha" ]]; then
 	RELEASE_ID="$RELEASE_ID.`date +%Y%m%d`"
     fi
     PRODUCT_ID="OpenMandrivaLx.$VERSION-$RELEASE_ID-$TYPE"
@@ -347,11 +347,11 @@ setupSyslinux() {
 	# install syslinux programs
 	echo "Installing syslinux programs."
         for i in isolinux.bin vesamenu.c32 hdt.c32 poweroff.com chain.c32 isohdpfx.bin; do
-			if [ ! -f "$1"/usr/lib/syslinux/$i ]; then
-				echo "$i does not exists. Exiting."
-				error
-			fi
-            $SUDO cp -f "$1"/usr/lib/syslinux/$i "$2"/isolinux ;
+    	    if [ ! -f "$1"/usr/lib/syslinux/$i ]; then
+		echo "$i does not exists. Exiting."
+		error
+	    fi
+    	    $SUDO cp -f "$1"/usr/lib/syslinux/$i "$2"/isolinux ;
         done
 	# install pci.ids
 	$SUDO cp -f  "$1"/usr/share/pci.ids "$2"/isolinux/pci.ids
@@ -654,8 +654,13 @@ EOF
 	echo "Updating urpmi repositories"
 	$SUDO urpmi.update --urpmi-root "$1" -a -ff --wget --force-key
 
+	# get back to real /etc/resolv.conf
 	$SUDO rm -f "$1"/etc/resolv.conf
-	$SUDO ln -s /run/systemd/resolve/resolv.conf "$1"/etc/resolv.conf
+	if [ `cat /etc/release | grep -o 2014.0` \< "2015.0" ]; then
+	    $SUDO ln -sf /run/resolvconf/resolv.conf "$1"/etc/resolv.conf
+	else
+	    $SUDO ln -sf /run/systemd/resolve/resolv.conf "$1"/etc/resolv.conf
+	fi
 
 	# ldetect stuff
 	$SUDO chroot "$1" /usr/sbin/update-ldetect-lst
