@@ -58,6 +58,7 @@ VERSION="`date +%Y.0`"
 RELEASE_ID=alpha
 TYPE=kde4
 DISPLAYMANAGER="kdm"
+DEBUG="nodebug"
 # always build free ISO
 FREE=1
 
@@ -77,7 +78,17 @@ ISO_DATE="`echo $(date -u +%Y-%m-%d-%H-%M-%S-00) | sed -e s/-//g`"
 [ -n "$4" ] && RELEASE_ID="$4"
 [ -n "$5" ] && TYPE="$5"
 [ -n "$6" ] && DISPLAYMANAGER="$6"
+[ -n "$7" ] && DEBUG="$7"
+
 [ "$EXTARCH" = "i386" ] && EXTARCH=i586
+
+#Check the number of args given to the script a missing version arg will stiil produce an iso
+# Argument parsing and VERSION are insufficiently robust. This hack is a stopgap
+if [ $#!=7 ]; then
+echo "Error!! Insufficient arguments"
+echo "Example:- x86_64 cooker V1A  2015.0 alpha hawaii sddm"
+exit
+fi
 
 if [ "$TREE" == "cooker" ]; then
     REPOPATH="http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/"
@@ -152,37 +163,37 @@ getPkgList() {
     else
 	LISTDIR=$OURDIR
     fi
-
-    # remove if exists
-    if [ -d $LISTDIR/iso-pkg-lists ]; then
+    #Support for building released isos
+    if [ $TREE = "cooker" ]; then
+        BRANCH=master
+    else
+        BRANCH="$TREE$VERSION"
+    fi
+    # Some debug help here. We keep the existing list to enable changes to be made for testing
+    # or for developing specialist builds. 
+        # remove if exists and debug is not set
+    if [ -d $LISTDIR/iso-pkg-lists ] && [ $DEBUG = "nodebug" ]; then
 	$SUDO rm -rf $LISTDIR/iso-pkg-lists
-    fi
 
-    ### possible fix for timed out GIT pulls
-    if [ ! -d $LISTDIR/iso-pkg-lists ]; then
-	if [ $TREE = "cooker" ]; then
-	    BRANCH=master
-	else
-	    BRANCH="$TREE$VERSION"
-    fi
-
+	### possible fix for timed out GIT pulls
+	if [ ! -d $LISTDIR/iso-pkg-lists ]; then
     # download iso packages lists from www.abf.io
     PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-$BRANCH.tar.gz"
     wget --tries=10 -O iso-pkg-lists-$BRANCH.tar.gz --content-disposition $PKGLIST
     tar -xf iso-pkg-lists-$BRANCH.tar.gz
-    mv -f iso-pkg-lists-$BRANCH iso-pkg-lists
+    # Why not retain the unique list name it will help when people want their own spins
+#    mv -f iso-pkg-lists-$BRANCH iso-pkg-lists
     rm -f iso-pkg-lists-$BRANCH.tar.gz
-
-    fi
-
+    	fi
+    fi	
     # bail out if download was unsuccesfull
-    if [ ! -d $LISTDIR/iso-pkg-lists ]; then
-	echo "Could not find $OURDIR/iso-pkg-lists. Exiting."
+    	if [ ! -d $LISTDIR/iso-pkg-lists-$BRANCH ]; then
+	echo "Could not find $OURDIR/iso-pkg-lists-$BRANCH. Exiting."
 	error
-    fi
+    	fi
 
     # export file list
-    FILELISTS="$LISTDIR/iso-pkg-lists/$DIST-$TYPE.lst"
+    FILELISTS="$LISTDIR/iso-pkg-lists-$BRANCH/$DIST-$TYPE.lst"
 
 }
 
@@ -265,11 +276,13 @@ createChroot() {
 		echo "Syslinux is missing in chroot. Installing it."
 		$SUDO urpmi --urpmi-root "$2" --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto syslinux
 	fi
-#	$SUDO urpmi --urpmi-root "$2" --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto dracut
+	$SUDO urpmi --urpmi-root "$2" --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto dracut
 	# check CHROOT
 	if [ ! -d  "$2"/lib/modules ]; then
 		echo "Broken chroot installation. Exiting"
 		error
+	else
+	    echo "1" >$OURDIR/CHRT_LOCK
 	fi
 
 	# this will be needed in future
@@ -384,6 +397,8 @@ setupSyslinux() {
 		export UEFI=1
 		$SUDO mkdir -m 0755 -p "$2"/EFI/BOOT "$2"/EFI/BOOT/fonts "$2"/EFI/BOOT/themes "$2"/EFI/BOOT/locale
 		$SUDO cp -f "$1"/boot/efi/EFI/openmandriva/grub.efi "$2"/EFI/BOOT/grub.efi
+		#For bootable iso's we may need grub.efi as BOOTX64.efi
+		$SUDO cp -f "$1"/boot/efi/EFI/openmandriva/grub.efi "$2"/EFI/BOOT/BOOTX64.efi
 		$SUDO cp -f $OURDIR/EFI/grub.cfg "$2"/EFI/BOOT/BOOTX64.cfg
 		$SUDO cp -f $OURDIR/EFI/grub.cfg "$2"/EFI/BOOT/grub.cfg
 		$SUDO sed -i -e "s,@VERSION@,$VERSION,g" "$2"/EFI/BOOT/*.cfg
