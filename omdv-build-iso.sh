@@ -163,7 +163,7 @@ getPkgList() {
 	LISTDIR=$OURDIR
     fi
     #Support for building released isos
-    if [ $TREE = "cooker" ]; then
+    if [ ${TREE,,} = "cooker" ]; then
         BRANCH=master
     else
         BRANCH="$TREE$VERSION"
