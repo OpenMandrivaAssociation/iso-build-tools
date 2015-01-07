@@ -160,7 +160,7 @@ getPkgList() {
 
     ### possible fix for timed out GIT pulls
     if [ ! -d $LISTDIR/iso-pkg-lists ]; then
-	if [ $TREE = "cooker" ]; then
+	if [ ${TREE,,} = "cooker" ]; then
 	    BRANCH=master
 	else
 	    BRANCH="$TREE$VERSION"
@@ -265,7 +265,7 @@ createChroot() {
 		echo "Syslinux is missing in chroot. Installing it."
 		$SUDO urpmi --urpmi-root "$2" --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto syslinux
 	fi
-#	$SUDO urpmi --urpmi-root "$2" --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto dracut
+
 	# check CHROOT
 	if [ ! -d  "$2"/lib/modules ]; then
 		echo "Broken chroot installation. Exiting"
@@ -592,8 +592,7 @@ EOF
 	    if [[ $i  =~ ^.*socket$|^.*path$|^.*target$|^.*timer$ ]]; then
 		if [ -e "$1"/lib/systemd/system/$i ]; then
 		    echo "Disabling $i"
-		    chroot "$1" systemctl disable $i
-		    #2> /dev/null || :
+		    chroot "$1" systemctl disable $i 2> /dev/null || :
 		else
 		    echo "Special service $i does not exist. Skipping."
 		fi
