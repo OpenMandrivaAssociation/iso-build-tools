@@ -352,6 +352,12 @@ createInitrd() {
 
 }
 
+# Usage: setupGrub2 /target/dir
+# Sets up grub2 to boot /target/dir
+setupGrub2() {
+	echo "TODO - add grub2 support"
+}
+
 # Usage: setupSysLinux /target/dir
 # Sets up syslinux to boot /target/dir
 setupSyslinux() {
@@ -486,6 +492,12 @@ LABEL poweroff
 EOF
 	$SUDO chmod 0755 "$2"/isolinux
 	echo "syslinux setup completed"
+}
+
+# Usage: setupBootloader
+# Sets up grub2/syslinux to boot /target/dir
+setupBootloader() {
+	setupSyslinux "$CHROOTNAME" "$ISOROOTNAME"
 }
 
 setupISOenv() {
@@ -772,7 +784,7 @@ updateSystem
 getPkgList
 createChroot "$FILELISTS" "$CHROOTNAME"
 createInitrd "$CHROOTNAME"
-setupSyslinux "$CHROOTNAME" "$ISOROOTNAME"
+setupBootloader
 setupISOenv "$CHROOTNAME"
 createSquash "$CHROOTNAME" "$ISOROOTNAME"
 buildIso $OURDIR/$PRODUCT_ID.$EXTARCH.iso "$ISOROOTNAME"
