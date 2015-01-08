@@ -347,7 +347,7 @@ setupGrub2() {
 	
 	echo "TODO - add grub2 support"
 	mkdir -p "$2"/boot/grub2 "$2"/boot/grub2/themes "2"/boot/grub2/locale
-	for i in "$1"$grub2_lib/*.mod "$1"$grub2_lib/*.lst "$1"$grub2_lib/efiemu??.o "$1"/usr/share/grub/*.pf2; do
+	for i in "$1"$grub2_lib/*.mod "$1"$grub2_lib/*.lst "$1"$grub2_lib/efiemu*.o "$1"/usr/share/grub/*.pf2; do
 		$SUDO cp -f $i "$2"/boot/grub2 ;
 	done
 	$SUDO /usr/bin/grub2-mkimage -d "$1"$grub2_lib/ -o ${core_img} -O i386-pc biosdisk iso9660
