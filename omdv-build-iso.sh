@@ -347,11 +347,11 @@ setupGrub2() {
 	
 	echo "TODO - add grub2 support"
 	mkdir -p "$2"/boot/grub2 "$2"/boot/grub2/themes "2"/boot/grub2/locale
-	for i in "$2"$grub2_lib/*.mod "$2"$grub2_lib/*.lst "$2"$grub2_lib/efiemu*.o "$2"/usr/share/grub/*.pf2; do
+	for i in "$1"$grub2_lib/*.mod "$1"$grub2_lib/*.lst "$1"$grub2_lib/efiemu*.o "$1"/usr/share/grub/*.pf2; do
 		$SUDO cp -f $i "$2"/boot/grub2 ;
 	done
-	$SUDO chroot "$2"/usr/bin/grub2-mkimage -d "$2"$grub2_lib -o ${core_img} -O i386-pc biosdisk iso9660
-	$SUDO cat "$2"/usr/lib/grub/i386-pc/boot.img ${core_img} > "$2"/boot/grub2/grub_eltorito
+	$SUDO chroot "$1"/usr/bin/grub2-mkimage -d "$1"$grub2_lib -o ${core_img} -O i386-pc biosdisk iso9660
+	$SUDO cat "$1"/usr/lib/grub/i386-pc/boot.img ${core_img} > "$2"/boot/grub2/grub_eltorito
 	XORRISO_OPTIONS="-b boot/grub2/grub_eltorito -J"
 	echo "End grub2."
 }
@@ -702,7 +702,9 @@ createSquash() {
     if [ -f "$2"/LiveOS/squashfs.img ]; then
 	$SUDO rm -rf "$2"/LiveOS/squashfs.img
     fi
-
+	
+	mkdir -p "$2"/LiveOS
+	
     # unmout all stuff inside CHROOT to build squashfs image
     umountAll "$1"
 
