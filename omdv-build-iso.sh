@@ -128,32 +128,26 @@ trap error ERR
 
 updateSystem() {
     #Force update of critical packages
-    if [ "$ABF" = "1" ]; then
-	echo "We are inside ABF (www.abf.io)"
-        urpmq --list-url
-	urpmi.update -ff updates
-
+	if [ "$ABF" = "1" ]; then
+		echo "We are inside ABF (www.abf.io)"
+		urpmq --list-url
+		urpmi.update -ff updates
     # inside ABF, lxc-container which is used to run this script is based
     # on Rosa2012 which does not have cdrtools
-        urpmi --no-verify-rpm perl-URPM xorriso syslinux squashfs-tools 
-    else
-	echo "Building in user custom environment"
-	# TODO prolly need to be removed
-	if [ `cat /etc/release | grep -o 2014.0` \< "2015.0" ]; then
-	    urpmi --no-verify-rpm perl-URPM xorriso syslinux squashfs-tools
+		urpmi --no-verify-rpm perl-URPM xorriso syslinux squashfs-tools 
 	else
-	    urpmi --no-verify-rpm perl-URPM xorriso syslinux squashfs-tools
+		echo "Building in user custom environment"
+		urpmi --no-verify-rpm perl-URPM xorriso syslinux grub2 squashfs-tools
 	fi
-    fi
 }
 
 getPkgList() {
 
     # fix for ABF
     if [ "$ABF" = "1" ]; then
-	LISTDIR=$(pwd)
+		LISTDIR=$(pwd)
     else
-	LISTDIR=$OURDIR
+		LISTDIR=$OURDIR
     fi
     #Support for building released isos
     if [ ${TREE,,} = "cooker" ]; then
@@ -165,28 +159,27 @@ getPkgList() {
     # or for developing specialist builds. 
         # remove if exists and debug is not set
     if [ -d $LISTDIR/iso-pkg-lists ] && [ $DEBUG = "nodebug" ]; then
-	$SUDO rm -rf $LISTDIR/iso-pkg-lists
+		$SUDO rm -rf $LISTDIR/iso-pkg-lists
 
-	### possible fix for timed out GIT pulls
-	if [ ! -d $LISTDIR/iso-pkg-lists ]; then
-    # download iso packages lists from www.abf.io
-    PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-$BRANCH.tar.gz"
-    wget --tries=10 -O iso-pkg-lists-$BRANCH.tar.gz --content-disposition $PKGLIST
-    tar -xf iso-pkg-lists-$BRANCH.tar.gz
-    # Why not retain the unique list name it will help when people want their own spins
-#    mv -f iso-pkg-lists-$BRANCH iso-pkg-lists
-    rm -f iso-pkg-lists-$BRANCH.tar.gz
-    	fi
-    fi	
-    # bail out if download was unsuccesfull
-    	if [ ! -d $LISTDIR/iso-pkg-lists-$BRANCH ]; then
-	echo "Could not find $OURDIR/iso-pkg-lists-$BRANCH. Exiting."
-	error
-    	fi
+		### possible fix for timed out GIT pulls
+		if [ ! -d $LISTDIR/iso-pkg-lists ]; then
+			# download iso packages lists from www.abf.io
+			PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-$BRANCH.tar.gz"
+			wget --tries=10 -O iso-pkg-lists-$BRANCH.tar.gz --content-disposition $PKGLIST
+			tar -xf iso-pkg-lists-$BRANCH.tar.gz
+			# Why not retain the unique list name it will help when people want their own spins
+			$SUDO mv -f iso-pkg-lists-$BRANCH iso-pkg-lists
+			$SUDO rm -f iso-pkg-lists-$BRANCH.tar.gz
+		fi
+	fi	
+	# bail out if download was unsuccesfull
+	if [ ! -d $LISTDIR/iso-pkg-lists-$BRANCH ]; then
+		echo "Could not find $OURDIR/iso-pkg-lists-$BRANCH. Exiting."
+		error
+    fi
 
     # export file list
-    FILELISTS="$LISTDIR/iso-pkg-lists-$BRANCH/$DIST-$TYPE.lst"
-
+	FILELISTS="$LISTDIR/iso-pkg-lists-$BRANCH/$DIST-$TYPE.lst"
 }
 
 showInfo() {
