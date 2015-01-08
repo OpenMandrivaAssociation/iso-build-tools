@@ -448,19 +448,19 @@ LABEL boot
 	MENU LABEL Boot OpenMandriva Lx in Live Mode
 	LINUX /isolinux/vmlinuz0
 	INITRD /isolinux/liveinitrd.img
-	APPEND rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image quiet rhgb vga=788 splash=silent logo.nologo root=live:LABEL=$LABEL locale.lang=en_US vconsole.keymap=us
+	APPEND rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image audit=0 quiet rhgb vga=788 splash=silent logo.nologo root=live:LABEL=$LABEL locale.lang=en_US vconsole.keymap=us
 
 LABEL install
 	MENU LABEL Install OpenMandriva Lx
 	LINUX /isolinux/vmlinuz0
 	INITRD /isolinux/liveinitrd.img
-	APPEND rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image quiet rhgb vga=788 splash=silent logo.nologo root=live:LABEL=$LABEL locale.lang=en_US vconsole.keymap=us install
+	APPEND rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image audit=0 quiet rhgb vga=788 splash=silent logo.nologo root=live:LABEL=$LABEL locale.lang=en_US vconsole.keymap=us install
 
 LABEL vesa
 	MENU LABEL Boot OpenMandriva Lx in safe mode
 	LINUX /isolinux/vmlinuz0
 	INITRD /isolinux/liveinitrd.img
-	APPEND rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image xdriver=vesa nomodeset plymouth.enable=0 vga=792 install root=live:LABEL=$LABEL locale.lang=en_EN vconsole.keymap=en
+	APPEND rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image audit=0 xdriver=vesa nomodeset plymouth.enable=0 vga=792 install root=live:LABEL=$LABEL locale.lang=en_EN vconsole.keymap=en
 
 LABEL supergrub
         MENU LABEL Run super grub2 disk
