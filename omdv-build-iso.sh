@@ -167,8 +167,7 @@ getPkgList() {
 			PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-$BRANCH.tar.gz"
 			wget --tries=10 -O iso-pkg-lists-$BRANCH.tar.gz --content-disposition $PKGLIST
 			tar -xf iso-pkg-lists-$BRANCH.tar.gz
-			# Why not retain the unique list name it will help when people want their own spins
-			$SUDO mv -f iso-pkg-lists-$BRANCH iso-pkg-lists
+			# Why not retain the unique list name it will help when people want their own spins ?
 			$SUDO rm -f iso-pkg-lists-$BRANCH.tar.gz
 		fi
 	fi	
