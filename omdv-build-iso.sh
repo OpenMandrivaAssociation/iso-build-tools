@@ -82,16 +82,6 @@ ISO_DATE="`echo $(date -u +%Y-%m-%d-%H-%M-%S-00) | sed -e s/-//g`"
 
 [ "$EXTARCH" = "i386" ] && EXTARCH=i586
 
-#Check the number of args given to the script a missing version arg will stiil produce an iso
-# Argument parsing and VERSION are insufficiently robust. This hack is a stopgap
-if [ $# -eq 7 ]; then
-    echo "Starting Build"
-else
-    echo "Error!! Insufficient arguments"
-    echo "Example:- x86_64 cooker V1A  2015.0 alpha hawaii sddm"
-    exit
-fi
-
 if [ "${TREE,,}" == "cooker" ]; then
     REPOPATH="http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/"
 else
