@@ -350,8 +350,8 @@ setupGrub2() {
 	for i in "$1"$grub2_lib/*.mod "$1"$grub2_lib/*.lst "$1"$grub2_lib/efiemu??.o "$1"/usr/share/grub/*.pf2; do
 		$SUDO cp -f $i "$2"/boot/grub2 ;
 	done
-	$SUDO grub-mkimage -d "$1"$grub2_lib/ -o "$2" -O i386-pc biosdisk iso9660
-	$SUDO cat /usr/lib/grub/i386-pc/boot.img ${core_img} > "$2"/boot/grub2/grub_eltorito
+	$SUDO grub2-mkimage -d "$1"$grub2_lib/ -o ${core_img} -O i386-pc biosdisk iso9660
+	$SUDO cat "$1"/usr/lib/grub/i386-pc/boot.img ${core_img} > "$2"/boot/grub2/grub_eltorito
 	XORRISO_OPTIONS="-b boot/grub2/grub_eltorito -J"
 	echo "End grub2."
 }
