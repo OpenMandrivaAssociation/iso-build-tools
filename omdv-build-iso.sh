@@ -355,7 +355,22 @@ createInitrd() {
 # Usage: setupGrub2 /target/dir
 # Sets up grub2 to boot /target/dir
 setupGrub2() {
+	if [ ! -e "$1"/usr/bin/grub2-mkimage ]; then
+		echo "Missing grub2-mkimage in installation."
+		error
+	fi
+	grub2_lib="/usr/lib/grub/i386-pc"
+	core_img=$(mktemp)
+	
 	echo "TODO - add grub2 support"
+	mkdir -p "$2"/boot/grub2 "$2"/boot/grub2/themes "2"/boot/grub2/locale
+	for i in "$1"$grub2_lib/*.mod "$1"$grub2_lib/*.lst "$1"$grub2_lib/efiemu??.o "$1"/usr/share/grub/*.pf2; do
+		$SUDO cp -f $i "$2"/boot/grub2 ;
+	done
+	$SUDO grub-mkimage -d "$1"$grub2_lib/ -o "$2" -O i386-pc biosdisk iso9660
+	$SUDO cat /usr/lib/grub/i386-pc/boot.img ${core_img} > "$2"/boot/grub2/grub_eltorito
+	XORRISO_OPTIONS="-b boot/grub2/grub_eltorito -J"
+	echo "End grub2."
 }
 
 # Usage: setupSysLinux /target/dir
@@ -491,13 +506,14 @@ LABEL poweroff
 	COMBOOT poweroff.com
 EOF
 	$SUDO chmod 0755 "$2"/isolinux
+	XORRISO_OPTIONS="-b isolinux/isolinux.bin -c isolinux/boot.cat -isohybrid-mbr "$2"/isolinux/isohdpfx.bin -partition_offset 16 "
 	echo "syslinux setup completed"
 }
 
 # Usage: setupBootloader
 # Sets up grub2/syslinux to boot /target/dir
 setupBootloader() {
-	setupSyslinux "$CHROOTNAME" "$ISOROOTNAME"
+	setupGrub2 "$CHROOTNAME" "$ISOROOTNAME"
 }
 
 setupISOenv() {
@@ -725,8 +741,7 @@ buildIso() {
 		$SUDO xorriso -as mkisofs -R -r -J -joliet-long -l -cache-inodes \
 		--modification-date=${ISO_DATE} \
 		-omit-version-number -disable-deep-relocation \
-		-b isolinux/isolinux.bin -c isolinux/boot.cat \
-		-isohybrid-mbr "$2"/isolinux/isohdpfx.bin -partition_offset 16 \
+		$XORRISO_OPTIONS \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		-eltorito-alt-boot -e EFI/BOOT/grub.efi -no-emul-boot \
 		-append_partition 2 0x01 "$2"/EFI/BOOT/grub.efi \
@@ -737,8 +752,7 @@ buildIso() {
 		$SUDO xorriso -as mkisofs -R -r -J -joliet-long -l -cache-inodes \
 		--modification-date=${ISO_DATE} \
 		-omit-version-number -disable-deep-relocation \
-		-isohybrid-mbr "$2"/isolinux/isohdpfx.bin -partition_offset 16 \
-		-b isolinux/isolinux.bin -c isolinux/boot.cat \
+		$XORRISO_OPTIONS \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		-publisher "OpenMandriva Association" \
 		-preparer "OpenMandriva Association" \
