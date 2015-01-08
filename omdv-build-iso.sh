@@ -134,10 +134,10 @@ updateSystem() {
 		urpmi.update -ff updates
     # inside ABF, lxc-container which is used to run this script is based
     # on Rosa2012 which does not have cdrtools
-		urpmi --no-verify-rpm perl-URPM xorriso syslinux squashfs-tools 
+		urpmi --no-verify-rpm perl-URPM grub2 xorriso syslinux squashfs-tools 
 	else
 		echo "Building in user custom environment"
-		urpmi --no-verify-rpm perl-URPM xorriso syslinux grub2 squashfs-tools
+		urpmi --no-verify-rpm perl-URPM grub2 xorriso syslinux grub2 squashfs-tools
 	fi
 }
 
@@ -350,7 +350,7 @@ setupGrub2() {
 	for i in "$1"$grub2_lib/*.mod "$1"$grub2_lib/*.lst "$1"$grub2_lib/efiemu??.o "$1"/usr/share/grub/*.pf2; do
 		$SUDO cp -f $i "$2"/boot/grub2 ;
 	done
-	$SUDO grub2-mkimage -d "$1"$grub2_lib/ -o ${core_img} -O i386-pc biosdisk iso9660
+	$SUDO /usr/bin/grub2-mkimage -d "$1"$grub2_lib/ -o ${core_img} -O i386-pc biosdisk iso9660
 	$SUDO cat "$1"/usr/lib/grub/i386-pc/boot.img ${core_img} > "$2"/boot/grub2/grub_eltorito
 	XORRISO_OPTIONS="-b boot/grub2/grub_eltorito -J"
 	echo "End grub2."
