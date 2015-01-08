@@ -82,12 +82,6 @@ ISO_DATE="`echo $(date -u +%Y-%m-%d-%H-%M-%S-00) | sed -e s/-//g`"
 
 [ "$EXTARCH" = "i386" ] && EXTARCH=i586
 
-if [ "${TREE,,}" == "cooker" ]; then
-    REPOPATH="http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/"
-else
-    REPOPATH="http://abf-downloads.abf.io/$TREE$VERSION/repository/$EXTARCH/"
-fi
-
 if [ "${RELEASE_ID,,}" == "final" ]; then
     PRODUCT_ID="OpenMandrivaLx.$VERSION-$TYPE"
 else
@@ -223,6 +217,12 @@ parsePkgList() {
 # Creates a chroot environment with all packages in the packages.lst
 # file and their dependencies in /target/dir
 createChroot() {
+	# path to repository
+	if [ "${TREE,,}" == "cooker" ]; then
+		REPOPATH="http://abf-downloads.abf.io/$TREE/repository/$EXTARCH/"
+	else
+		REPOPATH="http://abf-downloads.abf.io/$TREE$VERSION/repository/$EXTARCH/"
+	fi
 	echo "Creating chroot $2"
 	# Make sure /proc, /sys and friends are mounted so %post scripts can use them
 	$SUDO mkdir -p "$2"/proc "$2"/sys "$2"/dev "$2"/dev/pts
