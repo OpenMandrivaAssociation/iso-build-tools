@@ -361,7 +361,7 @@ setupGrub2() {
 setupSyslinux() {
 	echo "Starting syslinux setup."
 
-	$SUDO mkdir -p "$2"/boot/syslinux
+	$SUDO mkdir -p "$2"/boot/syslinux "$2"/boot/syslinux/hdt
 	$SUDO chmod 1777 "$2"/boot/syslinux
 	# install syslinux programs
 	echo "Installing syslinux programs."
@@ -373,7 +373,8 @@ setupSyslinux() {
     	    $SUDO cp -f "$1"/usr/lib/syslinux/$i "$2"/boot/syslinux ;
         done
 	# install pci.ids
-	$SUDO cp -f  "$1"/usr/share/pci.ids "$2"/boot/syslinux/pci.ids
+	$SUDO gzip -c -9 "$1"/usr/share/pci.ids > "$2"/boot/syslinux/hdt/pciids.gz
+	$SUDO gzip -c -9 "$1"/usr/lib/modules/*/modules.alias > "$2"/boot/syslinux/hdt/modalias.gz
 
 	$SUDO mkdir -p "$2"/LiveOS
 
@@ -477,6 +478,7 @@ LABEL memtest
 LABEL hardware
 	MENU LABEL Run hardware detection tool
 	COM32 hdt.c32
+	APPEND modules_alias=boot/syslinux/hdt/modalias.gz pciids=boot/syslinux/hdt/pciids.gz
 
 LABEL harddisk
 	MENU LABEL Boot from harddisk
