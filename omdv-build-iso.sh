@@ -496,7 +496,7 @@ EOF
 # Usage: setupBootloader
 # Sets up grub2/syslinux to boot /target/dir
 setupBootloader() {
-	setupGrub2 "$CHROOTNAME" "$ISOROOTNAME"
+	setupSyslinux "$CHROOTNAME" "$ISOROOTNAME"
 }
 
 setupISOenv() {
