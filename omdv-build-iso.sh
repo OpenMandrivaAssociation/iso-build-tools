@@ -361,8 +361,8 @@ setupGrub2() {
 setupSyslinux() {
 	echo "Starting syslinux setup."
 
-	$SUDO mkdir -p "$2"/isolinux
-	$SUDO chmod 1777 "$2"/isolinux
+	$SUDO mkdir -p "$2"/boot/syslinux
+	$SUDO chmod 1777 "$2"/boot/syslinux
 	# install syslinux programs
 	echo "Installing syslinux programs."
         for i in isolinux.bin vesamenu.c32 hdt.c32 poweroff.com chain.c32 isohdpfx.bin; do
@@ -370,20 +370,19 @@ setupSyslinux() {
 		echo "$i does not exists. Exiting."
 		error
 	    fi
-    	    $SUDO cp -f "$1"/usr/lib/syslinux/$i "$2"/isolinux ;
+    	    $SUDO cp -f "$1"/usr/lib/syslinux/$i "$2"/boot/syslinux ;
         done
 	# install pci.ids
-	$SUDO cp -f  "$1"/usr/share/pci.ids "$2"/isolinux/pci.ids
+	$SUDO cp -f  "$1"/usr/share/pci.ids "$2"/boot/syslinux/pci.ids
 
 	$SUDO mkdir -p "$2"/LiveOS
-	$SUDO mkdir -p "$2"/isolinux
 
 	echo "Installing liveinitrd inside syslinux"
-	$SUDO cp -a "$1"/boot/vmlinuz-$KERNEL_ISO "$2"/isolinux/vmlinuz0
-	$SUDO cp -a "$1"/boot/liveinitrd.img "$2"/isolinux/liveinitrd.img
+	$SUDO cp -a "$1"/boot/vmlinuz-$KERNEL_ISO "$2"/boot/syslinux/vmlinuz0
+	$SUDO cp -a "$1"/boot/liveinitrd.img "$2"/boot/syslinux/liveinitrd.img
 
-	if [ ! -f "$2"/isolinux/liveinitrd.img ]; then
-	    echo "Missing /isolinux/liveinitrd.img. Exiting."
+	if [ ! -f "$2"/boot/syslinux/liveinitrd.img ]; then
+	    echo "Missing /boot/syslinux/liveinitrd.img. Exiting."
 	    error
 	else
 	    $SUDO rm -rf "$1"/boot/liveinitrd.img
@@ -391,12 +390,12 @@ setupSyslinux() {
 
 	echo "Copy various syslinux settings"
 	# copy boot menu background
-        $SUDO cp -rfT $OURDIR/extraconfig/syslinux/background.png "$2"/isolinux/background.png
+        $SUDO cp -rfT $OURDIR/extraconfig/syslinux/background.png "$2"/boot/syslinux/background.png
         # copy memtest
-        $SUDO cp -rfT $OURDIR/extraconfig/memtest "$2"/isolinux/memtest
+        $SUDO cp -rfT $OURDIR/extraconfig/memtest "$2"/boot/syslinux/memtest
         # copy SuperGrub iso
-        $SUDO cp -rfT $OURDIR/extraconfig/memdisk "$2"/isolinux/memdisk
-        $SUDO cp -rfT $OURDIR/extraconfig/sgb.iso "$2"/isolinux/sgb.iso
+        $SUDO cp -rfT $OURDIR/extraconfig/memdisk "$2"/boot/syslinux/memdisk
+        $SUDO cp -rfT $OURDIR/extraconfig/sgb.iso "$2"/boot/syslinux/sgb.iso
 
 	# UEFI support
 	if [ -f "$1"/boot/efi/EFI/openmandriva/grub.efi ] && [ "$EXTARCH" = "x86_64" ]; then
@@ -420,7 +419,7 @@ setupSyslinux() {
 	echo "Create syslinux menu"
 	# kernel/initrd filenames referenced below are the ISO9660 names.
 	# syslinux doesn't support Rock Ridge.
-	$SUDO cat >"$2"/isolinux/isolinux.cfg <<EOF
+	$SUDO cat >"$2"/boot/syslinux/isolinux.cfg <<EOF
 UI vesamenu.c32
 DEFAULT boot
 PROMPT 0
@@ -450,20 +449,20 @@ MENU COLOR tabmsg 31;40 #30ffffff #00000000 std
 
 LABEL boot
 	MENU LABEL Boot OpenMandriva Lx in Live Mode
-	LINUX /isolinux/vmlinuz0
-	INITRD /isolinux/liveinitrd.img
+	LINUX /boot/syslinux/vmlinuz0
+	INITRD /boot/syslinux/liveinitrd.img
 	APPEND rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image audit=0 quiet rhgb vga=788 splash=silent logo.nologo root=live:LABEL=$LABEL locale.lang=en_US vconsole.keymap=us
 
 LABEL install
 	MENU LABEL Install OpenMandriva Lx
-	LINUX /isolinux/vmlinuz0
-	INITRD /isolinux/liveinitrd.img
+	LINUX /boot/syslinux/vmlinuz0
+	INITRD /boot/syslinux/liveinitrd.img
 	APPEND rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image audit=0 quiet rhgb vga=788 splash=silent logo.nologo root=live:LABEL=$LABEL locale.lang=en_US vconsole.keymap=us install
 
 LABEL vesa
 	MENU LABEL Boot OpenMandriva Lx in safe mode
-	LINUX /isolinux/vmlinuz0
-	INITRD /isolinux/liveinitrd.img
+	LINUX /boot/syslinux/vmlinuz0
+	INITRD /boot/syslinux/liveinitrd.img
 	APPEND rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image audit=0 xdriver=vesa nomodeset plymouth.enable=0 vga=792 install root=live:LABEL=$LABEL locale.lang=en_EN vconsole.keymap=en
 
 LABEL supergrub
@@ -473,7 +472,7 @@ LABEL supergrub
 
 LABEL memtest
 	MENU LABEL Test memory
-	LINUX /isolinux/memtest
+	LINUX /boot/syslinux/memtest
 
 LABEL hardware
 	MENU LABEL Run hardware detection tool
@@ -488,8 +487,8 @@ LABEL poweroff
 	MENU LABEL Turn off computer
 	COMBOOT poweroff.com
 EOF
-	$SUDO chmod 0755 "$2"/isolinux
-	XORRISO_OPTIONS="-b isolinux/isolinux.bin -c isolinux/boot.cat -isohybrid-mbr "$2"/isolinux/isohdpfx.bin -partition_offset 16 "
+	$SUDO chmod 0755 "$2"/boot/syslinux
+	XORRISO_OPTIONS="-b boot/syslinux/isolinux.bin -c boot/syslinux/boot.cat -isohybrid-mbr "$2"/boot/syslinux/isohdpfx.bin -partition_offset 16 "
 	echo "syslinux setup completed"
 }
 
