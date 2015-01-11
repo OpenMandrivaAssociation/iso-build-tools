@@ -377,7 +377,7 @@ setupSyslinux() {
         done
 	# install pci.ids
 	$SUDO gzip -c -9 "$1"/usr/share/pci.ids > "$2"/boot/syslinux/hdt/pciids.gz
-	$SUDO gzip -c -9 "$1"/usr/lib/modules/*/modules.alias > "$2"/boot/syslinux/hdt/modalias.gz
+	$SUDO gzip -c -9 "$1"/lib/modules/*/modules.alias > "$2"/boot/syslinux/hdt/modalias.gz
 
 	$SUDO mkdir -p "$2"/LiveOS
 
