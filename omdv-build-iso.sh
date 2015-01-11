@@ -177,6 +177,7 @@ showInfo() {
 	echo "Type is $TYPE"
 	echo "Display Manager is $DISPLAYMANAGER"
 	echo "ISO label is $LABEL"
+	echo "ISO label is $BUILD_ID"
 	echo $'###\n'
 }
 
@@ -185,8 +186,6 @@ showInfo() {
 # mentioned by other package list files being %include-d)
 parsePkgList() {
 	LINE=0
-
-
 	cat "$1" | while read r; do
 		LINE=$((LINE+1))
 		SANITIZED="`echo $r | sed -e 's,	, ,g;s,  *, ,g;s,^ ,,;s, $,,;s,#.*,,'`"
@@ -424,75 +423,11 @@ setupSyslinux() {
 	echo "Create syslinux menu"
 	# kernel/initrd filenames referenced below are the ISO9660 names.
 	# syslinux doesn't support Rock Ridge.
-	$SUDO cat >"$2"/boot/syslinux/syslinux.cfg <<EOF
-UI vesamenu.c32
-DEFAULT boot
-PROMPT 0
-MENU TITLE Welcome to OpenMandriva Lx $VERSION $EXTARCH $TYPE
-MENU BACKGROUND background.png
-MENU AUTOBOOT Starting OpenMandriva Lx $VERSION in # second{,s}. Press any key to interrupt.
-TIMEOUT 300
-MENU WIDTH 78
-MENU MARGIN 4
-MENU ROWS 8
-MENU VSHIFT 10
-MENU TIMEOUTROW 14
-MENU TABMSGROW 14
-MENU CMDLINEROW 15
-MENU HELPMSGROW 18
-MENU HELPMSGENDROW 29
+	$SUDO cp -rfT $OURDIR/extraconfig/syslinux/syslinux.cfg "$2"/boot/syslinux/syslinux.cfg
 
-MENU COLOR border 30;44 #40ffffff #a0000000 std
-MENU COLOR title 1;36;44 #9033ccff #a0000000 std
-MENU COLOR sel 7;37;40 #e0ffffff #20ffffff all
-MENU COLOR unsel 37;44 #50ffffff #a0000000 std
-MENU COLOR help 37;40 #c0ffffff #a0000000 std
-MENU COLOR timeout_msg 37;40 #80ffffff #00000000 std
-MENU COLOR timeout 1;37;40 #c0ffffff #00000000 std
-MENU COLOR msg07 37;40 #90ffffff #a0000000 std
-MENU COLOR tabmsg 31;40 #30ffffff #00000000 std
+	# adjust syslinux config
+	sed -i -e "s/%VERSION%/$VERSION/g" -e "s/%EXTARCH%/${EXTARCH}/g" -e "s/%TYPE%/${TYPE} ${BUILD_ID}/g" -e "s/%LABEL%/${LABEL}/g" "$2"/boot/syslinux/syslinux.cfg
 
-LABEL boot
-	MENU LABEL Boot OpenMandriva Lx in Live Mode
-	LINUX /boot/syslinux/vmlinuz0
-	INITRD /boot/syslinux/liveinitrd.img
-	APPEND rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image audit=0 quiet rhgb vga=788 splash=silent logo.nologo root=live:LABEL=$LABEL locale.lang=en_US vconsole.keymap=us
-
-LABEL install
-	MENU LABEL Install OpenMandriva Lx
-	LINUX /boot/syslinux/vmlinuz0
-	INITRD /boot/syslinux/liveinitrd.img
-	APPEND rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image audit=0 quiet rhgb vga=788 splash=silent logo.nologo root=live:LABEL=$LABEL locale.lang=en_US vconsole.keymap=us install
-
-LABEL vesa
-	MENU LABEL Boot OpenMandriva Lx in safe mode
-	LINUX /boot/syslinux/vmlinuz0
-	INITRD /boot/syslinux/liveinitrd.img
-	APPEND rootfstype=auto ro rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 rd.live.image audit=0 xdriver=vesa nomodeset plymouth.enable=0 vga=792 install root=live:LABEL=$LABEL locale.lang=en_EN vconsole.keymap=en
-
-LABEL supergrub
-        MENU LABEL Run super grub2 disk
-        kernel memdisk
-        append initrd=sgb.iso
-
-LABEL memtest
-	MENU LABEL Test memory
-	LINUX /boot/syslinux/memtest
-
-LABEL hardware
-	MENU LABEL Run hardware detection tool
-	COM32 hdt.c32
-	APPEND modules_alias=boot/syslinux/hdt/modalias.gz pciids=boot/syslinux/hdt/pciids.gz
-
-LABEL harddisk
-	MENU LABEL Boot from harddisk
-	KERNEL chain.c32
-        APPEND hd0 0
-
-LABEL poweroff
-	MENU LABEL Turn off computer
-	COMBOOT poweroff.com
-EOF
 	$SUDO chmod 0755 "$2"/boot/syslinux
 	XORRISO_OPTIONS="${XORRISO_OPTIONS} -b boot/syslinux/isolinux.bin -c boot/syslinux/boot.cat -isohybrid-mbr "$2"/boot/syslinux/isohdpfx.bin -partition_offset 16 "
 	echo "syslinux setup completed"
