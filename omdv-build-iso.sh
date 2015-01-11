@@ -48,6 +48,9 @@ fi
 # check whether script is executed inside ABF (www.abf.io)
 if echo $(realpath $(dirname $0)) | grep -q /home/vagrant; then
     ABF=1
+    OURDIR=$(realpath $(dirname $0))
+else
+    OURDIR="/usr/share/omdv-build-iso"
 fi
 
 # default definitions
@@ -64,7 +67,6 @@ FREE=1
 
 SUDO=sudo
 [ "`id -u`" = "0" ] && SUDO=""
-OURDIR=$(realpath $(dirname $0))
 LOGDIR="."
 ROOTNAME="`mktemp -d /tmp/liverootXXXXXX`"
 [ -z "$ROOTNAME" ] && ROOTNAME=/tmp/liveroot.$$
@@ -139,10 +141,11 @@ getPkgList() {
 
     # fix for ABF
     if [ "$ABF" = "1" ]; then
-		LISTDIR=$(pwd)
+	LISTDIR=$(pwd)
     else
-		LISTDIR=$OURDIR
+	LISTDIR=$OURDIR
     fi
+
     #Support for building released isos
     if [ ${TREE,,} = "cooker" ]; then
         BRANCH=master
@@ -150,12 +153,12 @@ getPkgList() {
         BRANCH="$TREE$VERSION"
     fi
     # Some debug help here. We keep the existing list to enable changes to be made for testing
-    # or for developing specialist builds. 
+    # or for developing specialist builds.
 	# remove if exists and debug is not set
     if [ -d $LISTDIR/iso-pkg-lists-$BRANCH ] && [ $DEBUG = "nodebug" ]; then
 		$SUDO rm -rf $LISTDIR/iso-pkg-lists-$BRANCH
 	fi
-	
+
 	### possible fix for timed out GIT pulls
 	if [ ! -d $LISTDIR/iso-pkg-lists-$BRANCH ]; then
 		# download iso packages lists from www.abf.io
@@ -165,10 +168,10 @@ getPkgList() {
 		# Why not retain the unique list name it will help when people want their own spins ?
 		$SUDO rm -f iso-pkg-lists-$BRANCH.tar.gz
 	fi
-	
+
 	# bail out if download was unsuccesfull
 	if [ ! -d $LISTDIR/iso-pkg-lists-$BRANCH ]; then
-		echo "Could not find $OURDIR/iso-pkg-lists-$BRANCH. Exiting."
+		echo "Could not find $LISTDIR/iso-pkg-lists-$BRANCH. Exiting."
 		error
     fi
 
@@ -344,7 +347,7 @@ setupGrub2() {
 	fi
 	grub2_lib="/usr/lib/grub/i386-pc"
 	core_img=$(mktemp)
-	
+
 	echo "TODO - add grub2 support"
 	mkdir -p "$2"/boot/grub2 "$2"/boot/grub2/themes "2"/boot/grub2/locale
 	for i in "$1"$grub2_lib/*.mod "$1"$grub2_lib/*.lst "$1"$grub2_lib/efiemu*.o "$1"/usr/share/grub/*.pf2; do
@@ -394,6 +397,7 @@ setupSyslinux() {
         $SUDO cp -rfT $OURDIR/extraconfig/syslinux/background.png "$2"/boot/syslinux/background.png
         # copy memtest
         $SUDO cp -rfT $OURDIR/extraconfig/memtest "$2"/boot/syslinux/memtest
+        $SUDO chmod +x "$2"/boot/syslinux/memtest
         # copy SuperGrub iso
         $SUDO cp -rfT $OURDIR/extraconfig/memdisk "$2"/boot/syslinux/memdisk
         $SUDO cp -rfT $OURDIR/extraconfig/sgb.iso "$2"/boot/syslinux/sgb.iso
@@ -703,9 +707,8 @@ createSquash() {
     if [ -f "$2"/LiveOS/squashfs.img ]; then
 	$SUDO rm -rf "$2"/LiveOS/squashfs.img
     fi
-	
-	mkdir -p "$2"/LiveOS
-	
+
+    mkdir -p "$2"/LiveOS
     # unmout all stuff inside CHROOT to build squashfs image
     umountAll "$1"
 
