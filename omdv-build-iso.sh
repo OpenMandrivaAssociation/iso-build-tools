@@ -187,6 +187,11 @@ showInfo() {
 # mentioned by other package list files being %include-d)
 parsePkgList() {
 	LINE=0
+	if [ ! -e "$1" ]; then
+	    echo "$1 does not exists. Exiting"
+	    error
+	fi
+
 	cat "$1" | while read r; do
 		LINE=$((LINE+1))
 		SANITIZED="`echo $r | sed -e 's,	, ,g;s,  *, ,g;s,^ ,,;s, $,,;s,#.*,,'`"
@@ -219,6 +224,8 @@ createChroot() {
 	# Make sure /proc, /sys and friends are mounted so %post scripts can use them
 	$SUDO mkdir -p "$CHROOTNAME"/proc "$CHROOTNAME"/sys "$CHROOTNAME"/dev "$CHROOTNAME"/dev/pts
 
+	echo "Adding urpmi repository $REPOPATH into $CHROOTNAME"
+
 	if [ "$FREE" = "0" ]; then
 		$SUDO urpmi.addmedia --urpmi-root "$CHROOTNAME" --distrib $REPOPATH
 	else
@@ -238,6 +245,7 @@ createChroot() {
 	# update medias
 	$SUDO urpmi.update -a -c -ff --wget --urpmi-root "$CHROOTNAME" main
 	if [ "${TREE,,}" != "cooker" ]; then
+		echo "Updating urpmi repositories in $CHROOTNAME"
 		$SUDO urpmi.update -a -c -ff --wget --urpmi-root "$CHROOTNAME" updates
 	fi
 
@@ -247,7 +255,13 @@ createChroot() {
 	$SUDO mount --bind /dev/pts "$CHROOTNAME"/dev/pts
 
 	# start rpm packages installation
+	echo "Start installing packages in $CHROOTNAME"
 	parsePkgList "$FILELISTS" | xargs $SUDO urpmi --urpmi-root "$CHROOTNAME" --download-all --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto
+
+	if [[ $? != 0 ]]; then
+	    echo "Can not install packages from $FILELISTS";
+	    error
+	fi
 
 	if [ ! -e "$CHROOTNAME"/usr/lib/syslinux/isolinux.bin ]; then
 		echo "Syslinux is missing in chroot. Installing it."
