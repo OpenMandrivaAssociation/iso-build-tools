@@ -152,31 +152,20 @@ getPkgList() {
     else
         BRANCH="$TREE$VERSION"
     fi
-    # Some debug help here. We keep the existing list to enable changes to be made for testing
-    # or for developing specialist builds.
-	# remove if exists and debug is not set
-    if [ -d $LISTDIR/iso-pkg-lists-$BRANCH ] && [ $DEBUG = "nodebug" ]; then
-		$SUDO rm -rf $LISTDIR/iso-pkg-lists-$BRANCH
-	fi
 
-	### possible fix for timed out GIT pulls
-	if [ ! -d $LISTDIR/iso-pkg-lists-$BRANCH ]; then
-		# download iso packages lists from www.abf.io
-		PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-$BRANCH.tar.gz"
-		wget --tries=10 -O iso-pkg-lists-$BRANCH.tar.gz --content-disposition $PKGLIST
-		tar -xf iso-pkg-lists-$BRANCH.tar.gz
-		# Why not retain the unique list name it will help when people want their own spins ?
-		$SUDO rm -f iso-pkg-lists-$BRANCH.tar.gz
-	fi
-
-	# bail out if download was unsuccesfull
-	if [ ! -d $LISTDIR/iso-pkg-lists-$BRANCH ]; then
-		echo "Could not find $LISTDIR/iso-pkg-lists-$BRANCH. Exiting."
-		error
+    # update iso-pkg-lists from ABF if missing
+    if [ ! -d $LISTDIR/iso-pkg-lists-$BRANCH ]; then
+	echo "Could not find $LISTDIR/iso-pkg-lists-$BRANCH. Downloading from ABF."
+	# download iso packages lists from www.abf.io
+	PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-$BRANCH.tar.gz"
+	$SUDO wget --tries=10 -O iso-pkg-lists-$BRANCH.tar.gz --content-disposition $PKGLIST
+	$SUDO tar -xf iso-pkg-lists-$BRANCH.tar.gz
+	# Why not retain the unique list name it will help when people want their own spins ?
+	$SUDO rm -f iso-pkg-lists-$BRANCH.tar.gz
     fi
 
     # export file list
-	FILELISTS="$LISTDIR/iso-pkg-lists-$BRANCH/$DIST-$TYPE.lst"
+    FILELISTS="$LISTDIR/iso-pkg-lists-$BRANCH/$DIST-$TYPE.lst"
 }
 
 showInfo() {
