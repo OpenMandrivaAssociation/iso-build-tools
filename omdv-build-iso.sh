@@ -21,27 +21,81 @@
 #
 
 # This tools is specified to build OpenMandriva Lx distribution ISO
-# Usage:
-# omdv-build-iso.sh EXTARCH TREE VERSION RELEASE_ID TYPE DISPLAYMANAGER
-# omdv-build-iso.sh x86_64 cooker 2015.0 alpha hawaii sddm
-#
 
+usage_help() {
+    echo ""
+    echo "Please run script with arguments."
+    echo ""
+    echo "usage $0 [options]"
+    echo ""
+    echo " general options:"
+    echo " --arch= Architecture of packages: x86_64"
+    echo " --tree= Branch of software repository: cooker"
+    echo " --versio=n Version for software repository: 2015.0"
+    echo " --release_id= Release identifer: alpha"
+    echo " --type= User environment type on ISO: KDE4"
+    echo " --displaymanager= Display Manager used in desktop environemt: KDM"
+    echo " --debug Enable debug output"
+    echo ""
+    echo "Exiting."
+    exit 1
+}
+
+# use only allowed arguments
+if [ $# -ge 1 ]; then
+    for k in "$@"; do
+	case "$k" in
+		--arch=*)
+        	    EXTARCH=${k#*=}
+        	    shift
+        	    ;;
+    		--tree=*)
+        	    TREE=${k#*=}
+        	    shift
+        	    ;;
+		--version=*)
+        	    VERSION=${k#*=}
+        	    if [[ "${VERSION,,}" == "cooker" ]]
+        	    then
+        		VERSION="`date +%Y.0`"
+        	    fi
+        	    shift
+        	    ;;
+    		--release_id=*)
+        	    RELEASE_ID=${k#*=}
+        	    shift
+        	    ;;
+		--type=*)
+        	    TYPE=${k#*=}
+        	    shift
+        	    ;;
+    		--displaymanager=*)
+        	    DISPLAYMANAGER=${k#*=}
+        	    shift
+        	    ;;
+    		--debug)
+        	    DEBUG=debug
+        	    shift
+        	    ;;
+        	--help)
+        	    echo "HELP"
+        	    usage_help
+        	    ;;
+    		*)
+		    usage_help
+        	    ;;
+	    esac
+	shift
+    done
+else
+    usage_help
+fi
+
+# run only when root
 if [ "`id -u`" != "0" ]; then
     # We need to be root for umount and friends to work...
     exec sudo $0 "$@"
     echo Run me as root.
-    exit 1
-fi
-
-# check for arguments
-if [[ $@ ]]; then
-    true
-else
-    echo "Please run script with arguments."
-    echo "$0 ARCH TREE VERSION RELEASE_ID TYPE DISPLAYMANAGER"
-    echo "For example:"
-    echo "./$0 x86_64 cooker 2015.0 alpha hawaii sddm"
-    echo "Exiting."
     exit 1
 fi
 
@@ -55,35 +109,30 @@ fi
 
 # default definitions
 DIST=omdv
-EXTARCH=`uname -m`
-TREE=cooker
-VERSION="`date +%Y.0`"
-RELEASE_ID=alpha
-TYPE=kde4
-DISPLAYMANAGER="kdm"
-DEBUG="nodebug"
+[ -z "$EXTARCH" ] && EXTARCH=`uname -m`
+[ -z "${TYPE}" ] && TREE=cooker
+[ -z "${VERSION}" ] && VERSION="`date +%Y.0`"
+[ -z "${RELEASE_ID}" ] && RELEASE_ID=alpha
+[ -z "${TYPE}" ] && TYPE=kde4
+[ -z "${DISPLAYMANAGER}" ] && DISPLAYMANAGER="kdm"
+[ -z "${DEBUG}" ] && DEBUG="nodebug"
+
 # always build free ISO
 FREE=1
 
 SUDO=sudo
 [ "`id -u`" = "0" ] && SUDO=""
 LOGDIR="."
+# set up main chroot
 ROOTNAME="`mktemp -d /tmp/liverootXXXXXX`"
 [ -z "$ROOTNAME" ] && ROOTNAME=/tmp/liveroot.$$
 CHROOTNAME="$ROOTNAME"/BASE
 ISOROOTNAME="$ROOTNAME"/ISO
 ISO_DATE="`echo $(date -u +%Y-%m-%d-%H-%M-%S-00) | sed -e s/-//g`"
-
-[ -n "$1" ] && EXTARCH="$1"
-[ -n "$2" ] && TREE="$2"
-[ -n "$3" ] && VERSION="$3"
-[ -n "$4" ] && RELEASE_ID="$4"
-[ -n "$5" ] && TYPE="$5"
-[ -n "$6" ] && DISPLAYMANAGER="$6"
-[ -n "$7" ] && DEBUG="$7"
-
+# in case when i386 is passed, fall back to i586
 [ "$EXTARCH" = "i386" ] && EXTARCH=i586
 
+# ISO name logic
 if [ "${RELEASE_ID,,}" == "final" ]; then
     PRODUCT_ID="OpenMandrivaLx.$VERSION-$TYPE"
 else
@@ -177,8 +226,9 @@ showInfo() {
 	echo "Type is $TYPE"
 	echo "Display Manager is $DISPLAYMANAGER"
 	echo "ISO label is $LABEL"
-	echo "ISO label is $BUILD_ID"
+	echo "Build ID is $BUILD_ID"
 	echo $'###\n'
+	exit
 }
 
 # Usage: parsePkgList xyz.lst
