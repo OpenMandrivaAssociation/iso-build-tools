@@ -226,47 +226,47 @@ createChroot() {
 	else
 		REPOPATH="http://abf-downloads.abf.io/$TREE$VERSION/repository/$EXTARCH/"
 	fi
-	echo "Creating chroot $2"
+	echo "Creating chroot $CHROOTNAME"
 	# Make sure /proc, /sys and friends are mounted so %post scripts can use them
-	$SUDO mkdir -p "$2"/proc "$2"/sys "$2"/dev "$2"/dev/pts
+	$SUDO mkdir -p "$CHROOTNAME"/proc "$CHROOTNAME"/sys "$CHROOTNAME"/dev "$CHROOTNAME"/dev/pts
 
 	if [ "$FREE" = "0" ]; then
-		$SUDO urpmi.addmedia --urpmi-root "$2" --distrib $REPOPATH
+		$SUDO urpmi.addmedia --urpmi-root "$CHROOTNAME" --distrib $REPOPATH
 	else
-		$SUDO urpmi.addmedia --urpmi-root "$2" "Main" $REPOPATH/main/release
-		$SUDO urpmi.addmedia --urpmi-root "$2" "Contrib" $REPOPATH/contrib/release
+		$SUDO urpmi.addmedia --urpmi-root "$CHROOTNAME" "Main" $REPOPATH/main/release
+		$SUDO urpmi.addmedia --urpmi-root "$CHROOTNAME" "Contrib" $REPOPATH/contrib/release
 		# this one is needed to grab firmwares
-		$SUDO urpmi.addmedia --urpmi-root "$2" "Non-free" $REPOPATH/non-free/release
+		$SUDO urpmi.addmedia --urpmi-root "$CHROOTNAME" "Non-free" $REPOPATH/non-free/release
 
 		if [ "${TREE,,}" != "cooker" ]; then
-			$SUDO urpmi.addmedia --urpmi-root "$2" "MainUpdates" $REPOPATH/main/updates
-			$SUDO urpmi.addmedia --urpmi-root "$2" "ContribUpdates" $REPOPATH/contrib/updates
+			$SUDO urpmi.addmedia --urpmi-root "$CHROOTNAME" "MainUpdates" $REPOPATH/main/updates
+			$SUDO urpmi.addmedia --urpmi-root "$CHROOTNAME" "ContribUpdates" $REPOPATH/contrib/updates
 			# this one is needed to grab firmwares
-			$SUDO urpmi.addmedia --urpmi-root "$2" "Non-freeUpdates" $REPOPATH/non-free/updates
+			$SUDO urpmi.addmedia --urpmi-root "$CHROOTNAME" "Non-freeUpdates" $REPOPATH/non-free/updates
 		fi
 	fi
 
 	# update medias
-	$SUDO urpmi.update -a -c -ff --wget --urpmi-root "$2" main
+	$SUDO urpmi.update -a -c -ff --wget --urpmi-root "$CHROOTNAME" main
 	if [ "${TREE,,}" != "cooker" ]; then
-		$SUDO urpmi.update -a -c -ff --wget --urpmi-root "$2" updates
+		$SUDO urpmi.update -a -c -ff --wget --urpmi-root "$CHROOTNAME" updates
 	fi
 
-	$SUDO mount --bind /proc "$2"/proc
-	$SUDO mount --bind /sys "$2"/sys
-	$SUDO mount --bind /dev "$2"/dev
-	$SUDO mount --bind /dev/pts "$2"/dev/pts
+	$SUDO mount --bind /proc "$CHROOTNAME"/proc
+	$SUDO mount --bind /sys "$CHROOTNAME"/sys
+	$SUDO mount --bind /dev "$CHROOTNAME"/dev
+	$SUDO mount --bind /dev/pts "$CHROOTNAME"/dev/pts
 
 	# start rpm packages installation
-	parsePkgList "$1" | xargs $SUDO urpmi --urpmi-root "$2" --download-all --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto
+	parsePkgList "$FILELISTS" | xargs $SUDO urpmi --urpmi-root "$CHROOTNAME" --download-all --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto
 
-	if [ ! -e "$2"/usr/lib/syslinux/isolinux.bin ]; then
+	if [ ! -e "$CHROOTNAME"/usr/lib/syslinux/isolinux.bin ]; then
 		echo "Syslinux is missing in chroot. Installing it."
-		$SUDO urpmi --urpmi-root "$2" --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto syslinux
+		$SUDO urpmi --urpmi-root "$CHROOTNAME" --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto syslinux
 	fi
-	$SUDO urpmi --urpmi-root "$2" --no-suggests --no-verify-rpm --fastunsafe --ignoresize --nolock --auto dracut
+
 	# check CHROOT
-	if [ ! -d  "$2"/lib/modules ]; then
+	if [ ! -d  "$CHROOTNAME"/lib/modules ]; then
 		echo "Broken chroot installation. Exiting"
 		error
 	else
@@ -274,7 +274,7 @@ createChroot() {
 	fi
 
 	# this will be needed in future
-	pushd "$2"/lib/modules
+	pushd "$CHROOTNAME"/lib/modules
 	    KERNEL_ISO=`ls -d --sort=time [0-9]* |head -n1 | sed -e 's,/$,,'`
 	    export KERNEL_ISO
 	popd
@@ -284,7 +284,7 @@ createChroot() {
 createInitrd() {
 
 	# check if dracut is installed
-	if [ ! -f "$1"/usr/sbin/dracut ]; then
+	if [ ! -f "$CHROOTNAME"/usr/sbin/dracut ]; then
 		echo "dracut is not insalled inside chroot. Exiting."
 		error
 	fi
@@ -295,9 +295,9 @@ createInitrd() {
 		echo "Missing $OURDIR/extraconfig/etc/dracut.conf.d/60-dracut-isobuild.conf . Exiting."
 		error
 	fi
-	$SUDO cp -rfT $OURDIR/extraconfig/etc/dracut.conf.d/60-dracut-isobuild.conf "$1"/etc/dracut.conf.d/60-dracut-isobuild.conf
+	$SUDO cp -rfT $OURDIR/extraconfig/etc/dracut.conf.d/60-dracut-isobuild.conf "$CHROOTNAME"/etc/dracut.conf.d/60-dracut-isobuild.conf
 
-	if [ ! -d "$1"/usr/lib/dracut/modules.d/90liveiso ]; then
+	if [ ! -d "$CHROOTNAME"/usr/lib/dracut/modules.d/90liveiso ]; then
 	    echo "Dracut is missing 90liveiso module. Installing it."
 
 	    if [ ! -d $OURDIR/dracut/90liveiso ]; then
@@ -305,36 +305,36 @@ createInitrd() {
 		error
 	    fi
 
-	    $SUDO cp -a -f $OURDIR/dracut/90liveiso "$1"/usr/lib/dracut/modules.d/
-	    $SUDO chmod 0755 "$1"/usr/lib/dracut/modules.d/90liveiso
-	    $SUDO chmod 0755 "$1"/usr/lib/dracut/modules.d/90liveiso/*.sh
+	    $SUDO cp -a -f $OURDIR/dracut/90liveiso "$CHROOTNAME"/usr/lib/dracut/modules.d/
+	    $SUDO chmod 0755 "$CHROOTNAME"/usr/lib/dracut/modules.d/90liveiso
+	    $SUDO chmod 0755 "$CHROOTNAME"/usr/lib/dracut/modules.d/90liveiso/*.sh
 	fi
 
 	# fugly hack to get /dev/disk/by-label
-	$SUDO sed -i -e '/KERNEL!="sr\*\", IMPORT{builtin}="blkid"/s/sr/none/g' -e '/TEST=="whole_disk", GOTO="persistent_storage_end"/s/TEST/# TEST/g' "$1"/lib/udev/rules.d/60-persistent-storage.rules
+	$SUDO sed -i -e '/KERNEL!="sr\*\", IMPORT{builtin}="blkid"/s/sr/none/g' -e '/TEST=="whole_disk", GOTO="persistent_storage_end"/s/TEST/# TEST/g' "$CHROOTNAME"/lib/udev/rules.d/60-persistent-storage.rules
 
-	if [ -f "$1"/boot/liveinitrd.img ]; then
-	    $SUDO rm -rf "$1"/boot/liveinitrd.img
+	if [ -f "$CHROOTNAME"/boot/liveinitrd.img ]; then
+	    $SUDO rm -rf "$CHROOTNAME"/boot/liveinitrd.img
 	fi
 
-	$SUDO chroot "$1" /usr/sbin/dracut -N -f --no-early-microcode --nofscks --noprelink  /boot/liveinitrd.img --conf /etc/dracut.conf.d/60-dracut-isobuild.conf $KERNEL_ISO
+	$SUDO chroot "$CHROOTNAME" /usr/sbin/dracut -N -f --no-early-microcode --nofscks --noprelink  /boot/liveinitrd.img --conf /etc/dracut.conf.d/60-dracut-isobuild.conf $KERNEL_ISO
 
-	if [ ! -f "$1"/boot/liveinitrd.img ]; then
-	    echo "File "$1"/boot/liveinitrd.img does not exist. Exiting."
+	if [ ! -f "$CHROOTNAME"/boot/liveinitrd.img ]; then
+	    echo "File "$CHROOTNAME"/boot/liveinitrd.img does not exist. Exiting."
 	    error
 	fi
 
 	echo "Building initrd-$KERNEL_ISO inside chroot"
 	# remove old initrd
-	$SUDO rm -rf "$1"/boot/initrd-$KERNEL_ISO.img
-	$SUDO rm -rf "$1"/boot/initrd0.img
+	$SUDO rm -rf "$CHROOTNAME"/boot/initrd-$KERNEL_ISO.img
+	$SUDO rm -rf "$CHROOTNAME"/boot/initrd0.img
 
 	# remove config for liveinitrd
-	$SUDO rm -rf "$1"/etc/dracut.conf.d/60-dracut-isobuild.conf
-	$SUDO rm -rf "$1"/usr/lib/dracut/modules.d/90liveiso
+	$SUDO rm -rf "$CHROOTNAME"/etc/dracut.conf.d/60-dracut-isobuild.conf
+	$SUDO rm -rf "$CHROOTNAME"/usr/lib/dracut/modules.d/90liveiso
 
-	$SUDO chroot "$1" /usr/sbin/dracut -N -f /boot/initrd-$KERNEL_ISO.img $KERNEL_ISO
-	$SUDO ln -s /boot/initrd-$KERNEL_ISO.img "$1"/boot/initrd0.img
+	$SUDO chroot "$CHROOTNAME" /usr/sbin/dracut -N -f /boot/initrd-$KERNEL_ISO.img $KERNEL_ISO
+	$SUDO ln -s /boot/initrd-$KERNEL_ISO.img "$CHROOTNAME"/boot/initrd0.img
 
 }
 
@@ -507,19 +507,19 @@ setupBootloader() {
 setupISOenv() {
 
 	# clear root password
-	$SUDO chroot "$1" /usr/bin/passwd -f -d root
+	$SUDO chroot "$CHROOTNAME" /usr/bin/passwd -f -d root
 
 	# set up default timezone
 	echo "Setting default timezone"
-	$SUDO ln -s /usr/share/zoneinfo/Universal "$1"/etc/localtime
+	$SUDO ln -s /usr/share/zoneinfo/Universal "$CHROOTNAME"/etc/localtime
 
 	# try harder with systemd-nspawn
 	# version 215 and never has then --share-system option
 	if (( `rpm -qa systemd --queryformat '%{VERSION} \n'` >= "215" )); then
-	    $SUDO systemd-nspawn --share-system -D "$1" /usr/bin/timedatectl set-timezone UTC
+	    $SUDO systemd-nspawn --share-system -D "$CHROOTNAME" /usr/bin/timedatectl set-timezone UTC
 	    # set default locale
 	    echo "Setting default localization"
-	    $SUDO systemd-nspawn --share-system -D "$1" /usr/bin/localectl set-locale LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8:en_US:en
+	    $SUDO systemd-nspawn --share-system -D "$CHROOTNAME" /usr/bin/localectl set-locale LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8:en_US:en
 	else
 	    echo "systemd-nspawn does not exists."
 	fi
@@ -528,26 +528,26 @@ setupISOenv() {
 	echo "Creating /etc/minsysreqs"
 
 	if [ "$TYPE" = "minimal" ]; then
-	    echo "ram = 512" >> "$1"/etc/minsysreqs
-	    echo "hdd = 5" >> "$1"/etc/minsysreqs
+	    echo "ram = 512" >> "$CHROOTNAME"/etc/minsysreqs
+	    echo "hdd = 5" >> "$CHROOTNAME"/etc/minsysreqs
 	elif [ "$EXTARCH" = "x86_64" ]; then
-		echo "ram = 1536" >> "$1"/etc/minsysreqs
-		echo "hdd = 10" >> "$1"/etc/minsysreqs
+		echo "ram = 1536" >> "$CHROOTNAME"/etc/minsysreqs
+		echo "hdd = 10" >> "$CHROOTNAME"/etc/minsysreqs
 	else
-	    echo "ram = 1024" >> "$1"/etc/minsysreqs
-	    echo "hdd = 10" >> "$1"/etc/minsysreqs
+	    echo "ram = 1024" >> "$CHROOTNAME"/etc/minsysreqs
+	    echo "hdd = 10" >> "$CHROOTNAME"/etc/minsysreqs
 	fi
 
 	# count imagesize and put in in /etc/minsysreqs
-	$SUDO echo "imagesize = $(du -a -x -b -P "$1" | tail -1 | awk '{print $1}')" >> "$1"/etc/minsysreqs
+	$SUDO echo "imagesize = $(du -a -x -b -P "$1" | tail -1 | awk '{print $1}')" >> "$CHROOTNAME"/etc/minsysreqs
 
 	# set up displaymanager
 	if [ "$TYPE" != "minimal" ]; then
-		$SUDO chroot "$1" systemctl enable $DISPLAYMANAGER.service 2> /dev/null || :
+		$SUDO chroot "$CHROOTNAME" systemctl enable $DISPLAYMANAGER.service 2> /dev/null || :
 
 		# Set reasonable defaults
-		if ! [ -f "$1"/etc/sysconfig/desktop ]; then
-		cat >"$1"/etc/sysconfig/desktop <<'EOF'
+		if ! [ -f "$CHROOTNAME"/etc/sysconfig/desktop ]; then
+		cat >"$CHROOTNAME"/etc/sysconfig/desktop <<'EOF'
 DISPLAYMANAGER="$DISPLAYMANAGER"
 DESKTOP="$TYPE"
 EOF
@@ -556,34 +556,34 @@ fi
 	fi
 
 	# copy some extra config files
-	$SUDO cp -rfT $OURDIR/extraconfig/etc "$1"/etc/
-	$SUDO cp -rfT $OURDIR/extraconfig/usr "$1"/usr/
+	$SUDO cp -rfT $OURDIR/extraconfig/etc "$CHROOTNAME"/etc/
+	$SUDO cp -rfT $OURDIR/extraconfig/usr "$CHROOTNAME"/usr/
 
 	# set up live user
-	$SUDO chroot "$1" /usr/sbin/adduser live
-	$SUDO chroot "$1" /usr/bin/passwd -d live
-	$SUDO chroot "$1" /bin/mkdir -p /home/live
-	$SUDO chroot "$1" /bin/cp -rfT /etc/skel /home/live/
-	$SUDO chroot "$1" /bin/chown -R live:live /home/live
-	$SUDO chroot "$1" /bin/mkdir /home/live/Desktop
-	$SUDO chroot "$1" /bin/chown -R live:live /home/live/Desktop
-	$SUDO cp -rfT $OURDIR/extraconfig/etc/skel "$1"/home/live/
-	$SUDO chroot "$1" chown -R 500:500 /home/live/
-	$SUDO chroot "$1" chmod -R 0777 /home/live/.local
-	$SUDO mkdir -p "$1"/home/live/.cache
-	$SUDO chroot "$1" chown 500:500 /home/live/.cache
+	$SUDO chroot "$CHROOTNAME" /usr/sbin/adduser live
+	$SUDO chroot "$CHROOTNAME" /usr/bin/passwd -d live
+	$SUDO chroot "$CHROOTNAME" /bin/mkdir -p /home/live
+	$SUDO chroot "$CHROOTNAME" /bin/cp -rfT /etc/skel /home/live/
+	$SUDO chroot "$CHROOTNAME" /bin/chown -R live:live /home/live
+	$SUDO chroot "$CHROOTNAME" /bin/mkdir /home/live/Desktop
+	$SUDO chroot "$CHROOTNAME" /bin/chown -R live:live /home/live/Desktop
+	$SUDO cp -rfT $OURDIR/extraconfig/etc/skel "$CHROOTNAME"/home/live/
+	$SUDO chroot "$CHROOTNAME" chown -R 500:500 /home/live/
+	$SUDO chroot "$CHROOTNAME" chmod -R 0777 /home/live/.local
+	$SUDO mkdir -p "$CHROOTNAME"/home/live/.cache
+	$SUDO chroot "$CHROOTNAME" chown 500:500 /home/live/.cache
 
 	# KDE4 related settings
 	if [ "$TYPE" = "kde4" ]; then
-		$SUDO mkdir -p "$1"/home/live/.kde4/env
-		echo "export KDEVARTMP=/tmp" > "$1"/home/live/.kde4/env/00-live.sh
-		echo "export KDETMP=/tmp" >> "$1"/home/live/.kde4/env/00-live.sh
-		$SUDO chroot "$1" chmod -R 0777 /home/live/.kde4
+		$SUDO mkdir -p "$CHROOTNAME"/home/live/.kde4/env
+		echo "export KDEVARTMP=/tmp" > "$CHROOTNAME"/home/live/.kde4/env/00-live.sh
+		echo "export KDETMP=/tmp" >> "$CHROOTNAME"/home/live/.kde4/env/00-live.sh
+		$SUDO chroot "$CHROOTNAME" chmod -R 0777 /home/live/.kde4
 	else
-    	$SUDO rm -rf "$1"/home/live/.kde4
+    	$SUDO rm -rf "$CHROOTNAME"/home/live/.kde4
     fi
 
-	$SUDO pushd "$1"/etc/sysconfig/network-scripts
+	$SUDO pushd "$CHROOTNAME"/etc/sysconfig/network-scripts
 	for iface in eth0 wlan0; do
 	cat > ifcfg-$iface << EOF
 DEVICE=$iface
@@ -601,17 +601,17 @@ EOF
 
 	for i in "${SERVICES_ENABLE[@]}"; do
 	    if [[ $i  =~ ^.*socket$|^.*path$|^.*target$|^.*timer$ ]]; then
-		if [ -e "$1"/lib/systemd/system/$i ]; then
+		if [ -e "$CHROOTNAME"/lib/systemd/system/$i ]; then
 		    echo "Enabling $i"
-		    chroot "$1" systemctl enable $i
+		    chroot "$CHROOTNAME" systemctl enable $i
 		    #2> /dev/null || :
 		else
 		    echo "Special service $i does not exist. Skipping."
 		fi
 	    elif [[ ! $i  =~ ^.*socket$|^.*path$|^.*target$|^.*timer$ ]]; then
-		if [ -e "$1"/lib/systemd/system/$i.service ]; then
+		if [ -e "$CHROOTNAME"/lib/systemd/system/$i.service ]; then
 		    echo "Enabling $i.service"
-		    chroot "$1" systemctl enable $i.service 2> /dev/null || :
+		    chroot "$CHROOTNAME" systemctl enable $i.service 2> /dev/null || :
 		else
 		    echo "Service $i does not exist. Skipping."
 		fi
@@ -623,16 +623,16 @@ EOF
 
 	for i in "${SERVICES_DISABLE[@]}"; do
 	    if [[ $i  =~ ^.*socket$|^.*path$|^.*target$|^.*timer$ ]]; then
-		if [ -e "$1"/lib/systemd/system/$i ]; then
+		if [ -e "$CHROOTNAME"/lib/systemd/system/$i ]; then
 		    echo "Disabling $i"
-		    chroot "$1" systemctl disable $i 2> /dev/null || :
+		    chroot "$CHROOTNAME" systemctl disable $i 2> /dev/null || :
 		else
 		    echo "Special service $i does not exist. Skipping."
 		fi
 	    elif [[ ! $i  =~ ^.*socket$|^.*path$|^.*target$|^.*timer$ ]]; then
-		if [ -e "$1"/lib/systemd/system/$i.service ]; then
+		if [ -e "$CHROOTNAME"/lib/systemd/system/$i.service ]; then
 		    echo "Disabling $i.service"
-		    chroot "$1" systemctl disable $i.service 2> /dev/null || :
+		    chroot "$CHROOTNAME" systemctl disable $i.service 2> /dev/null || :
 		else
 		    echo "Service $i does not exist. Skipping."
 		fi
@@ -644,19 +644,19 @@ EOF
 
 	# add urpmi medias inside chroot
 	echo "Removing old urpmi repositories."
-	$SUDO urpmi.removemedia -a --urpmi-root "$1"
+	$SUDO urpmi.removemedia -a --urpmi-root "$CHROOTNAME"
 
 	echo "Adding new urpmi repositories."
 	if [ "${TREE,,}" = "cooker" ]; then
 		MIRRORLIST="http://downloads.openmandriva.org/mirrors/cooker.$EXTARCH.list"
 
-		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Main' 'media/main/release'
-		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Contrib' 'media/contrib/release'
+		$SUDO urpmi.addmedia --urpmi-root "$CHROOTNAME" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Main' 'media/main/release'
+		$SUDO urpmi.addmedia --urpmi-root "$CHROOTNAME" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Contrib' 'media/contrib/release'
 		# this one is needed to grab firmwares
-		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Non-free' 'media/non-free/release'
+		$SUDO urpmi.addmedia --urpmi-root "$CHROOTNAME" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Non-free' 'media/non-free/release'
 	else
 		MIRRORLIST="http://downloads.openmandriva.org/mirrors/$TREE.$VERSION.$EXTARCH.list"
-		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --distrib --mirrorlist $MIRRORLIST
+		$SUDO urpmi.addmedia --urpmi-root "$CHROOTNAME" --wget --no-md5sum --distrib --mirrorlist $MIRRORLIST
 	fi
 
 
@@ -666,10 +666,10 @@ EOF
 
 		# use previous MIRRORLIST declaration but with i586 arch in link name
 		MIRRORLIST="`echo $MIRRORLIST | sed -e "s/x86_64/i586/g"`"
-		$SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Main32' 'media/main/release'
+		$SUDO urpmi.addmedia --urpmi-root "$CHROOTNAME" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Main32' 'media/main/release'
 
 		if [ "${TREE,,}" != "cooker" ]; then
-		    $SUDO urpmi.addmedia --urpmi-root "$1" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Main32Updates' 'media/main/updates'
+		    $SUDO urpmi.addmedia --urpmi-root "$CHROOTNAME" --wget --no-md5sum --mirrorlist "$MIRRORLIST" 'Main32Updates' 'media/main/updates'
 
 		    if [[ $? != 0 ]]; then
 			echo "Adding urpmi 32-bit media FAILED. Exiting";
@@ -684,37 +684,37 @@ EOF
 
 	#update urpmi medias
 	echo "Updating urpmi repositories"
-	$SUDO urpmi.update --urpmi-root "$1" -a -ff --wget --force-key
+	$SUDO urpmi.update --urpmi-root "$CHROOTNAME" -a -ff --wget --force-key
 
 	# get back to real /etc/resolv.conf
-	$SUDO rm -f "$1"/etc/resolv.conf
+	$SUDO rm -f "$CHROOTNAME"/etc/resolv.conf
 	if [ "`cat /etc/release | grep -o 2014.0`" \< "2015.0" ]; then
-	    $SUDO ln -sf /run/resolvconf/resolv.conf "$1"/etc/resolv.conf
+	    $SUDO ln -sf /run/resolvconf/resolv.conf "$CHROOTNAME"/etc/resolv.conf
 	else
-	    $SUDO ln -sf /run/systemd/resolve/resolv.conf "$1"/etc/resolv.conf
+	    $SUDO ln -sf /run/systemd/resolve/resolv.conf "$CHROOTNAME"/etc/resolv.conf
 	fi
 
 	# ldetect stuff
-	$SUDO chroot "$1" /usr/sbin/update-ldetect-lst
+	$SUDO chroot "$CHROOTNAME" /usr/sbin/update-ldetect-lst
 
 	#remove rpm db files to save some space
-	$SUDO chroot "$1" rm -f /var/lib/rpm/__db.*
+	$SUDO chroot "$CHROOTNAME" rm -f /var/lib/rpm/__db.*
 }
 
 createSquash() {
     echo "Starting squashfs image build."
 
-    if [ -f "$2"/LiveOS/squashfs.img ]; then
-	$SUDO rm -rf "$2"/LiveOS/squashfs.img
+    if [ -f "$ISOROOTNAME"/LiveOS/squashfs.img ]; then
+	$SUDO rm -rf "$ISOROOTNAME"/LiveOS/squashfs.img
     fi
 
-    mkdir -p "$2"/LiveOS
+    mkdir -p "$ISOROOTNAME"/LiveOS
     # unmout all stuff inside CHROOT to build squashfs image
-    umountAll "$1"
+    umountAll "$CHROOTNAME"
 
-    $SUDO mksquashfs "$1" "$2"/LiveOS/squashfs.img -comp xz -no-progress -no-recovery -b 4096
+    $SUDO mksquashfs "$CHROOTNAME" "$ISOROOTNAME"/LiveOS/squashfs.img -comp xz -no-progress -no-recovery -b 4096
 
-    if [ ! -f  "$2"/LiveOS/squashfs.img ]; then
+    if [ ! -f  "$ISOROOTNAME"/LiveOS/squashfs.img ]; then
 	echo "Failed to create squashfs. Exiting."
 	error
     fi
@@ -726,6 +726,12 @@ createSquash() {
 buildIso() {
 	echo "Starting ISO build."
 
+	if [ "$ABF" = "1" ]; then
+	    ISOFILE="$OURDIR/$PRODUCT_ID.$EXTARCH.iso"
+	else
+	    ISOFILE="/var/tmp/$PRODUCT_ID.$EXTARCH.iso"
+	fi
+
 	if [ "$UEFI" = "1" ]; then
 		$SUDO xorriso -as mkisofs -R -r -J -joliet-long -l -cache-inodes \
 		--modification-date=${ISO_DATE} \
@@ -733,10 +739,10 @@ buildIso() {
 		$XORRISO_OPTIONS \
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		-eltorito-alt-boot -e EFI/BOOT/grub.efi -no-emul-boot \
-		-append_partition 2 0x01 "$2"/EFI/BOOT/grub.efi \
+		-append_partition 2 0x01 "$ISOROOTNAME"/EFI/BOOT/grub.efi \
 		-publisher "OpenMandriva Association" \
 		-preparer "OpenMandriva Association" \
-		-volid "$LABEL" -o "$1" "$2"
+		-volid "$LABEL" -o "$ISOFILE" "$ISOROOTNAME"
 	else
 		$SUDO xorriso -as mkisofs -R -r -J -joliet-long -l -cache-inodes \
 		--modification-date=${ISO_DATE} \
@@ -745,10 +751,10 @@ buildIso() {
 		-no-emul-boot -boot-load-size 4 -boot-info-table \
 		-publisher "OpenMandriva Association" \
 		-preparer "OpenMandriva Association" \
-		-volid "$LABEL" -o "$1" "$2"
+		-volid "$LABEL" -o "$ISOFILE" "$ISOROOTNAME"
 	fi
 
-	if [ ! -f "$1" ]; then
+	if [ ! -f "$ISOOUTPUTDIR" ]; then
 	    echo "Failed build iso image. Exiting"
 	    error
 	fi
@@ -757,11 +763,13 @@ buildIso() {
 }
 
 postBuild() {
-    if [ ! -f $OURDIR/$PRODUCT_ID.$EXTARCH.iso ]; then
+    if [ ! -f $ISOFILE ]; then
 	umountAll "$CHROOTNAME"
 	error
     fi
 
+    if [ "$ABF" = "1" ]; then
+    	# We're running in ABF -- adjust to its directory structure
 	# count checksums
 	echo "Genrating ISO checksums."
 	pushd $OURDIR
@@ -769,8 +777,6 @@ postBuild() {
 		sha1sum $PRODUCT_ID.$EXTARCH.iso > $PRODUCT_ID.$EXTARCH.iso.sha1sum
 	popd
 
-    if [ "$ABF" = "1" ]; then
-	# We're running in ABF -- adjust to its directory structure
 	mkdir -p /home/vagrant/results /home/vagrant/archives
 	mv $OURDIR/*.iso* /home/vagrant/results/
     fi
@@ -785,12 +791,12 @@ postBuild() {
 showInfo
 updateSystem
 getPkgList
-createChroot "$FILELISTS" "$CHROOTNAME"
-createInitrd "$CHROOTNAME"
+createChroot
+createInitrd
 setupBootloader
-setupISOenv "$CHROOTNAME"
-createSquash "$CHROOTNAME" "$ISOROOTNAME"
-buildIso $OURDIR/$PRODUCT_ID.$EXTARCH.iso "$ISOROOTNAME"
+setupISOenv
+createSquash
+buildIso
 postBuild
 
 #END
