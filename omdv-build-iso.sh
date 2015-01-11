@@ -78,7 +78,6 @@ if [ $# -ge 1 ]; then
         	    shift
         	    ;;
         	--help)
-        	    echo "HELP"
         	    usage_help
         	    ;;
     		*)
