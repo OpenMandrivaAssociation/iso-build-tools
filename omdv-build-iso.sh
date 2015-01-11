@@ -424,7 +424,7 @@ setupSyslinux() {
 	echo "Create syslinux menu"
 	# kernel/initrd filenames referenced below are the ISO9660 names.
 	# syslinux doesn't support Rock Ridge.
-	$SUDO cat >"$2"/boot/syslinux/isolinux.cfg <<EOF
+	$SUDO cat >"$2"/boot/syslinux/syslinux.cfg <<EOF
 UI vesamenu.c32
 DEFAULT boot
 PROMPT 0
