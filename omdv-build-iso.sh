@@ -125,15 +125,15 @@ trap error ERR
 updateSystem() {
     #Force update of critical packages
 	if [ "$ABF" = "1" ]; then
-		echo "We are inside ABF (www.abf.io)"
-		urpmq --list-url
-		urpmi.update -ff updates
+	    echo "We are inside ABF (www.abf.io)"
+	    urpmq --list-url
+	    urpmi.update -ff updates
     # inside ABF, lxc-container which is used to run this script is based
     # on Rosa2012 which does not have cdrtools
-		urpmi --no-verify-rpm perl-URPM grub2 xorriso syslinux squashfs-tools 
+	    urpmi --no-verify-rpm perl-URPM grub2 xorriso syslinux squashfs-tools 
 	else
-		echo "Building in user custom environment"
-		urpmi --no-verify-rpm perl-URPM grub2 xorriso syslinux grub2 squashfs-tools
+	    echo "Building in user custom environment"
+	    urpmi --no-verify-rpm perl-URPM grub2 xorriso syslinux grub2 squashfs-tools
 	fi
 }
 
