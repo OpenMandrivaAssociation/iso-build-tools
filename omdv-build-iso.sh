@@ -754,7 +754,7 @@ buildIso() {
 		-volid "$LABEL" -o "$ISOFILE" "$ISOROOTNAME"
 	fi
 
-	if [ ! -f "$ISOOUTPUTDIR" ]; then
+	if [ ! -f "$ISOFILE" ]; then
 	    echo "Failed build iso image. Exiting"
 	    error
 	fi
