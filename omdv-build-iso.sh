@@ -159,6 +159,11 @@ getPkgList() {
 
     # export file list
     FILELISTS="$OURDIR/iso-pkg-lists-$BRANCH/$DIST-$TYPE.lst"
+
+    if [ ! -e "$FILELISTS" ]; then
+	echo "$FILELISTS does not exists. Exiting"
+	error
+    fi
 }
 
 showInfo() {
@@ -180,10 +185,7 @@ showInfo() {
 # mentioned by other package list files being %include-d)
 parsePkgList() {
 	LINE=0
-	if [ ! -e "$1" ]; then
-	    echo "$1 does not exists. Exiting"
-	    error
-	fi
+
 
 	cat "$1" | while read r; do
 		LINE=$((LINE+1))
@@ -213,6 +215,7 @@ createChroot() {
 	else
 		REPOPATH="http://abf-downloads.abf.io/$TREE$VERSION/repository/$EXTARCH/"
 	fi
+
 	echo "Creating chroot $CHROOTNAME"
 	# Make sure /proc, /sys and friends are mounted so %post scripts can use them
 	$SUDO mkdir -p "$CHROOTNAME"/proc "$CHROOTNAME"/sys "$CHROOTNAME"/dev "$CHROOTNAME"/dev/pts
