@@ -350,11 +350,11 @@ setupGrub2() {
 	echo "TODO - add grub2 support"
 	mkdir -p "$2"/boot/grub2 "$2"/boot/grub2/themes "2"/boot/grub2/locale
 	for i in "$1"$grub2_lib/*.mod "$1"$grub2_lib/*.lst "$1"$grub2_lib/efiemu*.o "$1"/usr/share/grub/*.pf2; do
-		$SUDO cp -f $i "$2"/boot/grub2 ;
+	    $SUDO cp -f $i "$2"/boot/grub2 ;
 	done
 	$SUDO "$1"/usr/bin/grub2-mkimage -p /boot/grub2 -d "$1"$grub2_lib -o ${core_img} -O i386-pc biosdisk iso9660
 	$SUDO cat "$1"/usr/lib/grub/i386-pc/boot.img ${core_img} > "$2"/boot/grub2/grub_eltorito
-	XORRISO_OPTIONS="-b boot/grub2/grub_eltorito -J"
+	XORRISO_OPTIONS="${XORRISO_OPTIONS} -b boot/grub2/grub_eltorito -J"
 	echo "End grub2."
 }
 
@@ -418,6 +418,7 @@ setupSyslinux() {
 		for i in dejavu_sans_bold_14.pf2 dejavu_sans_mono_11.pf2 terminal_font_11.pf2 unicode.pf2; do
 			$SUDO cp -f "$1"/boot/grub2/fonts/$i "$2"/EFI/BOOT/fonts/$i
 		done
+		XORRISO_OPTIONS="${XORRISO_OPTIONS} -eltorito-alt-boot -e EFI/BOOT/grub.efi -no-emul-boot -append_partition 2 0x01 "$ISOROOTNAME"/EFI/BOOT/grub.efi"
 	fi
 
 	echo "Create syslinux menu"
@@ -493,7 +494,7 @@ LABEL poweroff
 	COMBOOT poweroff.com
 EOF
 	$SUDO chmod 0755 "$2"/boot/syslinux
-	XORRISO_OPTIONS="-b boot/syslinux/isolinux.bin -c boot/syslinux/boot.cat -isohybrid-mbr "$2"/boot/syslinux/isohdpfx.bin -partition_offset 16 "
+	XORRISO_OPTIONS="${XORRISO_OPTIONS} -b boot/syslinux/isolinux.bin -c boot/syslinux/boot.cat -isohybrid-mbr "$2"/boot/syslinux/isohdpfx.bin -partition_offset 16 "
 	echo "syslinux setup completed"
 }
 
@@ -731,27 +732,19 @@ buildIso() {
 	    ISOFILE="/var/tmp/$PRODUCT_ID.$EXTARCH.iso"
 	fi
 
-	if [ "$UEFI" = "1" ]; then
-		$SUDO xorriso -as mkisofs -R -r -J -joliet-long -l -cache-inodes \
-		--modification-date=${ISO_DATE} \
-		-omit-version-number -disable-deep-relocation \
-		$XORRISO_OPTIONS \
-		-no-emul-boot -boot-load-size 4 -boot-info-table \
-		-eltorito-alt-boot -e EFI/BOOT/grub.efi -no-emul-boot \
-		-append_partition 2 0x01 "$ISOROOTNAME"/EFI/BOOT/grub.efi \
-		-publisher "OpenMandriva Association" \
-		-preparer "OpenMandriva Association" \
-		-volid "$LABEL" -o "$ISOFILE" "$ISOROOTNAME"
-	else
-		$SUDO xorriso -as mkisofs -R -r -J -joliet-long -l -cache-inodes \
-		--modification-date=${ISO_DATE} \
-		-omit-version-number -disable-deep-relocation \
-		$XORRISO_OPTIONS \
-		-no-emul-boot -boot-load-size 4 -boot-info-table \
-		-publisher "OpenMandriva Association" \
-		-preparer "OpenMandriva Association" \
-		-volid "$LABEL" -o "$ISOFILE" "$ISOROOTNAME"
+	if [ ! -x /usr/bin/xorriso ]; then
+	    echo "xorriso does not exists. Exiting."
+	    error
 	fi
+
+	$SUDO xorriso -as mkisofs -R -r -J -joliet-long -l -cache-inodes \
+	    --modification-date=${ISO_DATE} \
+	    -omit-version-number -disable-deep-relocation \
+	    ${XORRISO_OPTIONS} \
+	    -no-emul-boot -boot-load-size 4 -boot-info-table \
+	    -publisher "OpenMandriva Association" \
+	    -preparer "OpenMandriva Association" \
+	    -volid "$LABEL" -o "$ISOFILE" "$ISOROOTNAME"
 
 	if [ ! -f "$ISOFILE" ]; then
 	    echo "Failed build iso image. Exiting"
