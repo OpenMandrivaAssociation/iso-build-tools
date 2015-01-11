@@ -148,7 +148,7 @@ getPkgList() {
 
     #Support for building released isos
     if [ ${TREE,,} = "cooker" ]; then
-        BRANCH=master
+        BRANCH=cooker
     else
         BRANCH="$TREE$VERSION"
     fi
