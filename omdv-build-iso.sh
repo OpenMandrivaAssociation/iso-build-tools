@@ -139,13 +139,6 @@ updateSystem() {
 
 getPkgList() {
 
-    # fix for ABF
-    if [ "$ABF" = "1" ]; then
-	LISTDIR=$(pwd)
-    else
-	LISTDIR=$OURDIR
-    fi
-
     #Support for building released isos
     if [ ${TREE,,} = "cooker" ]; then
         BRANCH=cooker
@@ -154,8 +147,8 @@ getPkgList() {
     fi
 
     # update iso-pkg-lists from ABF if missing
-    if [ ! -d $LISTDIR/iso-pkg-lists-$BRANCH ]; then
-	echo "Could not find $LISTDIR/iso-pkg-lists-$BRANCH. Downloading from ABF."
+    if [ ! -d $OURDIR/iso-pkg-lists-$BRANCH ]; then
+	echo "Could not find $OURDIR/iso-pkg-lists-$BRANCH. Downloading from ABF."
 	# download iso packages lists from www.abf.io
 	PKGLIST="https://abf.io/openmandriva/iso-pkg-lists/archive/iso-pkg-lists-$BRANCH.tar.gz"
 	$SUDO wget --tries=10 -O iso-pkg-lists-$BRANCH.tar.gz --content-disposition $PKGLIST
@@ -165,7 +158,7 @@ getPkgList() {
     fi
 
     # export file list
-    FILELISTS="$LISTDIR/iso-pkg-lists-$BRANCH/$DIST-$TYPE.lst"
+    FILELISTS="$OURDIR/iso-pkg-lists-$BRANCH/$DIST-$TYPE.lst"
 }
 
 showInfo() {
