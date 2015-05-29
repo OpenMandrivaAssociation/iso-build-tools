@@ -99,7 +99,7 @@ else
 	urpmi.update -a -c -ff --wget --urpmi-root $CHROOTNAME main
 	urpmi.update -a -c -ff --wget --urpmi-root $CHROOTNAME updates
 	echo "## Installing packages in chroot. ##"
-	urpmi --no-suggests --no-verify-rpm --fastunsafe --ignoresize --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi perl-URPM rpm locales-en rpm-build livecd-tools syslinux yum lorax grub-efi grub-efi-efi git --prefer /distro-kde4-config-OpenMandriva/ --prefer /distro-theme-OpenMandriva/ --auto
+	urpmi --no-suggests --no-verify-rpm --fastunsafe --ignoresize --urpmi-root $CHROOTNAME --root $CHROOTNAME basesystem-minimal basesystem urpmi perl-URPM rpm locales-en rpm-build livecd-tools syslinux yum lorax git --prefer /distro-kde4-config-OpenMandriva/ --prefer /distro-theme-OpenMandriva/ --auto
 	mkdir -p $CHROOTNAME/dev
 	mkdir -p $CHROOTNAME/dev/pts
 	mkdir -p $CHROOTNAME/proc
