@@ -10,7 +10,7 @@ services --disabled=#SVCDIS#
 
 repo --name=Main --baseurl=#REPOURL#/main/release
 repo --name=MainUpdates --baseurl=#REPOURL#/main/updates
-#repo --name=MainTesting --baseurl=#REPOURL#/main/testing
+repo --name=MainTesting --baseurl=#REPOURL#/main/testing
 repo --name=Contrib --baseurl=#REPOURL#/contrib/release
 repo --name=ContribUpdates --baseurl=#REPOURL#/contrib/updates
 # (tpg) we support FREE world here !
